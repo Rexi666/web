@@ -1,16 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio Técnico - Rexi</title>
+    <title>Desarrollo MC - Rexi</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
+            display: flex;
+            min-height: 100vh;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #f0f0f0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
+        }
+
+        nav {
+            width: 250px;
+            background-color: #101c2a;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        nav h2 {
+            color: #00ffc3;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        nav a {
+            color: #1ecbe1;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background-color: #00ffc3;
+            color: #000;
+        }
+
+        .content {
+            flex-grow: 1;
             padding: 2rem;
         }
 
@@ -27,8 +68,7 @@
         p {
             font-size: 1.1rem;
             max-width: 800px;
-            margin: 0 auto;
-            margin-top: 1rem;
+            margin: 1rem auto;
             line-height: 1.7;
         }
 
@@ -56,7 +96,6 @@
 
         a {
             color: #1ecbe1;
-            text-decoration: none;
         }
 
         a:hover {
@@ -65,63 +104,66 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>Portfolio Técnico de Rexi</h1>
-        <p>Configurador y desarrollador de servidores Minecraft. Especializado en modalidades completas, resolución de bugs y creación de plugins personalizados.</p>
-    </header>
+    <nav>
+        <h2>Rexi</h2>
+        <a href="index.html">Página Principal</a>
+        <a href="portfolio-rexi.html" class="active">Desarrollo Minecraft</a>
+        <a href="creador-contenido.html">Creador de Contenido</a>
+        <a href="contacto.html">Contacto</a>
+    </nav>
 
-    <section>
-        <h2>Contacto</h2>
-        <p>Discord: @rexigamer</p>
-        <p>Servidor: <a href="https://discord.com/invite/a3zkKtrjTr" target="_blank">discord.com/invite/a3zkKtrjTr</a></p>
-        <p>Redes Sociales: <a href="https://www.linktr.ee/rexi666" target="_blank">linktr.ee/rexi666</a></p>
-    </section>
+    <div class="content">
+        <header>
+            <h1>Portfolio Técnico de Rexi</h1>
+            <p>Configurador y desarrollador de servidores Minecraft. Especializado en modalidades completas, resolución de bugs y creación de plugins personalizados.</p>
+        </header>
 
-    <section>
-        <h2>Experiencia</h2>
-        <h3>Anteriormente:</h3>
-        <ul>
-            <li><strong>NauticMC (Admin)</strong> – Servidor de vMario (>4M subs). Coordinación de staff.<br>
-                <a href="https://bit.ly/nauticmcrexi">bit.ly/nauticmcrexi</a> |
-                <a href="https://bit.ly/staffseriesrexi">bit.ly/staffseriesrexi</a>
-            </li>
-            <li><strong>KeiferMC (Configurador)</strong> – Eventos y survival para youtuber (+5M subs).</li>
-            <li><strong>Zaphirus (ExOwner & ExConfig)</strong> – Configuración y parte de la construcción.<br>
-                <a href="https://bit.ly/zaphirusrexi">bit.ly/zaphirusrexi</a>
-            </li>
-            <li><strong>StoneCraft (ExConfig)</strong> – Configuración. El proyecto no continuó.<br>
-                <a href="https://bit.ly/stonecraftrexi">bit.ly/stonecraftrexi</a>
-            </li>
-            <li><strong>RoleplayCraft (Quest ExConfig)</strong> – Misión personalizada de autobuses.<br>
-                <a href="https://bit.ly/rexiroleplaycraft">bit.ly/rexiroleplaycraft</a>
-            </li>
-            <li><strong>Imperio de Biomas (ExAdmin & ExConfig)</strong> – Desarrollo completo.<br>
-                <a href="https://bit.ly/biomasrexi">bit.ly/biomasrexi</a>
-            </li>
-        </ul>
+        <section>
+            <h2>Experiencia</h2>
+            <h3>Anteriormente:</h3>
+            <ul>
+                <li><strong>NauticMC (Admin)</strong> – Servidor de vMario (>4M subs). Coordinación de staff.<br>
+                    <a href="https://bit.ly/nauticmcrexi">bit.ly/nauticmcrexi</a> |
+                    <a href="https://bit.ly/staffseriesrexi">bit.ly/staffseriesrexi</a>
+                </li>
+                <li><strong>KeiferMC (Configurador)</strong> – Eventos y survival para youtuber (+5M subs).</li>
+                <li><strong>Zaphirus (ExOwner & ExConfig)</strong> – Configuración y parte de la construcción.<br>
+                    <a href="https://bit.ly/zaphirusrexi">bit.ly/zaphirusrexi</a>
+                </li>
+                <li><strong>StoneCraft (ExConfig)</strong> – Configuración. El proyecto no continuó.<br>
+                    <a href="https://bit.ly/stonecraftrexi">bit.ly/stonecraftrexi</a>
+                </li>
+                <li><strong>RoleplayCraft (Quest ExConfig)</strong> – Misión personalizada de autobuses.<br>
+                    <a href="https://bit.ly/rexiroleplaycraft">bit.ly/rexiroleplaycraft</a>
+                </li>
+                <li><strong>Imperio de Biomas (ExAdmin & ExConfig)</strong> – Desarrollo completo.<br>
+                    <a href="https://bit.ly/biomasrexi">bit.ly/biomasrexi</a>
+                </li>
+            </ul>
 
-        <h3>Actual:</h3>
-        <ul>
-            <li><strong>RedMC (Head-Configurador)</strong> – Gestión del equipo técnico y resolución de bugs complejos.<br>
-                <a href="https://bit.ly/redmcrexi">bit.ly/redmcrexi</a>
-            </li>
-            <li><strong>VaperMC (Configurador & Developer)</strong> – Modalidades completas + plugins personalizados.</li>
-        </ul>
-    </section>
+            <h3>Actual:</h3>
+            <ul>
+                <li><strong>RedMC (Head-Configurador)</strong> – Gestión del equipo técnico y resolución de bugs complejos.<br>
+                    <a href="https://bit.ly/redmcrexi">bit.ly/redmcrexi</a>
+                </li>
+                <li><strong>VaperMC (Configurador & Developer)</strong> – Modalidades completas + plugins personalizados.</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>Plugins que Domino</h2>
-        <ul>
-            <li><strong>Core del servidor:</strong> Essentials, LuckPerms, MultiverseCore, etc.</li>
-            <li><strong>Menús:</strong> DeluxeMenus, CommandPanels</li>
-            <li><strong>Tab & Scoreboard:</strong> TAB by Neznamy, AnimatedScoreboard</li>
-            <li><strong>Sistema de sanciones:</strong> LibertyBans, LiteBans</li>
-            <li><strong>Chat:</strong> AlonsoChat, ChatSentinel, Chatty, EzChat</li>
-            <li><strong>Traducción:</strong> Todos</li>
-            <li><strong>Eventos e ítems custom:</strong> ConditionalEvents, ServerVariables, ExecutableItems, ItemEditor</li>
-            <li><strong>Tienda:</strong> Tebex</li>
-            <li><strong>Otros:</strong> Forcepack, PlayerTimeLimit, Sleep-Most, DecentHolograms, Drop2Inventory, Realmines, Shopkeepers</li>
-        </ul>
-    </section>
+        <section>
+            <h2>Plugins que Domino</h2>
+            <ul>
+                <li><strong>Core del servidor:</strong> Essentials, LuckPerms, MultiverseCore, etc.</li>
+                <li><strong>Menús:</strong> DeluxeMenus, CommandPanels</li>
+                <li><strong>Tab & Scoreboard:</strong> TAB by Neznamy, AnimatedScoreboard</li>
+                <li><strong>Sistema de sanciones:</strong> LibertyBans, LiteBans</li>
+                <li><strong>Chat:</strong> AlonsoChat, ChatSentinel, Chatty, EzChat</li>
+                <li><strong>Traducción:</strong> Todos</li>
+                <li><strong>Eventos e ítems custom:</strong> ConditionalEvents, ServerVariables, ExecutableItems, ItemEditor</li>
+                <li><strong>Tienda:</strong> Tebex</li>
+                <li><strong>Otros:</strong> Forcepack, PlayerTimeLimit, Sleep-Most, DecentHolograms, Drop2Inventory, Realmines, Shopkeepers</li>
+            </ul>
+        </section>
+    </div>
 </body>
 </html>
