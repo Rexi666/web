@@ -2,110 +2,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio de Rexi</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio - Rexi</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
-            padding: 2rem;
-            background-color: #111;
-            color: #f5f5f5;
-            line-height: 1.6;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1, h2 {
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
             color: #00ffc3;
         }
-        a {
-            color: #1ecbe1;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        section {
+
+        p {
+            font-size: 1.2rem;
             margin-bottom: 2rem;
+            max-width: 600px;
         }
-        .tag {
-            display: inline-block;
-            background: #333;
-            color: #fff;
-            padding: 0.3rem 0.6rem;
-            border-radius: 5px;
-            margin: 0.2rem;
-            font-size: 0.9rem;
+
+        .buttons {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            background-color: #00ffc3;
+            color: #000;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #00c8a5;
         }
     </style>
 </head>
 <body>
-    <h1>Portfolio de Rexi</h1>
-    <p><strong>Última actualización:</strong> 31/03/2023</p>
-
-    <section>
-        <h2>Contacto</h2>
-        <p>Discord: @rexigamer</p>
-        <p>Servidor: <a href="https://discord.com/invite/a3zkKtrjTr" target="_blank">https://discord.com/invite/a3zkKtrjTr</a></p>
-        <p>Redes Sociales: <a href="https://www.linktr.ee/rexi666" target="_blank">linktr.ee/rexi666</a></p>
-    </section>
-
-    <section>
-        <h2>Información</h2>
-        <p>Me encanta configurar servidores y networks. Llevo años haciéndolo, inicialmente con mods y ahora con plugins. Tengo experiencia tanto en trabajos concretos (como misiones) como en modalidades completas.</p>
-    </section>
-
-    <section>
-        <h2>Experiencia</h2>
-        <h3>Anteriormente:</h3>
-        <ul>
-            <li><strong>NauticMC (Admin)</strong><br>
-                Servidor de vMario (>4M subs). Coordinación de staff y administración.<br>
-                <a href="https://bit.ly/nauticmcrexi">bit.ly/nauticmcrexi</a> |
-                <a href="https://bit.ly/staffseriesrexi">bit.ly/staffseriesrexi</a>
-            </li>
-            <li><strong>KeiferMC (Configurador)</strong><br>
-                Eventos y survival para un youtuber de más de 5M de subs.
-            </li>
-            <li><strong>Zaphirus (ExOwner & ExConfig)</strong><br>
-                Configuración completa del servidor y parte de la construcción.<br>
-                <a href="https://bit.ly/zaphirusrexi">bit.ly/zaphirusrexi</a>
-            </li>
-            <li><strong>StoneCraft (ExConfig)</strong><br>
-                Trabajo de configuración. El proyecto no siguió.<br>
-                <a href="https://bit.ly/stonecraftrexi">bit.ly/stonecraftrexi</a>
-            </li>
-            <li><strong>RoleplayCraft (Quest ExConfig)</strong><br>
-                Configuración de una misión de autobuses.<br>
-                <a href="https://bit.ly/rexiroleplaycraft">bit.ly/rexiroleplaycraft</a>
-            </li>
-            <li><strong>Imperio de Biomas (ExAdmin & ExConfig)</strong><br>
-                Desarrollo completo del servidor y parte de la construcción.<br>
-                <a href="https://bit.ly/biomasrexi">bit.ly/biomasrexi</a>
-            </li>
-        </ul>
-        <h3>Actual:</h3>
-        <ul>
-            <li><strong>RedMC (Head-Configurador)</strong><br>
-                Gestión del equipo de desarrollo y resolución de bugs complejos.<br>
-                <a href="https://bit.ly/redmcrexi">bit.ly/redmcrexi</a>
-            </li>
-            <li><strong>VaperMC (Configurador & Developer)</strong><br>
-                Configuración de modalidades y desarrollo de plugins personalizados.
-            </li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>Plugins que Domino</h2>
-        <p><strong>Core del servidor:</strong> Essentials, LuckPerms, MultiverseCore, etc.</p>
-        <p><strong>Menús:</strong> Deluxemenus, CommandPanels</p>
-        <p><strong>Tab & Scoreboard:</strong> TAB by Neznamy, AnimatedScoreboard</p>
-        <p><strong>Sistema de sanciones:</strong> LibertyBans, LiteBans</p>
-        <p><strong>Chat:</strong> AlonsoChat, ChatSentinel, Chatty, EzChat</p>
-        <p><strong>Traducción:</strong> Todos</p>
-        <p><strong>Eventos e ítems custom:</strong> ConditionalEvents, ServerVariables, ExecutableItems, ItemEditor</p>
-        <p><strong>Tienda:</strong> Tebex</p>
-        <p><strong>Otros:</strong> Forcepack, PlayerTimeLimit, Sleep-Most, DecentHolograms, Drop2Inventory, Realmines, Shopkeepers</p>
-    </section>
+    <h1>Bienvenido a mi sitio</h1>
+    <p>Elige a qué parte quieres acceder: a mi portfolio técnico o a mi faceta como creador de contenido.</p>
+    <div class="buttons">
+        <a class="button" href="portfolio-rexi.html">Portfolio Técnico</a>
+        <a class="button" href="creador.html">Creador de Contenido</a>
+    </div>
 </body>
 </html>
