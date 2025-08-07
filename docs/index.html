@@ -58,9 +58,24 @@
         .button:hover {
             background-color: #00c8a5;
         }
+
+		.logo {
+        width: 150px;
+        margin-bottom: 1rem;
+
+        /* Difuminado radial */
+        -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+        mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+    
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+		}
     </style>
 </head>
 <body>
+	<img src="images/logo-circular.png" alt="Logo" class="logo">
     <h1>Rexi666</h1>
     <p>Amplia experiencia en la creación, desarrollo y administración de servidores de minecraft</p>
     <div class="buttons">
