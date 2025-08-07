@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacto - Rexi</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        nav {
+            width: 250px;
+            background-color: #101c2a;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        nav h2 {
+            color: #00ffc3;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        nav a {
+            color: #1ecbe1;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background-color: #00ffc3;
+            color: #000;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #00ffc3;
+        }
+
+        p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        section {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: #00ffc3;
+            margin-bottom: 1rem;
+        }
+
+        ul {
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: #1ecbe1;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            background-color: #00ffc3;
+            color: #000;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #00c8a5;
+        }
+
+        .spacersmall {
+        height: 1rem; /* Puedes ajustar el valor: 0.5rem, 2rem, etc. */
+        }
+        .spacerbig {
+        height: 2rem; /* Puedes ajustar el valor: 0.5rem, 2rem, etc. */
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h2>Rexi</h2>
+        <a href="index.html">Página Principal</a>
+        <a href="portfolio-rexi.html">Desarrollo Minecraft</a>
+        <a href="creador-contenido.html">Creador de Contenido</a>
+        <a href="contacto.html" class="active">Contacto</a>
+    </nav>
+
+    <div class="content">
+        <header>
+            <h1>Contacto</h1>
+        </header>
+
+        <section>
+            <h2>Contacto</h2>
+            <h3>Discord</h3>
+            <div class="spacersmall"></div>
+            <a href="https://discord.com/invite/a3zkKtrjTr">
+              <img src="https://discordapp.com/api/guilds/1025688556779360266/widget.png?style=banner3" alt="Discord Invite"/>
+            </a>
+            <div class="spacersmall"></div>
+            <h3>Redes sociales</h3>
+            <!--<p>Redes Sociales: <a href="https://www.linktr.ee/rexi666" target="_blank">linktr.ee/rexi666</a></p> -->
+            <div class="spacerbig"></div>
+            <a class="button" href="creador-contenido.html">Creador de Contenido</a>
+        </section>
+    </div>
+</body>
+</html>
