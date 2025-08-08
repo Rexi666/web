@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎥Redes Sociales - Rexi</title>
+    <link rel="icon" type="image/png" href="images/logo-circular.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        nav {
+        position: fixed;       /* Fija el nav a la pantalla */
+        top: 0;                /* Desde arriba */
+        left: 0;               /* Pegado a la izquierda */
+        height: 100vh;         /* Ocupa toda la altura de la ventana */
+        width: 250px;
+        background-color: #101c2a;
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;      /* Si hay mucho contenido, scroll solo en la barra lateral */
+        }
+
+        nav h2 {
+            color: #00ffc3;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        nav a {
+            color: #1ecbe1;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        nav a:not(.logo-link):hover,
+        nav a:not(.logo-link).active {
+        background-color: #00ffc3;
+        color: #000;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 2rem;
+            margin-left: 250px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #00ffc3;
+        }
+
+        section {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: #00ffc3;
+            margin-bottom: 1rem;
+        }
+
+        ul {
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: #1ecbe1;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .imagesmall {
+        width: 300px;
+        margin-bottom: 1rem;
+		}
+        .imagebig {
+        width: 450px;
+        margin-bottom: 1rem;
+		}
+        .spacersmall {
+        height: 1rem; /* Puedes ajustar el valor: 0.5rem, 2rem, etc. */
+        }
+
+        .star-red {
+        color: red;
+        font-weight: bold;
+        }
+        .star-green {
+        color: limegreen;
+        font-weight: bold;
+        }
+
+        .logo-link {
+        display: inline-block;
+        outline: none;
+        border: none;
+        }
+        .logo-link:hover,
+        .logo-link:focus,
+        .logo-link:active {
+        outline: none;
+        border: none;
+        box-shadow: none;
+        background: none; /* evita que herede el fondo del nav:hover */
+        }
+        .logo {
+        width: 100px;
+        margin-bottom: 1rem;
+        -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+        mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+       }
+       .reveal {
+       opacity: 0;
+       transform: translateY(40px);
+       transition: all 0.6s ease;
+      }
+
+      .reveal.active {
+       opacity: 1;
+       transform: translateY(0);
+      }
+    </style>
+</head>
+<script>
+    function revealOnScroll() {
+        const reveals = document.querySelectorAll('.reveal');
+
+        for (const el of reveals) {
+            const windowHeight = window.innerHeight;
+            const elementTop = el.getBoundingClientRect().top;
+            const elementBottom = el.getBoundingClientRect().bottom;
+            const revealPoint = 150;
+
+            if (elementTop < windowHeight - revealPoint && elementBottom > 0) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        }
+    }
+
+    window.addEventListener('scroll', revealOnScroll);
+    window.addEventListener('load', revealOnScroll);
+</script>
+<body>
+    <nav>
+        <h2><a href="index.html" class="logo-link"><img src="images/logo-circular.png" alt="Logo" class="logo"></a></h2>
+        <a href="index.html">🏠Página Principal</a>
+        <a href="portfolio-rexi.html">🛠️Desarrollo Minecraft</a>
+        <a href="redes.html" class="active">🎥Redes Sociales</a>
+        <a href="contacto.html">📬Contacto</a>
+    </nav>
+
+    <div class="content">
+        <header>
+            <h1>Redes Sociales</h1>
+        </header>
+
+        <section>
+            <h2>Próximamente...</h2>
+        </section>
+    </div>
+</body>
+</html>
