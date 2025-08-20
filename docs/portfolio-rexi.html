@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🛠️Desarrollo MC - Rexi</title>
     <link rel="icon" type="image/png" href="images/logo-circular.png">
+    <link rel="stylesheet" href="chatbot/chatbot.css">
     <style>
         * {
             box-sizing: border-box;
@@ -157,104 +158,93 @@
        transform: translateY(0);
       }
 
-              /* ESTILOS DEL CHATBOT */
-        #closeChatBtn {
-          position: absolute;
-          top: 5px;
-          right: 10px;
-          background: transparent;
-          border: none;
-          color: #00ffc3;
-          font-size: 1.5rem;
-          font-weight: bold;
-          cursor: pointer;
-          z-index: 10001;
-        }
+/* Estilos responsivos para móviles */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column; /* nav arriba, content abajo */
+  }
 
-        #chatbox {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          width: 300px;
-          height: 400px;
-          border: 2px solid #00ffc3;
-          border-radius: 10px;
-          padding: 10px 10px 10px 10px;
-          display: none;
-          flex-direction: column;
-          background: #203a43;
-          color: white;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          z-index: 9999;
-          /* Añadido para que el botón de cerrar se posicione bien */
-          position: fixed;
-          box-sizing: border-box;
-          padding-top: 30px; /* para que no tape la X */
-        }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    box-shadow: none;
+    z-index: 1000;
+  }
 
-        #chatToggleBtn {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        border: none;
-        background-color: #00ffc3;
-        color: #000;
-        font-size: 2rem;
-        cursor: pointer;
-        z-index: 10000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 0 10px #00ffc3;
-        transition: background-color 0.3s ease;
-        }
+  nav h2 {
+    margin: 0;
+  }
 
-        #chatToggleBtn:hover {
-        background-color: #00c8a5;
-        }
-        #messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-        .message {
-            margin: 5px 0;
-        }
-        .user {
-            text-align: right;
-            color: #00ffc3;
-        }
-        .bot {
-            text-align: left;
-            color: #8cffd4;
-        }
-        #inputArea {
-            display: flex;
-        }
-        #input {
-            flex-grow: 1;
-            padding: 8px;
-            border-radius: 20px;
-            border: none;
-            outline: none;
-        }
-        #sendBtn {
-            background-color: #00ffc3;
-            border: none;
-            border-radius: 20px;
-            padding: 0 15px;
-            margin-left: 8px;
-            cursor: pointer;
-            color: #000;
-            font-weight: bold;
-        }
-        #sendBtn:hover {
-            background-color: #00c8a5;
-        }
+  .logo {
+    width: 50px;       /* antes 100px */
+    margin-bottom: 0;  /* elimina espacio extra */
+  }
+
+  /* Botón hamburguesa visible SOLO en móvil */
+  .menu-toggle {
+    display: block;
+    font-size: 1.8rem;
+    color: #00ffc3;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  /* Ocultar enlaces por defecto */
+  nav a {
+    display: none;
+  }
+
+  /* Menú desplegable hacia abajo */
+  nav.active {
+    background: #101c2a; /* fondo oscuro semitransparente */
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav.active a {
+    display: block;
+    width: 100%;
+    background: transparent; /* semi-transparente para que resalten */
+    padding: 0.8rem 1rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .content {
+    margin-left: 0;
+    padding-top: 100px;  /* espacio para la barra fija */
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  section {
+    padding: 1rem;
+  }
+
+  .imagesmall, .imagebig {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* En pantallas grandes ocultamos el botón hamburguesa */
+@media (min-width: 769px) {
+  .menu-toggle {
+    display: none;
+  }
+}
     </style>
 </head>
 <script>
@@ -281,6 +271,7 @@
 <body>
     <nav>
         <h2><a href="index.html" class="logo-link"><img src="images/logo-circular.png" alt="Logo" class="logo"></a></h2>
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <a href="index.html">🏠Página Principal</a>
         <a href="portfolio-rexi.html" class="active">🛠️Desarrollo Minecraft</a>
         <a href="redes.html">🎥Redes Sociales</a>
@@ -378,61 +369,11 @@
 </div>
 
 <button id="chatToggleBtn" title="Abrir chat">💬</button>
+<script src="chatbot/chatbot.js"></script> 
 <script>
-  const messages = document.getElementById('messages');
-  const input = document.getElementById('input');
-  const sendBtn = document.getElementById('sendBtn');
-  const chatbox = document.getElementById('chatbox');
-  const chatToggleBtn = document.getElementById('chatToggleBtn');
-
-  function addMessage(text, sender) {
-    const div = document.createElement('div');
-    div.classList.add('message', sender);
-    div.textContent = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
+  function toggleMenu() {
+    document.querySelector('nav').classList.toggle('active');
   }
-
-  function getBotResponse(text) {
-    text = text.toLowerCase();
-    if(text.includes('hola')) {
-      return '¡Hola! ¿En qué puedo ayudarte?';
-    } else if(text.includes('proyecto') || text.includes('ayuda') || text.includes('experiencia')) {
-      return 'Rexi tiene experiencia con proyectos de servidores de Minecraft, configuraciones y desarrollo. Tienes su contacto en la página dedicada.';
-    } else if(text.includes('discord') || text.includes('contact')) {
-      return 'Únete al servidor de Discord para contacto: https://discord.com/invite/a3zkKtrjTr';
-    } else if(text.includes('redes') || text.includes('sociales')) {
-      return 'Tienes las redes sociales en la página dedicada.';
-    } else {
-      return 'Lo siento, no entiendo tu pregunta. ¿Puedes reformularla? (Palabras clave: experiencia, discord, redes)';
-    }
-  }
-
-  sendBtn.addEventListener('click', () => {
-    const userText = input.value.trim();
-    if(userText === '') return;
-    addMessage(userText, 'user');
-    input.value = '';
-    setTimeout(() => {
-      addMessage(getBotResponse(userText), 'bot');
-    }, 500);
-  });
-
-  input.addEventListener('keydown', e => {
-    if(e.key === 'Enter') sendBtn.click();
-  });
-
-const closeChatBtn = document.getElementById('closeChatBtn');
-
-chatToggleBtn.addEventListener('click', () => {
-  chatbox.style.display = 'flex';
-  chatToggleBtn.style.display = 'none'; // ocultar el botón inferior al abrir
-});
-
-closeChatBtn.addEventListener('click', () => {
-  chatbox.style.display = 'none';
-  chatToggleBtn.style.display = 'flex'; // mostrar el botón inferior al cerrar
-});
-</script>    
+</script>
 </body>
 </html>
