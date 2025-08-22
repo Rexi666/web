@@ -1,3 +1,12 @@
+import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+const API_KEY = "AIzaSyAtAyvf4qdvWIMmpVg6tnyTq2Cs0zeyYG8";
+
+// Ahora sí puedes inicializar Gemini de la forma correcta
+const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// DOM
 const messages = document.getElementById('messages');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('sendBtn');
@@ -5,6 +14,7 @@ const chatbox = document.getElementById('chatbox');
 const chatToggleBtn = document.getElementById('chatToggleBtn');
 const closeChatBtn = document.getElementById('closeChatBtn');
 
+// Añadir mensajes
 function addMessage(text, sender) {
   const div = document.createElement('div');
   div.classList.add('message', sender);
@@ -13,7 +23,8 @@ function addMessage(text, sender) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-function getBotResponse(text) {
+// Lógica de respuesta de reserva (fallback)
+function getFallbackResponse(text) {
   text = text.toLowerCase();
   if (text.includes('hola')) {
     return '¡Hola! ¿En qué puedo ayudarte?';
@@ -28,20 +39,64 @@ function getBotResponse(text) {
   }
 }
 
-sendBtn.addEventListener('click', () => {
+// Respuesta IA (con lógica de reserva)
+async function getBotResponse(text) {
+  try {
+    // Intenta usar la API de Gemini
+    const result = await model.generateContent({
+      contents: [
+        { role: "user", parts: [{ text: text }] }
+      ],
+      generationConfig: {
+        temperature: 0.4,
+      },
+      safetySettings: [],
+      systemInstruction: {
+        role: "system",
+        parts: [{
+          text: `Eres un chatbot especializado en responder preguntas sobre mi (Rexi), un desarrollador de minecraft especializado en la creación, desarrollo y administración de servidores.
+
+Responde de forma clara y concisa.
+Si la pregunta no está en tu base de conocimiento, di:
+"No tengo información sobre eso".
+
+Rexi tiene experiencia con proyectos de servidores de Minecraft, configuraciones y desarrollo. La gente tiene su contacto en esta página.
+
+La gente puede contactar con él, mediante su servidor de discord: https://discord.com/invite/a3zkKtrjTr
+
+La gente tiene sus redes sociales en esta página
+
+La gente tiene su experiencia y proyectos anteriores en esta página`
+        }]
+      }
+    });
+
+    return result.response.text();
+  } catch (err) {
+    console.error("Error al conectar con la IA de Gemini. Usando respuestas de reserva.", err);
+    // Si la API falla, se usa la lógica de reserva
+    return getFallbackResponse(text);
+  }
+}
+
+// Enviar mensaje
+sendBtn.addEventListener('click', async () => {
   const userText = input.value.trim();
   if (userText === '') return;
+
   addMessage(userText, 'user');
   input.value = '';
-  setTimeout(() => {
-    addMessage(getBotResponse(userText), 'bot');
-  }, 500);
+
+  addMessage("Escribiendo...", 'bot');
+  const botResponse = await getBotResponse(userText);
+  messages.lastChild.textContent = botResponse;
 });
 
 input.addEventListener('keydown', e => {
   if (e.key === 'Enter') sendBtn.click();
 });
 
+// Abrir/cerrar chat
 chatToggleBtn.addEventListener('click', () => {
   chatbox.style.display = 'flex';
   chatToggleBtn.style.display = 'none';
