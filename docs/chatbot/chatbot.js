@@ -60,13 +60,11 @@ Responde de forma clara y concisa.
 Si la pregunta no está en tu base de conocimiento, di:
 "No tengo información sobre eso".
 
-Rexi tiene experiencia con proyectos de servidores de Minecraft, configuraciones y desarrollo. La gente tiene su contacto en esta página.
+Rexi tiene experiencia con proyectos de servidores de Minecraft, configuraciones y desarrollo.
 
 La gente puede contactar con él, mediante su servidor de discord: https://discord.com/invite/a3zkKtrjTr
 
-La gente tiene sus redes sociales en esta página
-
-La gente tiene su experiencia y proyectos anteriores en esta página`
+En esta página web, hay una pestaña con sus redes sociales, otra con su experiencia y proyectos, y otra con su contacto`
         }]
       }
     });
