@@ -106,9 +106,57 @@
       font-size: 0.9rem;
       width: auto;
     }
-    #logout:hover {
-      background: #d62828;
-    }
+    #logout:hover { background: #d62828; }
+
+    .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.admin-buttons button {
+  margin-left: 0.5rem;
+  width: auto; /* que no ocupen toda la fila */
+  padding: 0.5rem 1rem;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  width: auto;
+  background: #e63946;
+  color: #fff;
+  display: block; /* Lo convierte en un elemento de bloque */
+  margin-left: auto;
+}
+.btn-small:hover {
+  background: #d62828;
+}
+
+.admin-buttons {
+  display: none; /* oculto por defecto */
+}
+
+.admin-buttons button {
+  display: none; /* ocultar botones internos si no eres admin */
+}
+
+.btn-download {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  background: #2ecc71;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin-left: auto; /* empuja a la derecha */
+  width: auto;
+}
+.btn-download:hover {
+  background: #27ae60;
+}
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -131,20 +179,27 @@
   <!-- BOTÓN CERRAR SESIÓN -->
   <button id="logout" style="display:none">Cerrar sesión</button>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="card" style="display:none">
+<!-- DASHBOARD -->
+<div id="dashboard" class="card" style="display:none">
+  <div class="dashboard-header">
     <h2>📂 Archivos disponibles</h2>
-    <div id="dashboard-content">
-      <ul id="file-list"></ul>
-      <div id="info-panel"></div>
+    <div class="admin-buttons" style="display:none">
+      <input type="file" id="fileInput" style="display:none">
+      <button id="uploadBtn">⬆ Subir archivo</button>
+      <button id="newFolderBtn">📁 Nueva carpeta</button>
     </div>
   </div>
+  <div id="dashboard-content">
+    <ul id="file-list"></ul>
+    <div id="info-panel"></div>
+  </div>
+</div>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
     const supabaseUrl = "https://oixknmspnswjbsncefwl.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peGtubXNwbnN3amJzbmNlZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTkzNDQsImV4cCI6MjA3MTI5NTM0NH0.FgVfyEdmVTR9fXDioRVtwzpdcFuFQL31uJrMK8cYF7o"; // ⚠️ cambia esto por tu key
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peGtubXNwbnN3amJzbmNlZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTkzNDQsImV4cCI6MjA3MTI5NTM0NH0.FgVfyEdmVTR9fXDioRVtwzpdcFuFQL31uJrMK8cYF7o"; // ⚠️ cambia esto por tu key segura
     const supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false }
     });
@@ -155,6 +210,10 @@
     const loginDiv = document.querySelector("#login");
     const fileList = document.querySelector("#file-list");
     const infoPanel = document.querySelector("#info-panel");
+
+    let filesLoaded = false;
+    let currentPath = "";
+    let userRole = null;
 
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -169,19 +228,25 @@
       await supabase.auth.signOut();
     });
 
-    let filesLoaded = false;
-    let currentPath = "";
-
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
+        userRole = session.user.user_metadata.role;
         loginDiv.style.display = "none";
         dashboard.style.display = "block";
         document.querySelector("#logout").style.display = "block";
+
+        if (userRole === "admin") {
+          mostrarBotonesAdmin();
+        } else {
+          ocultarBotonesAdmin(); // 🔹 aseguramos que no se vean
+        }
+
         if (!filesLoaded && event === "SIGNED_IN") {
           loadFiles(currentPath);
           filesLoaded = true;
         }
       } else {
+        userRole = null;
         loginDiv.style.display = "block";
         dashboard.style.display = "none";
         document.querySelector("#logout").style.display = "none";
@@ -194,7 +259,6 @@
     async function loadFiles(path = "") {
       currentPath = path;
 
-      // Mostrar "cargando..."
       fileList.innerHTML = "<li>Cargando...</li>";
       infoPanel.style.display = "none";
       infoPanel.textContent = "";
@@ -206,7 +270,7 @@
         return;
       }
 
-      fileList.innerHTML = ""; // limpiar para empezar
+      fileList.innerHTML = "";
 
       // Info.txt
       const mensajeFile = data.find(f => f.name.toLowerCase() === "info.txt");
@@ -263,6 +327,27 @@
           link.textContent = f.name;
           li.prepend("📄 ");
           li.appendChild(link);
+
+          // 🔹 Botón descargar (siempre visible)
+const downloadBtn = document.createElement("button");
+downloadBtn.textContent = "⬇ Descargar";
+downloadBtn.classList.add("btn-download");
+downloadBtn.addEventListener("click", () => {
+  window.open(urlData.signedUrl, "_blank");
+});
+li.appendChild(downloadBtn);
+
+          if (userRole === "admin") {
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "❌ Eliminar archivo";
+            delBtn.classList.add("btn-small");
+            delBtn.addEventListener("click", async () => {
+              await supabase.storage.from("files").remove([fullPath]);
+              loadFiles(currentPath);
+            });
+            li.appendChild(delBtn);
+          }
+
           fileList.appendChild(li);
         }
       }
@@ -271,6 +356,43 @@
         fileList.innerHTML = "<li>No hay archivos</li>";
       }
     }
+
+    function mostrarBotonesAdmin() {
+  const adminBtns = document.querySelector(".admin-buttons");
+  adminBtns.style.display = "flex";
+  const uploadBtn = document.querySelector("#uploadBtn");
+  const newFolderBtn = document.querySelector("#newFolderBtn");
+  const fileInput = document.querySelector("#fileInput");
+
+  adminBtns.style.display = "flex"; // mostrar contenedor
+  uploadBtn.style.display = "inline-block";
+  newFolderBtn.style.display = "inline-block";
+
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+    const { error } = await supabase.storage.from("files").upload(filePath, file, { upsert: true });
+    if (error) alert("❌ Error al subir: " + error.message);
+    else loadFiles(currentPath);
+  };
+
+  newFolderBtn.onclick = async () => {
+    const nombre = prompt("Nombre de la carpeta:");
+    if (!nombre) return;
+    const filePath = currentPath ? `${currentPath}/${nombre}/.keep` : `${nombre}/.keep`;
+    const { error } = await supabase.storage.from("files").upload(filePath, new Blob([""]), { upsert: true });
+    if (error) alert("❌ Error al crear carpeta: " + error.message);
+    else loadFiles(currentPath);
+  };
+}
+function ocultarBotonesAdmin() {
+  const adminBtns = document.querySelector(".admin-buttons");
+  adminBtns.style.display = "none";
+}
 
     // Cerrar sesión al cerrar pestaña
     window.addEventListener("beforeunload", async () => {
