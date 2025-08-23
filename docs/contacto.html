@@ -344,8 +344,28 @@
         <section class="reveal">
             <h2>Ponte en contacto conmigo</h2>
             <p>¿Tienes un proyecto, una idea o necesitas ayuda técnica para tu servidor de Minecraft? Estoy disponible para colaboraciones, desarrollos personalizados o asesoramiento técnico.</p>
+        </section>
 
-            <div class="spacerbig"></div>
+        <section class="reveal">
+  <h2>Formulario de contacto</h2>
+  <form id="contactForm">
+    <label for="contact">Correo:</label><br>
+    <input type="text" id="contact" name="contact" required style="width:100%;padding:10px;margin:10px 0;border-radius:8px;"><br>
+
+    <label for="discord">Discord ID (opcional):</label><br>
+    <input type="text" id="discord" name="discord" style="width:100%;padding:10px;margin:10px 0;border-radius:8px;"><br>
+
+    <label for="message">Mensaje:</label><br>
+    <textarea id="message" name="message" rows="5" required style="width:100%;padding:10px;margin:10px 0;border-radius:8px;"></textarea><br>
+
+    <button type="submit" class="button">Enviar</button>
+  </form>
+
+  <p id="statusMsg"></p>
+</section>
+
+        <section>
+            <h2>Otras formas de contacto</h2>
 
             <h3>Discord</h3>
             <p>Únete a mi servidor de discord para soporte, dudas o presupuestos:</p>
@@ -384,6 +404,63 @@
   function toggleMenu() {
     document.querySelector('nav').classList.toggle('active');
   }
+</script>
+<script>
+  document.getElementById("contactForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const contact = document.getElementById("contact").value;
+    const discord = document.getElementById("discord").value;
+    const message = document.getElementById("message").value;
+
+    // ⚠️ Tu webhook de Discord
+    const webhookURL = "https://discord.com/api/webhooks/1408863278616285364/UjO4w1SRorEdTZ8K-QeLGVN8aE5ccxannaBAsXB2G90NHLg9K7rUXbKzBTW0cd7gT_vN";
+
+    // Campos base
+    const fields = [
+      { name: "Correo", value: contact, inline: false },
+      { name: "Mensaje", value: message, inline: false }
+    ];
+
+    // Solo añadir Discord si no está vacío
+    if (discord.trim() !== "") {
+      fields.splice(1, 0, { name: "Discord ID", value: discord, inline: false });
+    }
+
+    const payload = {
+      embeds: [{
+        title: "📬 Nuevo mensaje desde la web",
+        color: 3447003,
+        fields: fields,
+        footer: { text: "Formulario de contacto Rexi" }
+      }]
+    };
+
+const cooldown = 60000; // 1 min
+const lastSent = localStorage.getItem("lastSent") || 0;
+
+if (Date.now() - lastSent < cooldown) {
+  alert("⏳ Espera antes de enviar otro mensaje.");
+  return;
+}
+
+localStorage.setItem("lastSent", Date.now());
+
+    try {
+      const res = await fetch(webhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        document.getElementById("statusMsg").innerText = "✅ Mensaje enviado correctamente.";
+        document.getElementById("contactForm").reset();
+      } else {
+        document.getElementById("statusMsg").innerText = "❌ Error al enviar el mensaje.";
+      }
+    } catch (err) {
+      document.getElementById("statusMsg").innerText = "⚠️ No se pudo conectar al servidor.";
+    }
+  });
 </script>
 </body>
 </html>
