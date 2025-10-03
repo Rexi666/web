@@ -4,7 +4,7 @@ const API_KEY = "AIzaSyAtAyvf4qdvWIMmpVg6tnyTq2Cs0zeyYG8";
 
 // Ahora sí puedes inicializar Gemini de la forma correcta
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // DOM
 const messages = document.getElementById('messages');
@@ -104,3 +104,4 @@ closeChatBtn.addEventListener('click', () => {
   chatbox.style.display = 'none';
   chatToggleBtn.style.display = 'flex';
 });
+
