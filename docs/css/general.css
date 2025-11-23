@@ -1,0 +1,228 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #f0f0f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+h1 {
+    font-size: 2.8rem;
+    color: #00ffc3;
+}
+
+section {
+    max-width: 1000px;
+    margin: 2rem auto;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+    color: #00ffc3;
+    margin-bottom: 1rem;
+}
+
+ul {
+    padding-left: 1.5rem;
+}
+
+li {
+    margin-bottom: 1rem;
+}
+
+a {
+    color: #1ecbe1;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.6s ease;
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* NAV */
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background-color: #101c2a;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+}
+
+nav h2 {
+    color: #00ffc3;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+nav a {
+    color: #1ecbe1;
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+nav a:not(.logo-link):hover,
+nav a:not(.logo-link).active {
+    background-color: #00ffc3;
+    color: #000;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 2rem;
+    margin-left: 250px;
+}
+
+.logo-link {
+    display: inline-block;
+    outline: none;
+    border: none;
+}
+
+.logo-link:hover,
+.logo-link:focus,
+.logo-link:active {
+    outline: none;
+    border: none;
+    box-shadow: none;
+    background: none;
+}
+
+.logo {
+    width: 100px;
+    margin-bottom: 1rem;
+    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+    mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+}
+
+@media (min-width: 769px) {
+    .menu-toggle {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    section {
+        padding: 1rem;
+    }
+
+    .imagesmall,
+    .imagebig {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* NAV */
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 1rem;
+        background: transparent;
+        box-shadow: none;
+        z-index: 1000;
+    }
+
+    nav h2 {
+        margin: 0;
+    }
+
+    /* Ocultar enlaces por defecto */
+    nav a {
+        display: none;
+    }
+
+    /* Menú desplegable hacia abajo */
+    nav.active {
+        background: #101c2a;
+        /* fondo oscuro semitransparente */
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav.active a {
+        display: block;
+        width: 100%;
+        background: transparent;
+        /* semi-transparente para que resalten */
+        padding: 0.8rem 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+        flex-direction: column;
+        /* nav arriba, content abajo */
+    }
+
+    .logo {
+        width: 50px;
+        /* antes 100px */
+        margin-bottom: 0;
+        /* elimina espacio extra */
+    }
+
+    /* Botón hamburguesa visible SOLO en móvil */
+    .menu-toggle {
+        display: block;
+        font-size: 1.8rem;
+        color: #00ffc3;
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: auto;
+    }
+
+    .content {
+        margin-left: 0;
+        padding-top: 100px;
+        /* espacio para la barra fija */
+    }
+}

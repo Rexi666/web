@@ -1,0 +1,23 @@
+.imagesmall {
+    width: 300px;
+    margin-bottom: 1rem;
+}
+
+.imagebig {
+    width: 450px;
+    margin-bottom: 1rem;
+}
+
+.spacersmall {
+    height: 1rem;
+}
+
+.star-red {
+    color: red;
+    font-weight: bold;
+}
+
+.star-green {
+    color: limegreen;
+    font-weight: bold;
+}

@@ -1,0 +1,48 @@
+.socials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.social-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+    color: #1ecbe1;
+}
+
+.social-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px #00ffc3;
+    color: #00ffc3;
+}
+
+.social-card img {
+    width: 60px;
+    margin-bottom: 1rem;
+}
+
+.social-card span {
+    font-size: 1.1rem;
+}
+
+.social-card a {
+    display: block;
+    margin-top: 0.5rem;
+    color: #1ecbe1;
+    font-size: 1.1rem;
+    text-decoration: none;
+}
+
+.social-card a:hover {
+    text-decoration: underline;
+    color: #00ffc3;
+}

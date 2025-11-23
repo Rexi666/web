@@ -1,0 +1,103 @@
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: #fff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #00ffc3;
+    }
+
+    p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        max-width: 600px;
+    }
+
+    .buttons {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 2rem;
+        width: 100%;
+        max-width: 800px;
+        margin-top: 1rem;
+    }
+
+    .buttons>div {
+        width: 100%;
+    }
+
+    .button {
+        background-color: #00ffc3;
+        color: #000;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        width: 100%;
+        text-align: center;
+        max-width: 290px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .button:hover {
+        background-color: #00c8a5;
+    }
+
+    @media (max-width: 600px) {
+        .buttons {
+            grid-template-columns: 1fr;
+            /* los apila */
+            gap: 1rem;
+            /* separación entre botones */
+            padding: 0 1rem;
+            /* aire a los lados */
+        }
+
+        .buttons>div {
+            text-align: center !important;
+        }
+
+        .button {
+            max-width: 100%;
+            /* que ocupen ancho completo disponible */
+            padding: 1rem;
+            /* más cómodos para dedo en pantalla */
+            font-size: 1rem;
+            /* un poco más pequeño para que no se desborde */
+        }
+    }
+
+    .logo {
+        width: 150px;
+        margin-bottom: 1rem;
+
+        /* Difuminado radial */
+        -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+        mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+    }
