@@ -886,7 +886,7 @@
 
         // Llama al proxy local si existe (/api/proxy), si no intenta directo
         const targetEndpoint = `${config.baseUrl}/chat/completions`;
-        const PROXY = 'https://oixknmspnswjbsncefwl.supabase.co/functions/v1/super-service';
+        const PROXY = 'https://proxy.antonferv.workers.dev/';
 
         const res = await fetch(PROXY, {
           method: 'POST',
