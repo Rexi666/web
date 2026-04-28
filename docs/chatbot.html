@@ -890,10 +890,10 @@
 
         const res = await fetch(PROXY_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain' },  // ← text/plain evita el preflight
           body: JSON.stringify({
             targetUrl: targetEndpoint,
-            auth: `Bearer ${config.apiKey}`,   // ← la key va en el body
+            auth: `Bearer ${config.apiKey}`,
             model: config.model,
             messages,
             temperature: config.temperature,
