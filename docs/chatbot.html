@@ -212,10 +212,7 @@
     }
 
     .config-body {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      overflow: hidden;
     }
 
     .config-body.hidden {
@@ -330,6 +327,103 @@
     #config-status.idle {
       color: var(--muted);
       background: transparent;
+    }
+
+    /* ── PRESETS ── */
+    .config-inner {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .presets-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-right: 1px solid var(--border);
+      padding-right: 16px;
+    }
+
+    .presets-label {
+      font-family: var(--mono);
+      font-size: .62rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .preset-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: left;
+      width: 100%;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--muted);
+      background: var(--surface2);
+    }
+
+    .preset-btn.active {
+      border-color: var(--accent);
+      background: rgba(0, 229, 160, .07);
+    }
+
+    .preset-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .preset-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      overflow: hidden;
+    }
+
+    .preset-name {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preset-model {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preset-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .config-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-content: start;
     }
 
     /* ── SYSTEM PROMPT ── */
@@ -670,34 +764,73 @@
       </div>
 
       <div class="config-body" id="config-body">
-        <div class="field full">
-          <label>Base URL</label>
-          <input type="text" id="base-url" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1" />
-        </div>
-        <div class="field">
-          <label>API Key</label>
-          <input type="password" id="api-key" placeholder="sk-…" />
-        </div>
-        <div class="field">
-          <label>Modelo</label>
-          <input type="text" id="model" placeholder="gpt-4o" value="gpt-4o" />
-        </div>
-        <div class="field">
-          <label>Temperatura</label>
-          <input type="number" id="temperature" placeholder="0.7" value="0.7" min="0" max="2" step="0.1" />
-        </div>
-        <div class="field">
-          <label>Max Tokens</label>
-          <input type="number" id="max-tokens" placeholder="2048" value="2048" min="1" />
-        </div>
-        <div class="field full sys-row">
-          <label>System Prompt (opcional)</label>
-          <textarea id="system-prompt" placeholder="Eres un asistente útil y preciso…"></textarea>
-        </div>
-        <div class="config-actions">
-          <button class="btn btn-primary" onclick="saveConfig()">Guardar configuración</button>
-          <button class="btn btn-ghost" onclick="clearChat()">Limpiar chat</button>
-          <span id="config-status" class="idle"></span>
+        <div class="config-inner">
+
+          <!-- PRESETS -->
+          <div class="presets-panel">
+            <div class="presets-label">Proveedores</div>
+
+            <button class="preset-btn" id="preset-meta" onclick="applyPreset('meta')">
+              <div class="preset-icon" style="background:#1a2a1a;">🟢</div>
+              <div class="preset-info">
+                <span class="preset-name">META</span>
+                <span class="preset-model">llama-3.3-70b-instruct</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" id="preset-openai" onclick="applyPreset('openai')">
+              <div class="preset-icon" style="background:#1a1a2a;">⚪</div>
+              <div class="preset-info">
+                <span class="preset-name">OpenAI</span>
+                <span class="preset-model">gpt-oss-120b</span>
+              </div>
+            </button>
+
+            <div class="preset-divider"></div>
+
+            <button class="preset-btn" id="preset-custom" onclick="applyPreset('custom')">
+              <div class="preset-icon" style="background:#1a1a2a;">✏️</div>
+              <div class="preset-info">
+                <span class="preset-name">Custom</span>
+                <span class="preset-model">manual</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- FIELDS -->
+          <div class="config-fields">
+            <div class="field full">
+              <label>Base URL</label>
+              <input type="text" id="base-url" placeholder="https://api.openai.com/v1"
+                value="https://integrate.api.nvidia.com/v1" />
+            </div>
+            <div class="field full">
+              <label>API Key</label>
+              <input type="password" id="api-key" placeholder="sk-…" />
+            </div>
+            <div class="field full">
+              <label>Modelo</label>
+              <input type="text" id="model" placeholder="gpt-4o" value="meta/llama-3.3-70b-instruct" />
+            </div>
+            <div class="field">
+              <label>Temperatura</label>
+              <input type="number" id="temperature" placeholder="0.7" value="0.7" min="0" max="2" step="0.1" />
+            </div>
+            <div class="field">
+              <label>Max Tokens</label>
+              <input type="number" id="max-tokens" placeholder="2048" value="2048" min="1" />
+            </div>
+            <div class="field full sys-row">
+              <label>System Prompt (opcional)</label>
+              <textarea id="system-prompt" placeholder="Eres un asistente útil y preciso…"></textarea>
+            </div>
+            <div class="config-actions" style="grid-column:1/-1;">
+              <button class="btn btn-primary" onclick="saveConfig()">Guardar configuración</button>
+              <button class="btn btn-ghost" onclick="clearChat()">Limpiar chat</button>
+              <span id="config-status" class="idle"></span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -886,14 +1019,16 @@
 
         // Llama al proxy local si existe (/api/proxy), si no intenta directo
         const targetEndpoint = `${config.baseUrl}/chat/completions`;
-        const PROXY_URL = 'https://proxy-chatbot.rexi666.deno.net/';
+        const PROXY = 'https://oixknmspnswjbsncefwl.supabase.co/functions/v1/super-service';
 
-        const res = await fetch(PROXY_URL, {
+        const res = await fetch(PROXY, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },  // ← text/plain evita el preflight
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.apiKey}`,
+          },
           body: JSON.stringify({
-            targetUrl: targetEndpoint,
-            auth: `Bearer ${config.apiKey}`,
+            targetUrl: targetEndpoint,        // ← URL aquí dentro
             model: config.model,
             messages,
             temperature: config.temperature,
@@ -903,19 +1038,12 @@
         });
 
         const responseText = await res.text();
-
         if (!res.ok) {
           let errMsg = `HTTP ${res.status}`;
           try { errMsg = JSON.parse(responseText)?.error?.message || errMsg; } catch { }
           throw new Error(errMsg);
         }
-
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch {
-          throw new Error(`Respuesta inválida del servidor: ${responseText.slice(0, 200)}`);
-        }
+        const data = JSON.parse(responseText);
         const reply = data?.choices?.[0]?.message?.content ?? '(respuesta vacía)';
 
         removeTypingIndicator();
@@ -953,6 +1081,57 @@
         e.preventDefault();
         if (!isLoading && config.apiKey) sendMessage();
       }
+    });
+
+    // ── PRESETS ───────────────────────────────────────────────────────────────
+    const PRESETS = {
+      meta: {
+        name: 'META',
+        baseUrl: 'https://integrate.api.nvidia.com/v1',
+        model: 'meta/llama-3.3-70b-instruct',
+        apiKey: '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',
+      },
+      openai: {
+        name: 'OpenAI',
+        baseUrl: 'https://integrate.api.nvidia.com/v1',
+        model: 'openai/gpt-oss-120b',
+        apiKey: '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',
+      },
+      custom: {
+        name: 'Custom',
+        baseUrl: '',
+        model: '',
+        apiKey: '',
+      },
+    };
+
+    let activePreset = 'nvidia';
+
+    function applyPreset(key) {
+      const preset = PRESETS[key];
+      if (!preset) return;
+
+      activePreset = key;
+
+      document.getElementById('base-url').value = preset.baseUrl;
+      document.getElementById('model').value = preset.model;
+
+      // Solo sobreescribir la key si el preset la tiene predefinida
+      if (preset.apiKey) {
+        document.getElementById('api-key').value = preset.apiKey;
+      } else {
+        document.getElementById('api-key').value = '';
+        document.getElementById('api-key').focus();
+      }
+
+      // Marcar preset activo
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`preset-${key}`)?.classList.add('active');
+    }
+
+    // Activar META por defecto al cargar
+    window.addEventListener('load', () => {
+      applyPreset('meta');
     });
 
     // ── TOAST ──────────────────────────────────────────────────────────────────
