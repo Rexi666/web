@@ -1,31 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LLM Chat</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0c0e12;
-      --surface:   #13161d;
-      --surface2:  #1a1e28;
-      --border:    #252a38;
-      --accent:    #00e5a0;
-      --accent2:   #0090ff;
-      --text:      #dde2f0;
-      --muted:     #5a6180;
-      --user-bg:   #0d2235;
-      --bot-bg:    #111620;
-      --error:     #ff4d6a;
-      --radius:    12px;
-      --mono:      'IBM Plex Mono', monospace;
-      --sans:      'IBM Plex Sans', sans-serif;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html, body { height: 100%; }
+    :root {
+      --bg: #0c0e12;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --border: #252a38;
+      --accent: #00e5a0;
+      --accent2: #0090ff;
+      --text: #dde2f0;
+      --muted: #5a6180;
+      --user-bg: #0d2235;
+      --bot-bg: #111620;
+      --error: #ff4d6a;
+      --radius: 12px;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
 
     body {
       font-family: var(--sans);
@@ -57,20 +69,24 @@
     body::after {
       content: '';
       position: fixed;
-      width: 600px; height: 600px;
+      width: 600px;
+      height: 600px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,229,160,.07) 0%, transparent 70%);
-      top: -100px; left: -100px;
+      background: radial-gradient(circle, rgba(0, 229, 160, .07) 0%, transparent 70%);
+      top: -100px;
+      left: -100px;
       pointer-events: none;
       z-index: 0;
     }
 
     .blob2 {
       position: fixed;
-      width: 500px; height: 500px;
+      width: 500px;
+      height: 500px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,144,255,.06) 0%, transparent 70%);
-      bottom: -80px; right: -80px;
+      background: radial-gradient(circle, rgba(0, 144, 255, .06) 0%, transparent 70%);
+      bottom: -80px;
+      right: -80px;
       pointer-events: none;
       z-index: 0;
     }
@@ -97,15 +113,19 @@
     }
 
     .logo {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border: 1.5px solid var(--accent);
       border-radius: 8px;
       display: grid;
       place-items: center;
-      box-shadow: 0 0 12px rgba(0,229,160,.3);
+      box-shadow: 0 0 12px rgba(0, 229, 160, .3);
     }
 
-    .logo svg { width: 18px; height: 18px; }
+    .logo svg {
+      width: 18px;
+      height: 18px;
+    }
 
     header h1 {
       font-family: var(--mono);
@@ -133,13 +153,17 @@
     }
 
     .dot {
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--muted);
       transition: background .3s;
     }
 
-    .dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
 
     /* ── CONFIG PANEL ── */
     #config-panel {
@@ -183,7 +207,9 @@
       transition: transform .3s;
     }
 
-    .config-toggle.open { transform: rotate(180deg); }
+    .config-toggle.open {
+      transform: rotate(180deg);
+    }
 
     .config-body {
       margin-top: 16px;
@@ -192,7 +218,9 @@
       gap: 12px;
     }
 
-    .config-body.hidden { display: none; }
+    .config-body.hidden {
+      display: none;
+    }
 
     .field {
       display: flex;
@@ -200,7 +228,9 @@
       gap: 6px;
     }
 
-    .field.full { grid-column: 1 / -1; }
+    .field.full {
+      grid-column: 1 / -1;
+    }
 
     label {
       font-family: var(--mono);
@@ -210,7 +240,8 @@
       text-transform: uppercase;
     }
 
-    input, select {
+    input,
+    select {
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -223,14 +254,19 @@
       width: 100%;
     }
 
-    input:focus, select:focus {
+    input:focus,
+    select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,229,160,.1);
+      box-shadow: 0 0 0 3px rgba(0, 229, 160, .1);
     }
 
-    input[type="password"] { letter-spacing: .1em; }
+    input[type="password"] {
+      letter-spacing: .1em;
+    }
 
-    select option { background: var(--surface2); }
+    select option {
+      background: var(--surface2);
+    }
 
     .config-actions {
       grid-column: 1 / -1;
@@ -259,7 +295,7 @@
 
     .btn-primary:hover {
       background: #1ffdb8;
-      box-shadow: 0 0 18px rgba(0,229,160,.4);
+      box-shadow: 0 0 18px rgba(0, 229, 160, .4);
     }
 
     .btn-ghost {
@@ -281,9 +317,20 @@
       border-radius: 20px;
     }
 
-    #config-status.ok   { color: var(--accent); background: rgba(0,229,160,.1); }
-    #config-status.err  { color: var(--error);  background: rgba(255,77,106,.1); }
-    #config-status.idle { color: var(--muted);  background: transparent; }
+    #config-status.ok {
+      color: var(--accent);
+      background: rgba(0, 229, 160, .1);
+    }
+
+    #config-status.err {
+      color: var(--error);
+      background: rgba(255, 77, 106, .1);
+    }
+
+    #config-status.idle {
+      color: var(--muted);
+      background: transparent;
+    }
 
     /* ── SYSTEM PROMPT ── */
     .sys-row {
@@ -308,7 +355,7 @@
 
     textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,229,160,.1);
+      box-shadow: 0 0 0 3px rgba(0, 229, 160, .1);
     }
 
     /* ── MESSAGES ── */
@@ -322,9 +369,18 @@
       scroll-behavior: smooth;
     }
 
-    #messages::-webkit-scrollbar { width: 4px; }
-    #messages::-webkit-scrollbar-track { background: transparent; }
-    #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    #messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
 
     .msg {
       display: flex;
@@ -336,7 +392,10 @@
     }
 
     @keyframes msgIn {
-      to { opacity: 1; transform: none; }
+      to {
+        opacity: 1;
+        transform: none;
+      }
     }
 
     .msg-meta {
@@ -346,7 +405,10 @@
       padding: 0 4px;
     }
 
-    .msg.user .msg-meta { text-align: right; color: rgba(0,144,255,.6); }
+    .msg.user .msg-meta {
+      text-align: right;
+      color: rgba(0, 144, 255, .6);
+    }
 
     .bubble {
       padding: 12px 16px;
@@ -358,15 +420,21 @@
       word-break: break-word;
     }
 
-    .msg.user { align-items: flex-end; }
+    .msg.user {
+      align-items: flex-end;
+    }
+
     .msg.user .bubble {
       background: var(--user-bg);
-      border: 1px solid rgba(0,144,255,.2);
+      border: 1px solid rgba(0, 144, 255, .2);
       border-bottom-right-radius: 3px;
       color: #c8daff;
     }
 
-    .msg.bot { align-items: flex-start; }
+    .msg.bot {
+      align-items: flex-start;
+    }
+
     .msg.bot .bubble {
       background: var(--bot-bg);
       border: 1px solid var(--border);
@@ -374,8 +442,8 @@
     }
 
     .msg.error .bubble {
-      background: rgba(255,77,106,.08);
-      border-color: rgba(255,77,106,.3);
+      background: rgba(255, 77, 106, .08);
+      border-color: rgba(255, 77, 106, .3);
       color: var(--error);
     }
 
@@ -383,13 +451,13 @@
     .bubble code {
       font-family: var(--mono);
       font-size: .82em;
-      background: rgba(255,255,255,.06);
+      background: rgba(255, 255, 255, .06);
       padding: 2px 6px;
       border-radius: 4px;
     }
 
     .bubble pre {
-      background: rgba(0,0,0,.35);
+      background: rgba(0, 0, 0, .35);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px;
@@ -397,26 +465,47 @@
       overflow-x: auto;
     }
 
-    .bubble pre code { background: none; padding: 0; }
+    .bubble pre code {
+      background: none;
+      padding: 0;
+    }
 
     /* typing indicator */
     .typing-dots {
-      display: flex; gap: 4px; padding: 4px 0;
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
     }
 
     .typing-dots span {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       background: var(--muted);
       border-radius: 50%;
       animation: bounce .9s infinite;
     }
 
-    .typing-dots span:nth-child(2) { animation-delay: .15s; }
-    .typing-dots span:nth-child(3) { animation-delay: .3s; }
+    .typing-dots span:nth-child(2) {
+      animation-delay: .15s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: .3s;
+    }
 
     @keyframes bounce {
-      0%,60%,100% { transform: translateY(0); opacity:.5; }
-      30%  { transform: translateY(-5px); opacity:1; }
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+        opacity: .5;
+      }
+
+      30% {
+        transform: translateY(-5px);
+        opacity: 1;
+      }
     }
 
     /* empty state */
@@ -434,7 +523,10 @@
       pointer-events: none;
     }
 
-    #empty-state svg { opacity: .2; margin-bottom: 4px; }
+    #empty-state svg {
+      opacity: .2;
+      margin-bottom: 4px;
+    }
 
     /* ── INPUT AREA ── */
     #input-area {
@@ -451,8 +543,8 @@
     }
 
     #input-area:focus-within {
-      border-color: rgba(0,229,160,.4);
-      box-shadow: 0 0 0 3px rgba(0,229,160,.06);
+      border-color: rgba(0, 229, 160, .4);
+      box-shadow: 0 0 0 3px rgba(0, 229, 160, .06);
     }
 
     #user-input {
@@ -469,10 +561,13 @@
       padding: 2px 0;
     }
 
-    #user-input::placeholder { color: var(--muted); }
+    #user-input::placeholder {
+      color: var(--muted);
+    }
 
     #send-btn {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
       border: none;
       background: var(--accent);
@@ -486,7 +581,7 @@
 
     #send-btn:hover:not(:disabled) {
       background: #1ffdb8;
-      box-shadow: 0 0 14px rgba(0,229,160,.5);
+      box-shadow: 0 0 14px rgba(0, 229, 160, .5);
     }
 
     #send-btn:disabled {
@@ -495,7 +590,10 @@
       cursor: not-allowed;
     }
 
-    #send-btn svg { width: 16px; height: 16px; }
+    #send-btn svg {
+      width: 16px;
+      height: 16px;
+    }
 
     /* ── FOOTER ── */
     footer {
@@ -533,6 +631,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="blob2"></div>
 
@@ -540,10 +639,11 @@
     <!-- HEADER -->
     <header>
       <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-          <path d="M2 17l10 5 10-5"/>
-          <path d="M2 12l10 5 10-5"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
         </svg>
       </div>
       <div>
@@ -560,7 +660,10 @@
     <div id="config-panel">
       <div class="config-header" onclick="toggleConfig()">
         <div class="config-header-left">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 2 12h2A8 8 0 1 1 12 20v2a10 10 0 0 0 7.07-17.07z"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.07 4.93A10 10 0 0 0 2 12h2A8 8 0 1 1 12 20v2a10 10 0 0 0 7.07-17.07z" />
+          </svg>
           Configuración API
         </div>
         <div class="config-toggle open" id="config-toggle">▲</div>
@@ -569,23 +672,23 @@
       <div class="config-body" id="config-body">
         <div class="field full">
           <label>Base URL</label>
-          <input type="text" id="base-url" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1"/>
+          <input type="text" id="base-url" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1" />
         </div>
         <div class="field">
           <label>API Key</label>
-          <input type="password" id="api-key" placeholder="sk-…"/>
+          <input type="password" id="api-key" placeholder="sk-…" />
         </div>
         <div class="field">
           <label>Modelo</label>
-          <input type="text" id="model" placeholder="gpt-4o" value="gpt-4o"/>
+          <input type="text" id="model" placeholder="gpt-4o" value="gpt-4o" />
         </div>
         <div class="field">
           <label>Temperatura</label>
-          <input type="number" id="temperature" placeholder="0.7" value="0.7" min="0" max="2" step="0.1"/>
+          <input type="number" id="temperature" placeholder="0.7" value="0.7" min="0" max="2" step="0.1" />
         </div>
         <div class="field">
           <label>Max Tokens</label>
-          <input type="number" id="max-tokens" placeholder="2048" value="2048" min="1"/>
+          <input type="number" id="max-tokens" placeholder="2048" value="2048" min="1" />
         </div>
         <div class="field full sys-row">
           <label>System Prompt (opcional)</label>
@@ -602,18 +705,22 @@
     <!-- MESSAGES -->
     <div id="messages">
       <div id="empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
         <div>Configura la API y empieza a chatear</div>
       </div>
     </div>
 
     <!-- INPUT -->
     <div id="input-area">
-      <textarea id="user-input" rows="1" placeholder="Escribe un mensaje… (Enter para enviar, Shift+Enter para nueva línea)"></textarea>
+      <textarea id="user-input" rows="1"
+        placeholder="Escribe un mensaje… (Enter para enviar, Shift+Enter para nueva línea)"></textarea>
       <button id="send-btn" onclick="sendMessage()" disabled title="Enviar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
         </svg>
       </button>
     </div>
@@ -639,8 +746,8 @@
 
     // ── CONFIG ─────────────────────────────────────────────────────────────────
     function saveConfig() {
-      const url   = document.getElementById('base-url').value.trim().replace(/\/$/, '');
-      const key   = document.getElementById('api-key').value.trim();
+      const url = document.getElementById('base-url').value.trim().replace(/\/$/, '');
+      const key = document.getElementById('api-key').value.trim();
       const model = document.getElementById('model').value.trim();
 
       if (!url || !key || !model) {
@@ -648,11 +755,11 @@
         return;
       }
 
-      config.baseUrl      = url;
-      config.apiKey       = key;
-      config.model        = model;
-      config.temperature  = parseFloat(document.getElementById('temperature').value) || 0.7;
-      config.maxTokens    = parseInt(document.getElementById('max-tokens').value)    || 2048;
+      config.baseUrl = url;
+      config.apiKey = key;
+      config.model = model;
+      config.temperature = parseFloat(document.getElementById('temperature').value) || 0.7;
+      config.maxTokens = parseInt(document.getElementById('max-tokens').value) || 2048;
       config.systemPrompt = document.getElementById('system-prompt').value.trim();
 
       showStatus('ok', '✓ Configuración guardada');
@@ -713,7 +820,7 @@
     }
 
     function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function addMessage(role, content, isError = false) {
@@ -721,7 +828,7 @@
       if (empty) empty.remove();
 
       const msgs = document.getElementById('messages');
-      const now  = new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'});
+      const now = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
 
       const div = document.createElement('div');
       div.className = `msg ${role}${isError ? ' error' : ''}`;
@@ -740,7 +847,7 @@
       if (empty) empty.remove();
 
       const msgs = document.getElementById('messages');
-      const div  = document.createElement('div');
+      const div = document.createElement('div');
       div.className = 'msg bot';
       div.id = 'typing-indicator';
       div.innerHTML = `<div class="msg-meta">${config.model || 'asistente'}</div>
@@ -758,7 +865,7 @@
       if (isLoading || !config.apiKey) return;
 
       const input = document.getElementById('user-input');
-      const text  = input.value.trim();
+      const text = input.value.trim();
       if (!text) return;
 
       input.value = '';
@@ -777,18 +884,24 @@
         if (config.systemPrompt) messages.push({ role: 'system', content: config.systemPrompt });
         messages.push(...history);
 
-        const res = await fetch(`${config.baseUrl}/chat/completions`, {
+        // Llama al proxy local si existe (/api/proxy), si no intenta directo
+        const targetEndpoint = `${config.baseUrl}/chat/completions`;
+        const PROXY = 'https://oixknmspnswjbsncefwl.supabase.co/functions/v1/super-service';
+
+        const res = await fetch(PROXY, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${config.apiKey}`,
+            'X-Target-URL': targetEndpoint,
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peGtubXNwbnN3amJzbmNlZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTkzNDQsImV4cCI6MjA3MTI5NTM0NH0.FgVfyEdmVTR9fXDioRVtwzpdcFuFQL31uJrMK8cYF7o',
           },
           body: JSON.stringify({
-            model:       config.model,
+            model: config.model,
             messages,
             temperature: config.temperature,
-            max_tokens:  config.maxTokens,
-            stream:      false,
+            max_tokens: config.maxTokens,
+            stream: false,
           }),
         });
 
@@ -817,7 +930,7 @@
 
     function setInputDisabled(disabled) {
       document.getElementById('user-input').disabled = disabled;
-      document.getElementById('send-btn').disabled   = disabled || !config.apiKey;
+      document.getElementById('send-btn').disabled = disabled || !config.apiKey;
     }
 
     // ── INPUT AUTO-RESIZE ──────────────────────────────────────────────────────
@@ -846,4 +959,5 @@
     }
   </script>
 </body>
+
 </html>
