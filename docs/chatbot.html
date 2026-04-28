@@ -886,7 +886,7 @@
 
         // Llama al proxy local si existe (/api/proxy), si no intenta directo
         const targetEndpoint = `${config.baseUrl}/chat/completions`;
-        const PROXY_URL = 'https://script.google.com/macros/s/AKfycbzCVMzdS2qGsur8g3rOCjwYOTbj6MUhDzoBvhK9GGudXaUn2AcK4WaqTLkvhlqiik8d/exec';
+        const PROXY_URL = 'https://proxy-chatbot.rexi666.deno.net/';
 
         const res = await fetch(PROXY_URL, {
           method: 'POST',
