@@ -266,6 +266,12 @@
       background: var(--surface2);
     }
 
+    #api-key {
+      -webkit-text-security: disc;
+      font-family: text-security-disc, monospace;
+      /* fallback visual */
+    }
+
     .config-actions {
       grid-column: 1 / -1;
       display: flex;
@@ -807,7 +813,8 @@
             </div>
             <div class="field full">
               <label>API Key</label>
-              <input type="password" id="api-key" placeholder="sk-…" autocomplete="new-password" />
+              <input type="text" id="api-key" placeholder="sk-…" autocomplete="off" onfocus="this.type='password'"
+                style="-webkit-text-security: disc;" />
             </div>
             <div class="field full">
               <label>Modelo</label>
