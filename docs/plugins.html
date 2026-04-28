@@ -1,205 +1,579 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8">
   <title>Portal de Descargas</title>
+  <link rel="icon" type="image/png" href="images/logo-circular.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+    :root {
+      --bg: #0a0c10;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-bright: rgba(255, 255, 255, 0.16);
+      --accent: #4f8ef7;
+      --accent-glow: rgba(79, 142, 247, 0.25);
+      --accent-2: #a78bfa;
+      --success: #34d399;
+      --danger: #f87171;
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #9ca3af;
+      --card-radius: 20px;
+      --mono: 'DM Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+    }
 
     body {
-      background: linear-gradient(135deg, #1d3557, #457b9d);
+      background: var(--bg);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      font-family: var(--sans);
+      color: var(--text);
+      overflow-x: hidden;
+      position: relative;
     }
 
+    /* ── Ambient Background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79, 142, 247, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167, 139, 250, 0.10) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Card base ── */
     .card {
-      background: #fff;
-      color: #333;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-      padding: 2rem;
+      position: relative;
+      z-index: 10;
+      background: rgba(14, 17, 25, 0.85);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 2.5rem;
       width: 100%;
-      max-width: 800px;
-      animation: fadeIn 0.6s ease;
+      max-width: 860px;
+      margin: 2rem 1rem;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+        0 32px 64px rgba(0, 0, 0, 0.5),
+        0 0 80px rgba(79, 142, 247, 0.04);
+      animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
-    h2 { margin-bottom: 1rem; color: #1d3557; }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
 
-    input, button {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Login ── */
+    #login {
+      max-width: 440px;
+    }
+
+    .login-logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    .login-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+      font-family: var(--mono);
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-family: var(--mono);
+      font-weight: 300;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      font-family: var(--mono);
+    }
+
+    .field input {
       width: 100%;
-      padding: 0.8rem;
-      margin: 0.5rem 0;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
 
-    button {
-      background: #1d3557;
+    .field input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      background: rgba(79, 142, 247, 0.06);
+      box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: var(--accent);
       color: #fff;
       border: none;
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(79, 142, 247, 0.35);
+      letter-spacing: 0.02em;
+      margin-top: 0.5rem;
     }
-    button:hover { background: #457b9d; }
 
-    #error { margin-top: 0.5rem; color: #e63946; font-size: 0.9rem; }
+    .btn-primary:hover {
+      background: #6aa3ff;
+      box-shadow: 0 6px 28px rgba(79, 142, 247, 0.5);
+      transform: translateY(-1px);
+    }
 
-    /* Layout del dashboard en 2 columnas */
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    #error {
+      margin-top: 0.75rem;
+      color: var(--danger);
+      font-size: 0.82rem;
+      font-family: var(--mono);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Dashboard ── */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.75rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .dashboard-title-group .login-label {
+      margin-bottom: 0.2rem;
+    }
+
+    .admin-buttons {
+      display: none;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-ghost {
+      padding: 0.5rem 0.9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      width: auto;
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-bright);
+      color: var(--text);
+    }
+
+    /* ── Dashboard grid ── */
     #dashboard-content {
       display: grid;
       grid-template-columns: 1fr;
       gap: 1rem;
     }
+
     #dashboard-content.has-info {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 320px;
     }
 
+    /* ── Info panel ── */
+    #info-panel {
+      background: rgba(167, 139, 250, 0.07);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: #c4b5fd;
+      white-space: pre-wrap;
+      line-height: 1.65;
+      display: none;
+      align-self: start;
+    }
+
+    .info-panel-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    /* ── File list ── */
     #file-list {
       list-style: none;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
     }
 
     li {
-      background: #f1f1f1;
-      padding: 0.8rem;
-      border-radius: 8px;
-      margin: 0.5rem 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      transition: background 0.15s, border-color 0.15s;
+      animation: fadeItem 0.3s ease both;
     }
-    li:hover { background: #e6e6e6; }
-    li a { color: #1d3557; text-decoration: none; font-weight: 500; }
-    li a:hover { text-decoration: underline; }
 
-    /* Panel info */
-    #info-panel {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      border-radius: 10px;
-      padding: 1rem;
-      white-space: pre-wrap;
+    @keyframes fadeItem {
+      from {
+        opacity: 0;
+        transform: translateX(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    li:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-bright);
+    }
+
+    .file-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-hover);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .file-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    li a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: color 0.15s;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    li a:hover {
+      color: var(--accent);
+    }
+
+    /* ── Item action buttons ── */
+    .btn-folder {
+      flex: 1;
+      text-align: left;
+      padding: 0;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-folder:hover {
+      color: var(--accent);
+    }
+
+    .btn-back {
+      padding: 0.35rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text-dim);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: auto;
+    }
+
+    .btn-back:hover {
+      border-color: var(--border-bright);
+      color: var(--text);
+    }
+
+    .btn-download {
+      padding: 0.35rem 0.75rem;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 7px;
+      color: var(--success);
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      width: auto;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    .btn-download:hover {
+      background: rgba(52, 211, 153, 0.2);
+      border-color: rgba(52, 211, 153, 0.5);
+      box-shadow: 0 0 16px rgba(52, 211, 153, 0.15);
+    }
+
+    .btn-small {
+      padding: 0.35rem 0.7rem;
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      border-radius: 7px;
+      color: var(--danger);
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .btn-small:hover {
+      background: rgba(248, 113, 113, 0.18);
+      border-color: rgba(248, 113, 113, 0.4);
+    }
+
+    /* ── Logout ── */
+    #logout {
+      position: fixed;
+      top: 1.2rem;
+      right: 1.2rem;
+      z-index: 1000;
+      padding: 0.45rem 0.9rem;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      border-radius: 8px;
+      color: var(--danger);
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: auto;
+      letter-spacing: 0.02em;
       display: none;
     }
 
-    #logout {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #e63946;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: 0.3s;
-      z-index: 1000;
-      padding: 6px 12px;
-      font-size: 0.9rem;
-      width: auto;
+    #logout:hover {
+      background: rgba(248, 113, 113, 0.2);
+      border-color: rgba(248, 113, 113, 0.5);
     }
-    #logout:hover { background: #d62828; }
 
-    .dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
 
-.admin-buttons button {
-  margin-left: 0.5rem;
-  width: auto; /* que no ocupen toda la fila */
-  padding: 0.5rem 1rem;
-}
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-.btn-small {
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  width: auto;
-  background: #e63946;
-  color: #fff;
-  display: block; /* Lo convierte en un elemento de bloque */
-  margin-left: auto;
-}
-.btn-small:hover {
-  background: #d62828;
-}
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-bright);
+      border-radius: 99px;
+    }
 
-.admin-buttons {
-  display: none; /* oculto por defecto */
-}
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .card {
+        padding: 1.75rem 1.25rem;
+        margin: 1rem 0.75rem;
+      }
 
-.admin-buttons button {
-  display: none; /* ocultar botones internos si no eres admin */
-}
-
-.btn-download {
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  background: #2ecc71;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  margin-left: auto; /* empuja a la derecha */
-  width: auto;
-}
-.btn-download:hover {
-  background: #27ae60;
-}
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      #dashboard-content.has-info {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
+
   <!-- LOGIN -->
   <div id="login" class="card">
-    <h2>Iniciar Sesión</h2>
+    <div class="login-logo">📂</div>
+    <div class="login-label">Portal de Descargas</div>
+    <h2>Bienvenido de nuevo</h2>
+    <p class="subtitle">Accede con tus credenciales</p>
+
     <form id="login-form">
-      <input type="email" id="email" placeholder="Correo" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
-      <button type="submit">Entrar</button>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="email" placeholder="tu@correo.com" required>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-primary">Entrar →</button>
     </form>
     <div id="error"></div>
   </div>
 
-  <!-- BOTÓN CERRAR SESIÓN -->
-  <button id="logout" style="display:none">Cerrar sesión</button>
+  <!-- CERRAR SESIÓN -->
+  <button id="logout">⏻ Cerrar sesión</button>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="card" style="display:none">
-  <div class="dashboard-header">
-    <h2>📂 Archivos disponibles</h2>
-    <div class="admin-buttons" style="display:none">
-      <input type="file" id="fileInput" style="display:none">
-      <button id="uploadBtn">⬆ Subir archivo</button>
-      <button id="newFolderBtn">📁 Nueva carpeta</button>
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="card" style="display:none">
+    <div class="dashboard-header">
+      <div class="dashboard-title-group">
+        <div class="login-label">Portal de Descargas</div>
+        <h2>Archivos disponibles</h2>
+      </div>
+      <div class="admin-buttons">
+        <input type="file" id="fileInput" style="display:none">
+        <button id="uploadBtn" class="btn-ghost">⬆ Subir archivo</button>
+        <button id="newFolderBtn" class="btn-ghost">📁 Nueva carpeta</button>
+      </div>
+    </div>
+
+    <div id="dashboard-content">
+      <ul id="file-list"></ul>
+      <div id="info-panel"></div>
     </div>
   </div>
-  <div id="dashboard-content">
-    <ul id="file-list"></ul>
-    <div id="info-panel"></div>
-  </div>
-</div>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
     const supabaseUrl = "https://oixknmspnswjbsncefwl.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peGtubXNwbnN3amJzbmNlZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTkzNDQsImV4cCI6MjA3MTI5NTM0NH0.FgVfyEdmVTR9fXDioRVtwzpdcFuFQL31uJrMK8cYF7o"; // ⚠️ cambia esto por tu key segura
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peGtubXNwbnN3amJzbmNlZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTkzNDQsImV4cCI6MjA3MTI5NTM0NH0.FgVfyEdmVTR9fXDioRVtwzpdcFuFQL31uJrMK8cYF7o";
     const supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false }
     });
@@ -220,7 +594,7 @@
       const email = document.querySelector("#email").value;
       const password = document.querySelector("#password").value;
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) errorBox.textContent = "⚠️ " + error.message;
+      if (error) errorBox.textContent = "⚠ " + error.message;
       else errorBox.textContent = "";
     });
 
@@ -235,11 +609,8 @@
         dashboard.style.display = "block";
         document.querySelector("#logout").style.display = "block";
 
-        if (userRole === "admin") {
-          mostrarBotonesAdmin();
-        } else {
-          ocultarBotonesAdmin(); // 🔹 aseguramos que no se vean
-        }
+        if (userRole === "admin") mostrarBotonesAdmin();
+        else ocultarBotonesAdmin();
 
         if (!filesLoaded && event === "SIGNED_IN") {
           loadFiles(currentPath);
@@ -258,17 +629,13 @@
 
     async function loadFiles(path = "") {
       currentPath = path;
-
-      fileList.innerHTML = "<li>Cargando...</li>";
+      fileList.innerHTML = "<li style='color:var(--text-muted);font-family:var(--mono);font-size:0.85rem;border:none;background:transparent;'>Cargando archivos…</li>";
       infoPanel.style.display = "none";
       infoPanel.textContent = "";
       document.querySelector("#dashboard-content").classList.remove("has-info");
 
       const { data, error } = await supabase.storage.from("files").list(path, { limit: 100 });
-      if (error) {
-        fileList.innerHTML = "<li>Error al cargar archivos</li>";
-        return;
-      }
+      if (error) { fileList.innerHTML = "<li>Error al cargar archivos</li>"; return; }
 
       fileList.innerHTML = "";
 
@@ -280,7 +647,7 @@
         if (urlData) {
           const res = await fetch(urlData.signedUrl);
           const txt = await res.text();
-          infoPanel.textContent = txt;
+          infoPanel.innerHTML = `<span class="info-panel-label">ℹ Info</span>${txt}`;
           infoPanel.style.display = "block";
           document.querySelector("#dashboard-content").classList.add("has-info");
         }
@@ -289,8 +656,11 @@
       // Botón volver
       if (path !== "") {
         const backLi = document.createElement("li");
+        backLi.style.background = "transparent";
+        backLi.style.border = "1px dashed var(--border)";
         const btn = document.createElement("button");
-        btn.textContent = "⬅ Volver";
+        btn.textContent = "← Volver";
+        btn.className = "btn-back";
         btn.addEventListener("click", () => {
           const parent = path.split("/").slice(0, -1).join("/");
           loadFiles(parent);
@@ -300,104 +670,124 @@
       }
 
       // Carpetas
-      const folders = data.filter((f) => f.metadata === null);
-      folders.forEach((folder) => {
+      const folders = data.filter(f => f.metadata === null);
+      folders.forEach((folder, i) => {
         const li = document.createElement("li");
+        li.style.animationDelay = `${i * 40}ms`;
+
+        const icon = document.createElement("div");
+        icon.className = "file-icon";
+        icon.textContent = "📁";
+
+        const nameWrap = document.createElement("div");
+        nameWrap.className = "file-name";
+
         const btn = document.createElement("button");
+        btn.className = "btn-folder";
         btn.textContent = folder.name;
-        btn.prepend("📁 ");
-        btn.addEventListener("click", () => {
-          loadFiles(path ? `${path}/${folder.name}` : folder.name);
-        });
-        li.appendChild(btn);
+        btn.addEventListener("click", () => loadFiles(path ? `${path}/${folder.name}` : folder.name));
+
+        nameWrap.appendChild(btn);
+        li.appendChild(icon);
+        li.appendChild(nameWrap);
         fileList.appendChild(li);
       });
 
       // Archivos
-      const files = data.filter((f) => f.metadata !== null && f.name.toLowerCase() !== "info.txt");
-      for (const f of files) {
+      const files = data.filter(f => f.metadata !== null && f.name.toLowerCase() !== "info.txt");
+      for (const [i, f] of files.entries()) {
         const fullPath = path ? `${path}/${f.name}` : f.name;
         const { data: urlData, error: urlError } = await supabase.storage.from("files").createSignedUrl(fullPath, 300);
-        if (!urlError) {
-          const li = document.createElement("li");
-          const link = document.createElement("a");
-          link.href = urlData.signedUrl;
-          link.target = "_blank";
-          link.download = f.name;
-          link.textContent = f.name;
-          li.prepend("📄 ");
-          li.appendChild(link);
+        if (urlError) continue;
 
-          // 🔹 Botón descargar (siempre visible)
-const downloadBtn = document.createElement("button");
-downloadBtn.textContent = "⬇ Descargar";
-downloadBtn.classList.add("btn-download");
-downloadBtn.addEventListener("click", () => {
-  window.open(urlData.signedUrl, "_blank");
-});
-li.appendChild(downloadBtn);
+        const ext = f.name.split(".").pop().toLowerCase();
+        const iconMap = { pdf: "📄", png: "🖼", jpg: "🖼", jpeg: "🖼", zip: "🗜", xlsx: "📊", docx: "📝", mp4: "🎬", mp3: "🎵" };
+        const icon = iconMap[ext] || "📄";
 
-          if (userRole === "admin") {
-            const delBtn = document.createElement("button");
-            delBtn.textContent = "❌ Eliminar archivo";
-            delBtn.classList.add("btn-small");
-            delBtn.addEventListener("click", async () => {
-              await supabase.storage.from("files").remove([fullPath]);
-              loadFiles(currentPath);
-            });
-            li.appendChild(delBtn);
-          }
+        const li = document.createElement("li");
+        li.style.animationDelay = `${(folders.length + i) * 40}ms`;
 
-          fileList.appendChild(li);
+        const iconEl = document.createElement("div");
+        iconEl.className = "file-icon";
+        iconEl.textContent = icon;
+
+        const nameWrap = document.createElement("div");
+        nameWrap.className = "file-name";
+
+        const link = document.createElement("a");
+        link.href = urlData.signedUrl;
+        link.target = "_blank";
+        link.download = f.name;
+        link.textContent = f.name;
+
+        nameWrap.appendChild(link);
+        li.appendChild(iconEl);
+        li.appendChild(nameWrap);
+
+        const downloadBtn = document.createElement("button");
+        downloadBtn.textContent = "⬇ Descargar";
+        downloadBtn.className = "btn-download";
+        downloadBtn.addEventListener("click", () => window.open(urlData.signedUrl, "_blank"));
+        li.appendChild(downloadBtn);
+
+        if (userRole === "admin") {
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "✕ Eliminar";
+          delBtn.className = "btn-small";
+          delBtn.addEventListener("click", async () => {
+            await supabase.storage.from("files").remove([fullPath]);
+            loadFiles(currentPath);
+          });
+          li.appendChild(delBtn);
         }
+
+        fileList.appendChild(li);
       }
 
       if (fileList.children.length === 0) {
-        fileList.innerHTML = "<li>No hay archivos</li>";
+        fileList.innerHTML = "<li style='color:var(--text-muted);font-family:var(--mono);font-size:0.85rem;border:none;background:transparent;'>No hay archivos en esta carpeta</li>";
       }
     }
 
     function mostrarBotonesAdmin() {
-  const adminBtns = document.querySelector(".admin-buttons");
-  adminBtns.style.display = "flex";
-  const uploadBtn = document.querySelector("#uploadBtn");
-  const newFolderBtn = document.querySelector("#newFolderBtn");
-  const fileInput = document.querySelector("#fileInput");
+      const adminBtns = document.querySelector(".admin-buttons");
+      const uploadBtn = document.querySelector("#uploadBtn");
+      const newFolderBtn = document.querySelector("#newFolderBtn");
+      const fileInput = document.querySelector("#fileInput");
 
-  adminBtns.style.display = "flex"; // mostrar contenedor
-  uploadBtn.style.display = "inline-block";
-  newFolderBtn.style.display = "inline-block";
+      adminBtns.style.display = "flex";
+      uploadBtn.style.display = "inline-flex";
+      newFolderBtn.style.display = "inline-flex";
 
-  uploadBtn.onclick = () => fileInput.click();
+      uploadBtn.onclick = () => fileInput.click();
 
-  fileInput.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+      fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+        const { error } = await supabase.storage.from("files").upload(filePath, file, { upsert: true });
+        if (error) alert("Error al subir: " + error.message);
+        else loadFiles(currentPath);
+      };
 
-    const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
-    const { error } = await supabase.storage.from("files").upload(filePath, file, { upsert: true });
-    if (error) alert("❌ Error al subir: " + error.message);
-    else loadFiles(currentPath);
-  };
+      newFolderBtn.onclick = async () => {
+        const nombre = prompt("Nombre de la carpeta:");
+        if (!nombre) return;
+        const filePath = currentPath ? `${currentPath}/${nombre}/.keep` : `${nombre}/.keep`;
+        const { error } = await supabase.storage.from("files").upload(filePath, new Blob([""]), { upsert: true });
+        if (error) alert("Error al crear carpeta: " + error.message);
+        else loadFiles(currentPath);
+      };
+    }
 
-  newFolderBtn.onclick = async () => {
-    const nombre = prompt("Nombre de la carpeta:");
-    if (!nombre) return;
-    const filePath = currentPath ? `${currentPath}/${nombre}/.keep` : `${nombre}/.keep`;
-    const { error } = await supabase.storage.from("files").upload(filePath, new Blob([""]), { upsert: true });
-    if (error) alert("❌ Error al crear carpeta: " + error.message);
-    else loadFiles(currentPath);
-  };
-}
-function ocultarBotonesAdmin() {
-  const adminBtns = document.querySelector(".admin-buttons");
-  adminBtns.style.display = "none";
-}
+    function ocultarBotonesAdmin() {
+      document.querySelector(".admin-buttons").style.display = "none";
+    }
 
-    // Cerrar sesión al cerrar pestaña
     window.addEventListener("beforeunload", async () => {
       await supabase.auth.signOut();
     });
   </script>
 </body>
+
 </html>
