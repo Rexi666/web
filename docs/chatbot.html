@@ -886,16 +886,14 @@
 
         // Llama al proxy local si existe (/api/proxy), si no intenta directo
         const targetEndpoint = `${config.baseUrl}/chat/completions`;
-        const PROXY = 'https://proxy.antonferv.workers.dev/';
+        const PROXY_URL = 'https://script.google.com/macros/s/AKfycbzCVMzdS2qGsur8g3rOCjwYOTbj6MUhDzoBvhK9GGudXaUn2AcK4WaqTLkvhlqiik8d/exec';
 
-        const res = await fetch(PROXY, {
+        const res = await fetch(PROXY_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${config.apiKey}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             targetUrl: targetEndpoint,
+            auth: `Bearer ${config.apiKey}`,   // ← la key va en el body
             model: config.model,
             messages,
             temperature: config.temperature,
