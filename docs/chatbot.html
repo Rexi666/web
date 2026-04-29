@@ -778,9 +778,9 @@
             <div class="presets-label">Proveedores</div>
 
             <button class="preset-btn" id="preset-meta" onclick="applyPreset('meta')">
-              <div class="preset-icon" style="background:#1a2a1a;">🟢</div>
+              <div class="preset-icon" style="background:#261a2a;">🟣</div>
               <div class="preset-info">
-                <span class="preset-name">META</span>
+                <span class="preset-name">Meta</span>
                 <span class="preset-model">llama-3.3-70b-instruct</span>
               </div>
             </button>
@@ -790,6 +790,30 @@
               <div class="preset-info">
                 <span class="preset-name">OpenAI</span>
                 <span class="preset-model">gpt-oss-120b</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" id="preset-google" onclick="applyPreset('google')">
+              <div class="preset-icon" style="background:#1f1a18;">🔴</div>
+              <div class="preset-info">
+                <span class="preset-name">Google</span>
+                <span class="preset-model">google/gemma-4-31b-it</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" id="preset-nvidia" onclick="applyPreset('nvidia')">
+              <div class="preset-icon" style="background:#1a2a1a;">🟢</div>
+              <div class="preset-info">
+                <span class="preset-name">Nvidia</span>
+                <span class="preset-model">nvidia/nemotron-3-super-120b-a12b</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" id="preset-deepseek" onclick="applyPreset('deepseek')">
+              <div class="preset-icon" style="background:#1a232a;">🔵</div>
+              <div class="preset-info">
+                <span class="preset-name">Deepseek</span>
+                <span class="preset-model">deepseek-ai/deepseek-v4-pro</span>
               </div>
             </button>
 
@@ -1094,7 +1118,7 @@
     // ── PRESETS ───────────────────────────────────────────────────────────────
     const PRESETS = {
       meta: {
-        name: 'META',
+        name: 'Meta',
         baseUrl: 'https://integrate.api.nvidia.com/v1',
         model: 'meta/llama-3.3-70b-instruct',
         apiKey: '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',
@@ -1104,6 +1128,24 @@
         baseUrl: 'https://integrate.api.nvidia.com/v1',
         model: 'openai/gpt-oss-120b',
         apiKey: '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',
+      },
+      google: {
+        name: 'Google',
+        baseUrl: 'https://integrate.api.nvidia.com/v1',
+        model: 'google/gemma-4-31b-it',
+        apiKey: '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',
+      },
+      nvidia: {
+        name: 'Nvidia',
+        baseUrl: 'https://integrate.api.nvidia.com/v1',
+        model: 'nvidia/nemotron-3-super-120b-a12b',
+        apiKey: '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',
+      },
+      deepseek: {
+        name: 'Deepseek',
+        baseUrl: 'https://integrate.api.nvidia.com/v1',
+        model: 'deepseek-ai/deepseek-v4-pro',
+        apiKey: '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',
       },
       custom: {
         name: 'Custom',
