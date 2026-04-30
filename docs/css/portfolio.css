@@ -1,23 +1,72 @@
 .imagesmall {
-    width: 300px;
-    margin-bottom: 1rem;
+  width: 300px;
+  max-width: 100%;
+  margin: 0.75rem 0 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,195,0.12);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  transition: box-shadow 0.3s ease;
 }
 
 .imagebig {
-    width: 450px;
-    margin-bottom: 1rem;
+  width: 460px;
+  max-width: 100%;
+  margin: 0.75rem 0 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,195,0.12);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  transition: box-shadow 0.3s ease;
+}
+
+.imagesmall:hover,
+.imagebig:hover {
+  box-shadow: 0 6px 32px rgba(0,255,195,0.15);
 }
 
 .spacersmall {
-    height: 1rem;
+  height: 0.85rem;
 }
 
+/* Badge-style legend stars */
 .star-red {
-    color: red;
-    font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: rgba(255, 60, 60, 0.15);
+  border: 1px solid rgba(255,60,60,0.35);
+  border-radius: 4px;
+  color: #ff5252;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  vertical-align: middle;
 }
 
 .star-green {
-    color: limegreen;
-    font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: rgba(0, 255, 100, 0.1);
+  border: 1px solid rgba(0,255,100,0.3);
+  border-radius: 4px;
+  color: #39ff80;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  vertical-align: middle;
+}
+
+/* Plugin tags in list */
+section li a {
+  color: #00ffc3;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+section li a:hover {
+  color: #fff;
 }

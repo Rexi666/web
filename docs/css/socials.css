@@ -1,48 +1,71 @@
 .socials {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .social-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
-    text-decoration: none;
-    color: #1ecbe1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-secondary, #7a96a8);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer on hover */
+.social-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(0,255,195,0.07) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  border-radius: inherit;
+}
+
+.social-card:hover::before {
+  opacity: 1;
 }
 
 .social-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0 15px #00ffc3;
-    color: #00ffc3;
+  transform: translateY(-6px);
+  box-shadow: 0 0 28px rgba(0, 255, 195, 0.18), 0 8px 32px rgba(0,0,0,0.35);
+  border-color: rgba(0,255,195,0.25);
+  color: #00ffc3;
+  text-decoration: none;
 }
 
 .social-card img {
-    width: 60px;
-    margin-bottom: 1rem;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  filter: brightness(0.85) saturate(0.9);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.social-card:hover img {
+  filter: brightness(1.1) saturate(1.1);
+  transform: scale(1.08);
 }
 
 .social-card span {
-    font-size: 1.1rem;
-}
-
-.social-card a {
-    display: block;
-    margin-top: 0.5rem;
-    color: #1ecbe1;
-    font-size: 1.1rem;
-    text-decoration: none;
-}
-
-.social-card a:hover {
-    text-decoration: underline;
-    color: #00ffc3;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  position: relative;
 }

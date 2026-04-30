@@ -1,80 +1,155 @@
-p {
-    font-size: 1.1rem;
-    max-width: 800px;
-    line-height: 1.7;
+/* ─── Form Elements ──────────────────────────────────────────── */
+#contactForm label {
+  display: block;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #7a96a8);
+  margin-bottom: 0.4rem;
+  margin-top: 1.25rem;
 }
 
-.buttons {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
+#contactForm label:first-child {
+  margin-top: 0;
 }
 
-.button {
-    background-color: #00ffc3;
-    color: #000;
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s ease;
+#contactForm input[type="text"],
+#contactForm textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  color: #eef2f5;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  resize: vertical;
 }
 
-.button:hover {
-    background-color: #00c8a5;
+#contactForm input[type="text"]:focus,
+#contactForm textarea:focus {
+  border-color: rgba(0,255,195,0.45);
+  box-shadow: 0 0 0 3px rgba(0,255,195,0.07);
 }
 
+#contactForm input::placeholder,
+#contactForm textarea::placeholder {
+  color: rgba(122,150,168,0.5);
+}
+
+/* Status message */
+#statusMsg {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-height: 1.5rem;
+  color: #00ffc3;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+.button,
+button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: #00ffc3;
+  color: #000;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  margin-top: 1.25rem;
+}
+
+.button:hover,
+button[type="submit"]:hover {
+  background: #00d9a8;
+  box-shadow: 0 0 24px rgba(0,255,195,0.35);
+  transform: translateY(-2px);
+  color: #000;
+}
+
+/* Discord button */
 .button2 {
-    background-color: #0066ff;
-    color: #000;
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    min-height: 60px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #5865f2;
+  color: #fff;
+  padding: 0.8rem 1.75rem;
+  border-radius: 50px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  min-height: 52px;
 }
 
 .button2:hover {
-    background-color: #004cbf;
+  background: #4752c4;
+  box-shadow: 0 0 22px rgba(88,101,242,0.45);
+  transform: translateY(-2px);
+  color: #fff;
 }
 
+/* Redes button */
 .button3 {
-    background-color: #8c00ff;
-    color: #000;
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    min-height: 60px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(138, 43, 226, 0.15);
+  color: #b06dff;
+  border: 1.5px solid rgba(138,43,226,0.4);
+  padding: 0.75rem 1.75rem;
+  border-radius: 50px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 48px;
 }
 
 .button3:hover {
-    background-color: #6500b7;
+  background: rgba(138,43,226,0.28);
+  border-color: rgba(180,100,255,0.6);
+  color: #c890ff;
+  box-shadow: 0 0 20px rgba(138,43,226,0.25);
+  transform: translateY(-2px);
 }
 
-.spacersmall {
-    height: 1rem;
+/* Spacers */
+.spacersmall { height: 0.85rem; }
+.spacerbig   { height: 1.75rem; }
+
+/* ─── Other contact list ─────────────────────────────────────── */
+section ul li {
+  font-size: 0.97rem;
 }
 
-.spacerbig {
-    height: 2rem;
+section ul li a {
+  color: #00ffc3;
+}
+
+section ul li a:hover {
+  color: #fff;
+}
+
+section h3 {
+  margin-top: 0;
 }

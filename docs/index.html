@@ -7,6 +7,8 @@
   <title>🏠Inicio - Rexi</title>
   <script src="js/analytics.js"></script>
   <link rel="icon" type="image/png" href="images/logo-circular.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="chatbot/chatbot.css">
   <link rel="stylesheet" href="css/index.css">
 </head>
@@ -14,29 +16,32 @@
 <body>
   <img src="images/logo-circular.png" alt="Logo" class="logo">
   <h1>Rexi666</h1>
-  <p>Amplia experiencia en la creación, desarrollo y administración de servidores de minecraft</p>
+  <p>Amplia experiencia en la creación, desarrollo y administración de servidores de Minecraft</p>
+
   <div class="buttons">
-    <div style="text-align: right;">
-      <a class="button" href="portfolio.html">🛠️Minecraft Config & Dev</a>
+    <div>
+      <a class="button" href="portfolio.html">🛠️ Minecraft Dev</a>
     </div>
-    <div style="text-align: center;">
-      <a class="button" href="contact.html">📬Contacto</a>
+    <div>
+      <a class="button" href="contact.html">📬 Contacto</a>
     </div>
-    <div style="text-align: left;">
-      <a class="button" href="socials.html" style="padding-left: 2.8rem; padding-right: 2.8rem;">🎥Redes Sociales</a>
+    <div>
+      <a class="button" href="socials.html">🎥 Redes Sociales</a>
     </div>
   </div>
 
-  <!-- CONTENEDOR DEL CHATBOT -->
+  <!-- CHATBOT -->
   <div id="chatbox">
-    <button id="closeChatBtn" title="Cerrar chat">×</button> <!-- La X arriba a la derecha -->
+    <div id="chatHeader">
+      <span>💬 Asistente de Rexi</span>
+      <button id="closeChatBtn" title="Cerrar chat">×</button>
+    </div>
     <div id="messages"></div>
     <div id="inputArea">
       <input type="text" id="input" placeholder="Escribe tu pregunta..." />
       <button id="sendBtn">Enviar</button>
     </div>
   </div>
-
   <button id="chatToggleBtn" title="Abrir chat">💬</button>
 
   <script type="module" src="https://esm.run/@google/generative-ai"></script>

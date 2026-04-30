@@ -4,9 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="js/analytics.js"></script>
   <title>🎥Redes Sociales - Rexi</title>
+  <script src="js/analytics.js"></script>
   <link rel="icon" type="image/png" href="images/logo-circular.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="chatbot/chatbot.css">
   <link rel="stylesheet" href="css/general.css">
   <link rel="stylesheet" href="css/socials.css">
@@ -17,16 +19,16 @@
   <nav>
     <h2><a href="index.html" class="logo-link"><img src="images/logo-circular.png" alt="Logo" class="logo"></a></h2>
     <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <a href="index.html">🏠Página Principal</a>
-    <a href="portfolio.html">🛠️Desarrollo Minecraft</a>
-    <a href="socials.html" class="active">🎥Redes Sociales</a>
-    <a href="contact.html">📬Contacto</a>
+    <a href="index.html">🏠 Página Principal</a>
+    <a href="portfolio.html">🛠️ Desarrollo Minecraft</a>
+    <a href="socials.html" class="active">🎥 Redes Sociales</a>
+    <a href="contact.html">📬 Contacto</a>
   </nav>
 
   <div class="content">
     <header>
       <h1>Mis Redes Sociales</h1>
-      <p>Sígueme en mis redes sociales!</p>
+      <p>Sígueme en mis redes sociales y únete a la comunidad</p>
     </header>
 
     <section class="reveal">
@@ -54,22 +56,26 @@
 
         <a href="https://x.com/Rexigamer666" target="_blank" class="social-card">
           <img src="images/icons/twitter.png" alt="Twitter/X">
-          <span>Twitter</span>
+          <span>Twitter / X</span>
         </a>
       </div>
     </section>
   </div>
-  <!-- CONTENEDOR DEL CHATBOT -->
+
+  <!-- CHATBOT -->
   <div id="chatbox">
-    <button id="closeChatBtn" title="Cerrar chat">×</button> <!-- La X arriba a la derecha -->
+    <div id="chatHeader">
+      <span>💬 Asistente de Rexi</span>
+      <button id="closeChatBtn" title="Cerrar chat">×</button>
+    </div>
     <div id="messages"></div>
     <div id="inputArea">
       <input type="text" id="input" placeholder="Escribe tu pregunta..." />
       <button id="sendBtn">Enviar</button>
     </div>
   </div>
-
   <button id="chatToggleBtn" title="Abrir chat">💬</button>
+
   <script type="module" src="https://esm.run/@google/generative-ai"></script>
   <script type="module" src="chatbot/chatbot.js"></script>
   <script>
