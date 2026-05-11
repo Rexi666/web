@@ -2,7 +2,7 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: '0 0 * * *' # a las 00:00 UTC
+    - cron: '0 */12 * * *' # a las 00:00 UTC
   workflow_dispatch: # Botón para ejecutar manualmente
 
 jobs:
