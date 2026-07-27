@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-const API_KEY = "AIzaSyBiPjbwGPxtPy2RrxTzJhJiAqON01cKuiI";
+const API_KEY = import.meta.env.GEMINI_API_KEY;
 
 // Ahora sí puedes inicializar Gemini de la forma correcta
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
 // DOM
 const messages = document.getElementById('messages');
