@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-const API_KEY = import.meta.env.GEMINI_API_KEY;
+const API_KEY = "GEMINI_API_KEY";
 
 // Ahora sí puedes inicializar Gemini de la forma correcta
 const genAI = new GoogleGenerativeAI(API_KEY);
