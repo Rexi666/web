@@ -2,35 +2,39 @@ const NVIDIA_API_KEY = "nvapi-G-bwb8LvKqd1Waxlt99xgIdGDnY5uyo9C3tFXiYu8CUIMs2Eei
 const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 const NVIDIA_MODEL = "meta/llama-3.3-70b-instruct";
 
-const PROXY_URL = 'https://oixknmspnswjbsncefwl.supabase.co/functions/v1/super-service';
+// Proxy de Cloudflare
+const PROXY_URL = 'https://proxy.antonferv.workers.dev/';
 
 // DOM
-const messages = document.getElementById('messages');
+const messagesContainer = document.getElementById('messages');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('sendBtn');
 const chatbox = document.getElementById('chatbox');
 const chatToggleBtn = document.getElementById('chatToggleBtn');
 const closeChatBtn = document.getElementById('closeChatBtn');
 
-// Añadir mensajes
+// Estado de la conversación
+let chatHistory = [];
+
+// Añadir mensajes al DOM
 function addMessage(text, sender) {
   const div = document.createElement('div');
   div.classList.add('message', sender);
   div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+  messagesContainer.appendChild(div);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 // Lógica de respuesta de reserva (fallback)
 function getFallbackResponse(text) {
-  text = text.toLowerCase();
-  if (text.includes('hola')) {
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes('hola')) {
     return '¡Hola! ¿En qué puedo ayudarte?';
-  } else if (text.includes('proyecto') || text.includes('ayuda') || text.includes('experiencia')) {
+  } else if (lowerText.includes('proyecto') || lowerText.includes('ayuda') || lowerText.includes('experiencia')) {
     return 'Rexi tiene experiencia con proyectos de servidores de Minecraft, configuraciones y desarrollo. Tienes su contacto en la página dedicada.';
-  } else if (text.includes('discord') || text.includes('contact')) {
+  } else if (lowerText.includes('discord') || lowerText.includes('contact')) {
     return 'Únete al servidor de Discord para contacto: https://discord.com/invite/a3zkKtrjTr';
-  } else if (text.includes('redes') || text.includes('sociales')) {
+  } else if (lowerText.includes('redes') || lowerText.includes('sociales')) {
     return 'Tienes las redes sociales en la página dedicada.';
   } else {
     return 'Lo siento, no entiendo tu pregunta. ¿Puedes reformularla? (Palabras clave: experiencia, discord, redes)';
@@ -49,62 +53,97 @@ La gente puede contactar con él, mediante su servidor de discord: https://disco
 
 En esta página web, hay una pestaña con sus redes sociales, otra con su experiencia y proyectos, y otra con su contacto`;
 
-// Respuesta IA (con lógica de reserva)
-async function getBotResponse(text) {
-  try {
-    const targetEndpoint = `${NVIDIA_BASE_URL}/chat/completions`;
+// Función auxiliar para esperar X milisegundos
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    const response = await fetch(PROXY_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${NVIDIA_API_KEY}`
-      },
-      body: JSON.stringify({
-        targetUrl: targetEndpoint,
-        model: NVIDIA_MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: text }
-        ],
-        temperature: 0.4,
-        max_tokens: 1024
-      })
-    });
+// Respuesta IA (con reintentos automáticos si Supabase está saturado)
+async function getBotResponse(userText, retries = 2) {
+  const apiMessages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...chatHistory,
+    { role: "user", content: userText }
+  ];
 
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+  const targetEndpoint = `${NVIDIA_BASE_URL}/chat/completions`;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${NVIDIA_API_KEY}`,
+        },
+        body: JSON.stringify({
+          targetUrl: targetEndpoint,
+          model: NVIDIA_MODEL,
+          messages: apiMessages,
+          temperature: 0.4,
+          max_tokens: 1024,
+          stream: false,
+        }),
+      });
+
+      const responseText = await res.text();
+
+      // Si nos da 503 (Worker ocupado) y aún nos quedan reintentos, esperamos y reintentamos
+      if (res.status === 503 && attempt < retries) {
+        console.warn(`Supabase ocupado (503). Reintentando (${attempt + 1}/${retries})...`);
+        await sleep(2000); // Espera 2 segundos antes de reintentar
+        continue;
+      }
+
+      if (!res.ok) {
+        let errMsg = `HTTP ${res.status}`;
+        try {
+          const errJson = JSON.parse(responseText);
+          errMsg = errJson?.error?.message || errJson?.error || errMsg;
+        } catch { }
+        throw new Error(errMsg);
+      }
+
+      const data = JSON.parse(responseText);
+      const reply = data?.choices?.[0]?.message?.content;
+
+      if (!reply) throw new Error("Respuesta vacía o formato inválido");
+
+      chatHistory.push({ role: "user", content: userText });
+      chatHistory.push({ role: "assistant", content: reply });
+
+      return reply;
+
+    } catch (err) {
+      if (attempt === retries) {
+        console.error("Error al conectar con la IA tras varios intentos. Usando respuestas de reserva.", err);
+        return getFallbackResponse(userText);
+      }
     }
-
-    const data = await response.json();
-
-    // Comprobar si devolvió una respuesta válida de la API
-    if (data.choices && data.choices[0] && data.choices[0].message) {
-      return data.choices[0].message.content;
-    } else if (data.error) {
-      throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
-    } else {
-      throw new Error("Estructura de respuesta no válida");
-    }
-
-  } catch (err) {
-    console.error("Error al conectar con la IA de NVIDIA mediante el proxy. Usando respuestas de reserva.", err);
-    // Si la API o el proxy fallan, se usa la lógica de reserva
-    return getFallbackResponse(text);
   }
 }
 
-// Enviar mensaje
+// Enviar mensaje (protegido contra clics dobles)
+let isSending = false;
+
 sendBtn.addEventListener('click', async () => {
   const userText = input.value.trim();
-  if (userText === '') return;
+  if (userText === '' || isSending) return;
+
+  isSending = true;
+  sendBtn.disabled = true;
+  input.disabled = true;
 
   addMessage(userText, 'user');
   input.value = '';
 
   addMessage("Escribiendo...", 'bot');
   const botResponse = await getBotResponse(userText);
-  messages.lastChild.textContent = botResponse;
+
+  messagesContainer.lastChild.textContent = botResponse;
+
+  isSending = false;
+  sendBtn.disabled = false;
+  input.disabled = false;
+  input.focus();
 });
 
 input.addEventListener('keydown', e => {
