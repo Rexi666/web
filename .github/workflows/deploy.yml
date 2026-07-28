@@ -1,0 +1,29 @@
+name: Deploy a GitHub Pages con API Key
+
+on:
+  push:
+    branches: ["main"] # Cambia a "master" si tu rama principal se llama master
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      # Busca "REPLACE_WITH_GEMINI_KEY" en chatbot.js y lo cambia por tu Secret
+      - name: Inyectar Gemini API Key
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          sed -i "s/GEMINI_API_KEY/$GEMINI_KEY/g" chatbot.js
+
+      # Publica todo el contenido en la rama gh-pages para GitHub Pages
+      - name: Desplegar en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
