@@ -2,6 +2,8 @@ const NVIDIA_API_KEY = "nvapi-G-bwb8LvKqd1Waxlt99xgIdGDnY5uyo9C3tFXiYu8CUIMs2Eei
 const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 const NVIDIA_MODEL = "meta/llama-3.3-70b-instruct";
 
+const PROXY_URL = 'https://oixknmspnswjbsncefwl.supabase.co/functions/v1/super-service';
+
 // DOM
 const messages = document.getElementById('messages');
 const input = document.getElementById('input');
@@ -50,13 +52,16 @@ En esta página web, hay una pestaña con sus redes sociales, otra con su experi
 // Respuesta IA (con lógica de reserva)
 async function getBotResponse(text) {
   try {
-    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+    const targetEndpoint = `${NVIDIA_BASE_URL}/chat/completions`;
+
+    const response = await fetch(PROXY_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${NVIDIA_API_KEY}`
       },
       body: JSON.stringify({
+        targetUrl: targetEndpoint,
         model: NVIDIA_MODEL,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
@@ -72,10 +77,19 @@ async function getBotResponse(text) {
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+
+    // Comprobar si devolvió una respuesta válida de la API
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      return data.choices[0].message.content;
+    } else if (data.error) {
+      throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+    } else {
+      throw new Error("Estructura de respuesta no válida");
+    }
+
   } catch (err) {
-    console.error("Error al conectar con la IA de NVIDIA. Usando respuestas de reserva.", err);
-    // Si la API falla, se usa la lógica de reserva
+    console.error("Error al conectar con la IA de NVIDIA mediante el proxy. Usando respuestas de reserva.", err);
+    // Si la API o el proxy fallan, se usa la lógica de reserva
     return getFallbackResponse(text);
   }
 }
