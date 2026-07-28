@@ -1,10 +1,6 @@
-import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-
-const API_KEY = "GEMINI_API_KEY";
-
-// Ahora sí puedes inicializar Gemini de la forma correcta
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+const NVIDIA_API_KEY = "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";
+const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
+const NVIDIA_MODEL = "meta/llama-3.3-70b-instruct";
 
 // DOM
 const messages = document.getElementById('messages');
@@ -39,22 +35,7 @@ function getFallbackResponse(text) {
   }
 }
 
-// Respuesta IA (con lógica de reserva)
-async function getBotResponse(text) {
-  try {
-    // Intenta usar la API de Gemini
-    const result = await model.generateContent({
-      contents: [
-        { role: "user", parts: [{ text: text }] }
-      ],
-      generationConfig: {
-        temperature: 0.4,
-      },
-      safetySettings: [],
-      systemInstruction: {
-        role: "system",
-        parts: [{
-          text: `Eres un chatbot especializado en responder preguntas sobre mi (Rexi), un desarrollador de minecraft especializado en la creación, desarrollo y administración de servidores.
+const SYSTEM_PROMPT = `Eres un chatbot especializado en responder preguntas sobre mi (Rexi), un desarrollador de minecraft especializado en la creación, desarrollo y administración de servidores.
 
 Responde de forma clara y concisa.
 Si la pregunta no está en tu base de conocimiento, di:
@@ -64,14 +45,36 @@ Rexi tiene experiencia con proyectos de servidores de Minecraft, configuraciones
 
 La gente puede contactar con él, mediante su servidor de discord: https://discord.com/invite/a3zkKtrjTr
 
-En esta página web, hay una pestaña con sus redes sociales, otra con su experiencia y proyectos, y otra con su contacto`
-        }]
-      }
+En esta página web, hay una pestaña con sus redes sociales, otra con su experiencia y proyectos, y otra con su contacto`;
+
+// Respuesta IA (con lógica de reserva)
+async function getBotResponse(text) {
+  try {
+    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${NVIDIA_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: NVIDIA_MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: text }
+        ],
+        temperature: 0.4,
+        max_tokens: 1024
+      })
     });
 
-    return result.response.text();
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
   } catch (err) {
-    console.error("Error al conectar con la IA de Gemini. Usando respuestas de reserva.", err);
+    console.error("Error al conectar con la IA de NVIDIA. Usando respuestas de reserva.", err);
     // Si la API falla, se usa la lógica de reserva
     return getFallbackResponse(text);
   }
