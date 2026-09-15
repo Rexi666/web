@@ -47,7 +47,8 @@
         <input type="text" id="discord" name="discord" placeholder="usuario#0000">
 
         <label for="message">Mensaje</label>
-        <textarea id="message" name="message" rows="5" required placeholder="Cuéntame tu proyecto..."></textarea>
+        <textarea id="message" name="message" rows="5" required maxlength="4000"
+          placeholder="Cuéntame tu proyecto..."></textarea>
 
         <button type="submit" class="button">Enviar mensaje →</button>
       </form>
@@ -109,23 +110,41 @@
 
       const webhookURL = "https://discord.com/api/webhooks/1408863278616285364/UjO4w1SRorEdTZ8K-QeLGVN8aE5ccxannaBAsXB2G90NHLg9K7rUXbKzBTW0cd7gT_vN";
 
+      // Límite de caracteres de la description de un embed
+      const MAX_DESC = 4096;
+
       const fields = [
-        { name: "Correo", value: contact, inline: false },
-        { name: "Mensaje", value: message, inline: false }
+        { name: "Correo", value: contact, inline: false }
       ];
 
       if (discord.trim() !== "") {
-        fields.splice(1, 0, { name: "Discord ID", value: discord, inline: false });
+        fields.push({ name: "Discord ID", value: discord, inline: false });
       }
 
-      const payload = {
-        embeds: [{
-          title: "📬 Nuevo mensaje desde la web",
-          color: 3447003,
-          fields: fields,
-          footer: { text: "Formulario de contacto Rexi" }
-        }]
-      };
+      // El mensaje va en la description (4096 chars) en vez de en un field (1024 chars).
+      // Si aun así se pasa, se reparte en varios embeds.
+      const chunks = [];
+      for (let i = 0; i < message.length; i += MAX_DESC) {
+        chunks.push(message.slice(i, i + MAX_DESC));
+      }
+      if (chunks.length === 0) chunks.push("");
+
+      const embeds = chunks.map((chunk, i) => {
+        const embed = {
+          description: chunk,
+          color: 3447003
+        };
+        if (i === 0) {
+          embed.title = "📬 Nuevo mensaje desde la web";
+          embed.fields = fields;
+        }
+        if (i === chunks.length - 1) {
+          embed.footer = { text: "Formulario de contacto Rexi" };
+        }
+        return embed;
+      });
+
+      const payload = { embeds: embeds };
 
       const cooldown = 60000;
       const lastSent = localStorage.getItem("lastSent") || 0;
