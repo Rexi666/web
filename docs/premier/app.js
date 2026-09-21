@@ -672,7 +672,7 @@ function openLogin() {
 async function apiCreateUser(email, password, displayName) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) throw new Error('Sesión caducada, vuelve a iniciar sesión');
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-user-premier`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
