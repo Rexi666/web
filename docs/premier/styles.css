@@ -972,3 +972,64 @@ dialog::backdrop {
     transform: none;
   }
 }
+
+/* ---------- imagen destacada del mapa ---------- */
+.map-hero {
+  position: relative;
+  min-height: 150px;
+  margin: 1rem 0 1.25rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  isolation: isolate;
+}
+
+.map-image {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.map-hero-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(12, 18, 27, .92) 0%, rgba(12, 18, 27, .58) 48%, rgba(12, 18, 27, .22) 100%);
+}
+
+.map-hero:not(.has-image) .map-hero-shade {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+}
+
+.map-hero .map-head {
+  min-height: 150px;
+  margin: 0;
+  padding: 1.25rem;
+  align-content: center;
+}
+
+.map-hero .map-title {
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .75);
+}
+
+@media (max-width: 640px) {
+
+  .map-hero,
+  .map-hero .map-head {
+    min-height: 125px;
+  }
+
+  .map-hero .map-head {
+    padding: 1rem;
+  }
+
+  .map-hero-shade {
+    background: linear-gradient(90deg, rgba(12, 18, 27, .9), rgba(12, 18, 27, .4));
+  }
+}

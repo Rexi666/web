@@ -22,7 +22,7 @@ const APP_ROLES = { viewer: 'Solo ver', player: 'Jugador', admin: 'Admin' };
 // ---------------------------------------------------------------- estado
 const S = {
   session: null, profile: null, loading: true,
-  players: [], agents: [], maps: [], pool: new Map(), agentImages: new Map(),
+  players: [], agents: [], maps: [], pool: new Map(), agentImages: new Map(), mapImages: new Map(),
   comps: [], slots: [], profiles: [],
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
@@ -98,6 +98,25 @@ function agentLabel(agent) {
     ${image ? `<img class="agent-icon" src="${esc(image)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">` : ''}
     <span>${esc(agent.name)}</span>
   </span>`;
+}
+
+async function loadMapImages() {
+  try {
+    const res = await fetch('https://valorant-api.com/v1/maps?language=es-ES');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    S.mapImages = new Map(
+      (json.data ?? [])
+        .filter((m) => m.displayName && (m.wideScreenSplash || m.splash))
+        .map((m) => [
+          m.displayName.toLocaleLowerCase('es'),
+          m.wideScreenSplash || m.splash,
+        ])
+    );
+  } catch (error) {
+    console.warn('No se pudieron cargar las imágenes de mapas:', error);
+    S.mapImages = new Map();
+  }
 }
 
 async function loadAll() {
@@ -266,13 +285,21 @@ function viewMaps() {
       ${esc(m.name)}${n ? `<span class="count">${n}</span>` : ''}</button>`;
   }).join('');
 
+  const mapImage = map
+    ? S.mapImages.get(map.name.toLocaleLowerCase('es'))
+    : null;
+
   return `
     <section>
       <div class="chips" role="tablist">${chips}</div>
-      <div class="map-head">
-        <h1 class="map-title">${esc(map?.name ?? '')}</h1>
-        ${map && !map.in_pool ? '<span class="badge">Fuera del map pool</span>' : ''}
-        ${isAdmin() ? '<button class="btn primary" data-action="new-comp">Nueva composición</button>' : ''}
+      <div class="map-hero ${mapImage ? 'has-image' : ''}">
+        ${mapImage ? `<img class="map-image" src="${esc(mapImage)}" alt="Vista del mapa ${esc(map?.name ?? '')}" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.map-hero').classList.remove('has-image'); this.remove()">` : ''}
+        <div class="map-hero-shade"></div>
+        <div class="map-head">
+          <h1 class="map-title">${esc(map?.name ?? '')}</h1>
+          ${map && !map.in_pool ? '<span class="badge">Fuera del map pool</span>' : ''}
+          ${isAdmin() ? '<button class="btn primary" data-action="new-comp">Nueva composición</button>' : ''}
+        </div>
       </div>
       ${comps.length
       ? `<div class="comps">${comps.map(compCard).join('')}</div>`
@@ -924,7 +951,7 @@ async function init() {
   render();
   const { data } = await sb.auth.getSession();
   S.session = data.session;
-  await Promise.all([loadProfile(), loadAgentImages()]);
+  await Promise.all([loadProfile(), loadAgentImages(), loadMapImages()]);
   await loadAll();
   S.loading = false;
   render();
