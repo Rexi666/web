@@ -1,14 +1,14 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_ANON_KEY, ENABLE_DISCORD_LOGIN, TEAM_NAME } from './config.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, TEAM_NAME } from './config.js';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------------------------------------------------------------- constantes
 const LEVELS = {
-  great: { label: 'Genial',      short: '★', cls: 'lv-great' },
-  good:  { label: 'Bien',        short: '✓', cls: 'lv-good'  },
-  bad:   { label: 'Malo',        short: '!', cls: 'lv-bad'   },
-  none:  { label: 'No lo tiene', short: '✕', cls: 'lv-none'  },
+  great: { label: 'Genial', short: '★', cls: 'lv-great' },
+  good: { label: 'Bien', short: '✓', cls: 'lv-good' },
+  bad: { label: 'Malo', short: '!', cls: 'lv-bad' },
+  none: { label: 'No lo tiene', short: '✕', cls: 'lv-none' },
 };
 const UNRATED = { label: 'Sin valorar', short: '', cls: 'lv-unrated' };
 const LEVEL_ORDER = ['great', 'good', 'bad', 'none'];
@@ -55,6 +55,8 @@ function toast(msg, type = 'ok') {
 
 function friendlyError(error) {
   const m = error?.message ?? String(error);
+  if (/invalid login credentials/i.test(m)) return 'Email o contraseña incorrectos.';
+  if (/email.*already registered|already been registered/i.test(m)) return 'Ese email ya tiene cuenta.';
   if (/row-level security|permission denied/i.test(m)) return 'No tienes permisos para hacer eso.';
   if (/duplicate key.*player_id/i.test(m)) return 'Ese jugador ya está en la composición.';
   if (/duplicate key.*agent_id/i.test(m)) return 'Ese agente ya está en la composición.';
@@ -194,7 +196,7 @@ function viewPool() {
       <div class="table-wrap">
         <table class="pool">
           <thead><tr><th class="corner"></th>${players.map((p) =>
-            `<th class="player-h ${p.id === me ? 'me' : ''}" scope="col"><span>${esc(p.name)}</span></th>`).join('')}</tr></thead>
+    `<th class="player-h ${p.id === me ? 'me' : ''}" scope="col"><span>${esc(p.name)}</span></th>`).join('')}</tr></thead>
           <tbody>${body}</tbody>
           <tfoot><tr><th class="agent-name" title="Agentes con nivel bien o genial">Jugables</th>${totals}</tr></tfoot>
         </table>
@@ -225,8 +227,8 @@ function viewMaps() {
         ${isAdmin() ? '<button class="btn primary" data-action="new-comp">Nueva composición</button>' : ''}
       </div>
       ${comps.length
-        ? `<div class="comps">${comps.map(compCard).join('')}</div>`
-        : empty(isAdmin() ? 'Aún no hay composiciones para este mapa. Crea la primera.' : 'Aún no hay composiciones para este mapa.')}
+      ? `<div class="comps">${comps.map(compCard).join('')}</div>`
+      : empty(isAdmin() ? 'Aún no hay composiciones para este mapa. Crea la primera.' : 'Aún no hay composiciones para este mapa.')}
     </section>`;
 }
 
@@ -301,8 +303,7 @@ function agentOptions(slot) {
     ${esc(a.name)}${suffix}${usedElsewhere.has(a.id) ? ' (en uso)' : ''}</option>`;
 
   if (!slot.player_id) {
-    return ROLE_ORDER.map((r) => `<optgroup label="${ROLES[r]}">${
-      agents.filter((a) => a.role === r).map((a) => opt(a)).join('')}</optgroup>`).join('');
+    return ROLE_ORDER.map((r) => `<optgroup label="${ROLES[r]}">${agents.filter((a) => a.role === r).map((a) => opt(a)).join('')}</optgroup>`).join('');
   }
   const groups = [...LEVEL_ORDER.slice(0, 2), null, ...LEVEL_ORDER.slice(2)]; // genial, bien, sin valorar, malo, no lo tiene
   return groups.map((lv) => {
@@ -344,7 +345,7 @@ function renderEditor() {
           <input data-draft="name" value="${esc(d.name)}" required maxlength="60"></label>
         <label class="field"><span>Mapa</span>
           <select data-draft="map">${S.maps.map((m) =>
-            `<option value="${m.id}" ${m.id === d.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
+    `<option value="${m.id}" ${m.id === d.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
       </div>
       <div class="edit-slots">${slotRows}</div>
       <label class="field"><span>Notas</span>
@@ -456,6 +457,24 @@ function viewAdmin() {
       </section>
 
       <section class="admin-block">
+        <h2>Crear cuenta</h2>
+        <p class="hint">Crea una cuenta sin que el usuario reciba ningún email. Después vincúlala a un jugador en la tabla de arriba.</p>
+        <form class="create-user-form" data-form="create-user">
+          <div class="field-row">
+            <label class="field grow"><span>Email</span><input name="email" type="email" required autocomplete="off"></label>
+            <label class="field grow"><span>Nombre (visible en la web)</span><input name="display_name" type="text" maxlength="40" autocomplete="off"></label>
+          </div>
+          <div class="field-row">
+            <label class="field grow"><span>Contraseña (mín. 8 caracteres)</span>
+              <div class="pw-wrap"><input name="password" type="password" required minlength="8" autocomplete="new-password" id="new-pw">
+              <button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Mostrar contraseña">👁</button></div>
+            </label>
+            <button class="btn primary" style="align-self:flex-end;flex:none">Crear cuenta</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="admin-block">
         <h2>Agentes</h2>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>Nombre</th><th>Rol</th><th></th></tr></thead>
@@ -550,16 +569,36 @@ function openLogin() {
         <h2>Iniciar sesión</h2>
         <button type="button" class="icon-btn" data-action="close-modal" aria-label="Cerrar">✕</button>
       </div>
-      <p class="hint">Te enviamos un enlace al email. Sin contraseñas.</p>
-      <label class="field"><span>Email</span><input type="email" name="email" required autocomplete="email"></label>
-      <button class="btn primary wide">Enviar enlace</button>
-      ${ENABLE_DISCORD_LOGIN ? `<div class="or">o</div>
-        <button type="button" class="btn discord wide" data-action="login-discord">Entrar con Discord</button>` : ''}
+      <label class="field"><span>Email</span>
+        <input type="email" name="email" required autocomplete="email"></label>
+      <label class="field"><span>Contraseña</span>
+        <div class="pw-wrap">
+          <input type="password" name="password" id="login-pw" required autocomplete="current-password">
+          <button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Mostrar contraseña">👁</button>
+        </div>
+      </label>
+      <button class="btn primary wide">Entrar</button>
     </form>`;
   $('#modal').showModal();
+  $('#modal input[name=email]').focus();
 }
 
-const redirectUrl = () => location.origin + location.pathname;
+// Función para crear cuenta desde el panel Admin (llama a la Edge Function)
+async function apiCreateUser(email, password, displayName) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) throw new Error('Sesión caducada, vuelve a iniciar sesión');
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ email, password, display_name: displayName }),
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json.data;
+}
 
 // ---------------------------------------------------------------- eventos
 async function onClick(e) {
