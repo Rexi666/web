@@ -95,7 +95,7 @@ async function loadAgentImages() {
 function agentLabel(agent) {
   const image = S.agentImages.get(agent.name.toLocaleLowerCase('es'));
   return `<span class="agent-ident">
-    ${image ? `<img class="agent-icon" src="${esc(image)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">` : ''}
+    ${image ? `<img class="agent-icon" src="${esc(image)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">` : ''}
     <span>${esc(agent.name)}</span>
   </span>`;
 }
