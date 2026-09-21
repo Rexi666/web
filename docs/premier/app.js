@@ -7,11 +7,12 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const LEVELS = {
   great: { label: 'Genial', short: '★', cls: 'lv-great' },
   good: { label: 'Bien', short: '✓', cls: 'lv-good' },
+  normal: { label: 'Normal', short: '•', cls: 'lv-normal' },
   bad: { label: 'Malo', short: '!', cls: 'lv-bad' },
   none: { label: 'No lo tiene', short: '✕', cls: 'lv-none' },
 };
 const UNRATED = { label: 'Sin valorar', short: '', cls: 'lv-unrated' };
-const LEVEL_ORDER = ['great', 'good', 'bad', 'none'];
+const LEVEL_ORDER = ['great', 'good', 'normal', 'bad', 'none'];
 
 const ROLES = { duelist: 'Duelistas', initiator: 'Iniciadores', controller: 'Controladores', sentinel: 'Centinelas' };
 const ROLE_ONE = { duelist: 'Duelista', initiator: 'Iniciador', controller: 'Controlador', sentinel: 'Centinela' };
@@ -184,7 +185,8 @@ function viewPool() {
   const totals = players.map((p) => {
     const great = agents.filter((a) => S.pool.get(key(p.id, a.id)) === 'great').length;
     const good = agents.filter((a) => S.pool.get(key(p.id, a.id)) === 'good').length;
-    return `<td class="total" title="${great} genial, ${good} bien">${great + good}</td>`;
+    const normal = agents.filter((a) => S.pool.get(key(p.id, a.id)) === 'normal').length;
+    return `<td class="total" title="${great} genial, ${good} bien, ${normal} normal">${great + good + normal}</td>`;
   }).join('');
 
   return `
@@ -306,7 +308,7 @@ function agentOptions(slot) {
   if (!slot.player_id) {
     return ROLE_ORDER.map((r) => `<optgroup label="${ROLES[r]}">${agents.filter((a) => a.role === r).map((a) => opt(a)).join('')}</optgroup>`).join('');
   }
-  const groups = [...LEVEL_ORDER.slice(0, 2), null, ...LEVEL_ORDER.slice(2)]; // genial, bien, sin valorar, malo, no lo tiene
+  const groups = [...LEVEL_ORDER.slice(0, 3), null, ...LEVEL_ORDER.slice(3)]; // genial, bien, normal, sin valorar, malo, no lo tiene
   return groups.map((lv) => {
     const list = agents.filter((a) => (S.pool.get(key(slot.player_id, a.id)) ?? null) === lv);
     if (!list.length) return '';
