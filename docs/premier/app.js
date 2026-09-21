@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_ANON_KEY, TEAM_NAME } from './config.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, TEAM_NAME, ENABLE_DISCORD_LOGIN } from './config.js';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -43,6 +43,7 @@ const role = () => (S.session ? S.profile?.role ?? 'viewer' : 'anon');
 const isAdmin = () => role() === 'admin';
 const myPlayer = () => S.players.find((p) => p.user_id && p.user_id === S.session?.user?.id);
 const canEditPlayer = (pid) => isAdmin() || (role() === 'player' && myPlayer()?.id === pid);
+const redirectUrl = () => new URL('.', window.location.href).href;
 const slotsOf = (cid) => S.slots.filter((s) => s.composition_id === cid).sort((a, b) => a.slot - b.slot);
 
 function toast(msg, type = 'ok') {
@@ -578,6 +579,10 @@ function openLogin() {
         </div>
       </label>
       <button class="btn primary wide">Entrar</button>
+      ${ENABLE_DISCORD_LOGIN ? `
+        <div class="or">o</div>
+        <button type="button" class="btn discord wide" data-action="login-discord">Entrar con Discord</button>
+      ` : ''}
     </form>`;
   $('#modal').showModal();
   $('#modal input[name=email]').focus();
@@ -592,11 +597,15 @@ async function apiCreateUser(email, password, displayName) {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${session.access_token}`,
+      'apikey': SUPABASE_ANON_KEY,
     },
     body: JSON.stringify({ email, password, display_name: displayName }),
   });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error);
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json.error) {
+    throw new Error(json.error || `Error HTTP ${res.status} al crear la cuenta`);
+  }
   return json.data;
 }
 
@@ -613,6 +622,16 @@ async function onClick(e) {
     case 'pick-level':
       openLevelMenu(el, Number(el.dataset.p), Number(el.dataset.a)); break;
     case 'open-login': openLogin(); break;
+    case 'toggle-pw': {
+      const input = el.parentElement?.querySelector('input');
+      if (!input) break;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      el.textContent = showing ? '👁' : '🙈';
+      el.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+      input.focus();
+      break;
+    }
     case 'login-discord': {
       const { error } = await sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: redirectUrl() } });
       if (error) toast(friendlyError(error), 'err');
@@ -690,13 +709,37 @@ async function onSubmit(e) {
   const fd = new FormData(form);
   switch (form.dataset.form) {
     case 'login': {
-      const { error } = await sb.auth.signInWithOtp({
-        email: String(fd.get('email')).trim(),
-        options: { emailRedirectTo: redirectUrl() },
-      });
+      const email = String(fd.get('email')).trim();
+      const password = String(fd.get('password') ?? '');
+      const submit = form.querySelector('button[type="submit"], button:not([type])');
+      if (submit) submit.disabled = true;
+
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (submit) submit.disabled = false;
       if (error) return toast(friendlyError(error), 'err');
+
       $('#modal').close();
-      toast('Enlace enviado. Revisa tu email.');
+      toast('Sesión iniciada');
+      break;
+    }
+    case 'create-user': {
+      const email = String(fd.get('email')).trim();
+      const password = String(fd.get('password') ?? '');
+      const displayName = String(fd.get('display_name') ?? '').trim();
+      const submit = form.querySelector('button[type="submit"], button:not([type])');
+
+      if (password.length < 8) return toast('La contraseña debe tener al menos 8 caracteres.', 'err');
+      if (submit) submit.disabled = true;
+      try {
+        await apiCreateUser(email, password, displayName);
+        form.reset();
+        toast('Cuenta creada correctamente');
+        await refresh();
+      } catch (error) {
+        toast(friendlyError(error), 'err');
+      } finally {
+        if (submit) submit.disabled = false;
+      }
       break;
     }
     case 'save-comp': await saveDraft(); break;
