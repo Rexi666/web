@@ -139,8 +139,15 @@ function render() {
   const main = $('#main');
   if (S.loading) { main.innerHTML = empty('Cargando…'); return; }
   if (S.tab === 'admin' && !isAdmin()) S.tab = 'pool';
+  if (S.tab === 'account' && !S.session) S.tab = 'pool';
 
-  main.innerHTML = S.tab === 'maps' ? viewMaps() : S.tab === 'admin' ? viewAdmin() : viewPool();
+  main.innerHTML = S.tab === 'maps'
+    ? viewMaps()
+    : S.tab === 'account'
+      ? viewAccount()
+      : S.tab === 'admin'
+        ? viewAdmin()
+        : viewPool();
 
   const newWrap = $('.table-wrap');
   if (newWrap) {
@@ -164,7 +171,12 @@ function renderAuth() {
 }
 
 function renderTabs() {
-  const tabs = [['pool', 'Agent pool'], ['maps', 'Mapas'], ...(isAdmin() ? [['admin', 'Admin']] : [])];
+  const tabs = [
+    ['pool', 'Agent pool'],
+    ['maps', 'Mapas'],
+    ...(S.session ? [['account', 'Mi cuenta']] : []),
+    ...(isAdmin() ? [['admin', 'Admin']] : []),
+  ];
   $('#tabs').innerHTML = tabs.map(([id, label]) =>
     `<button class="tab ${S.tab === id ? 'active' : ''}" data-action="tab" data-tab="${id}">${label}</button>`).join('');
 }
@@ -428,6 +440,39 @@ async function saveDraft() {
   S.draft = null;
   toast('Composición guardada');
   await refresh();
+}
+
+// ---------- vista: mi cuenta
+function viewAccount() {
+  const email = S.session?.user?.email ?? '';
+  return `
+    <section class="account-view">
+      <div class="view-head">
+        <h1>Mi cuenta</h1>
+        <p class="hint">Sesión iniciada como ${esc(email)}.</p>
+      </div>
+      <div class="admin-block account-card">
+        <h2>Cambiar contraseña</h2>
+        <p class="hint">La nueva contraseña debe tener al menos 8 caracteres.</p>
+        <form class="password-form" data-form="change-password">
+          <label class="field">
+            <span>Nueva contraseña</span>
+            <div class="pw-wrap">
+              <input type="password" name="password" required minlength="8" autocomplete="new-password">
+              <button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Mostrar contraseña">👁</button>
+            </div>
+          </label>
+          <label class="field">
+            <span>Repite la nueva contraseña</span>
+            <div class="pw-wrap">
+              <input type="password" name="password_confirm" required minlength="8" autocomplete="new-password">
+              <button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Mostrar contraseña">👁</button>
+            </div>
+          </label>
+          <button class="btn primary" type="submit">Cambiar contraseña</button>
+        </form>
+      </div>
+    </section>`;
 }
 
 // ---------- vista: admin
@@ -775,6 +820,22 @@ async function onSubmit(e) {
       } finally {
         if (submit) submit.disabled = false;
       }
+      break;
+    }
+    case 'change-password': {
+      const password = String(fd.get('password') ?? '');
+      const confirmation = String(fd.get('password_confirm') ?? '');
+      if (password.length < 8) return toast('La contraseña debe tener al menos 8 caracteres.', 'err');
+      if (password !== confirmation) return toast('Las contraseñas no coinciden.', 'err');
+
+      const submit = form.querySelector('button[type="submit"]');
+      if (submit) submit.disabled = true;
+      const { error } = await sb.auth.updateUser({ password });
+      if (submit) submit.disabled = false;
+      if (error) return toast(friendlyError(error), 'err');
+
+      form.reset();
+      toast('Contraseña actualizada correctamente');
       break;
     }
     case 'save-comp': await saveDraft(); break;

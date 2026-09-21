@@ -14,7 +14,7 @@
   --great: #3fd4a0;
   --good: #7aa7ff;
   --bad: #f0924a;
-  --none: #56607a;
+  --none: #d0420f;
 
   --display: 'Chakra Petch', 'Segoe UI', system-ui, sans-serif;
   --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
@@ -381,7 +381,7 @@ button.lv:disabled {
 
 .lv-none {
   background: var(--none);
-  color: #d0420f;
+  color: #56607a;
 }
 
 .lv-unrated {
@@ -914,6 +914,50 @@ dialog::backdrop {
     height: 30px;
   }
 }
+
+.account-view {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  margin-top: .25rem;
+}
+
+.pw-wrap {
+  display: flex;
+  align-items: stretch;
+}
+
+.pw-wrap input {
+  flex: 1;
+  width: 100%;
+  border-radius: 6px 0 0 6px;
+}
+
+.pw-toggle {
+  flex: none;
+  min-width: 42px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+}
+
+.pw-toggle:hover {
+  border-color: var(--muted);
+}
+
 
 @media (prefers-reduced-motion: reduce) {
 
