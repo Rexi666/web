@@ -22,7 +22,7 @@ const APP_ROLES = { viewer: 'Solo ver', player: 'Jugador', admin: 'Admin' };
 // ---------------------------------------------------------------- estado
 const S = {
   session: null, profile: null, loading: true,
-  players: [], agents: [], maps: [], pool: new Map(),
+  players: [], agents: [], maps: [], pool: new Map(), agentImages: new Map(),
   comps: [], slots: [], profiles: [],
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
@@ -73,6 +73,31 @@ async function loadProfile() {
   if (!S.session) return;
   const { data } = await sb.from('profiles').select('*').eq('id', S.session.user.id).maybeSingle();
   S.profile = data;
+}
+
+async function loadAgentImages() {
+  try {
+    const res = await fetch('https://valorant-api.com/v1/agents?language=es-ES&isPlayableCharacter=true');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    S.agentImages = new Map(
+      (json.data ?? [])
+        .filter((a) => a.isPlayableCharacter && a.displayName && (a.displayIconSmall || a.displayIcon))
+        .map((a) => [a.displayName.toLocaleLowerCase('es'), a.displayIconSmall || a.displayIcon])
+    );
+  } catch (error) {
+    // La web sigue funcionando aunque el servicio externo de imágenes no responda.
+    console.warn('No se pudieron cargar las imágenes de agentes:', error);
+    S.agentImages = new Map();
+  }
+}
+
+function agentLabel(agent) {
+  const image = S.agentImages.get(agent.name.toLocaleLowerCase('es'));
+  return `<span class="agent-ident">
+    ${image ? `<img class="agent-icon" src="${esc(image)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">` : ''}
+    <span>${esc(agent.name)}</span>
+  </span>`;
 }
 
 async function loadAll() {
@@ -179,7 +204,7 @@ function viewPool() {
     if (!list.length) continue;
     body += `<tr class="role-row"><th colspan="${players.length + 1}">${ROLES[r]}</th></tr>`;
     for (const a of list) {
-      body += `<tr><th class="agent-name" scope="row">${esc(a.name)}</th>` + players.map((p) => {
+      body += `<tr><th class="agent-name" scope="row">${agentLabel(a)}</th>` + players.map((p) => {
         const lv = S.pool.get(key(p.id, a.id));
         const i = lvInfo(lv);
         const editable = canEditPlayer(p.id);
@@ -789,7 +814,7 @@ async function init() {
   render();
   const { data } = await sb.auth.getSession();
   S.session = data.session;
-  await loadProfile();
+  await Promise.all([loadProfile(), loadAgentImages()]);
   await loadAll();
   S.loading = false;
   render();

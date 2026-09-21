@@ -381,7 +381,7 @@ button.lv:disabled {
 
 .lv-none {
   background: var(--none);
-  color: #c6cddb;
+  color: #d0420f;
 }
 
 .lv-unrated {
@@ -883,6 +883,36 @@ dialog::backdrop {
 .toast.err {
   background: var(--danger);
   color: #2a0b0b;
+}
+
+.pool .agent-name {
+  min-width: 150px;
+}
+
+.agent-ident {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.agent-icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  object-fit: contain;
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+
+@media (max-width: 640px) {
+  .pool .agent-name {
+    min-width: 125px;
+  }
+
+  .agent-icon {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
