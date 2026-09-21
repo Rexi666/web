@@ -495,6 +495,10 @@ function viewAdmin() {
         ${Object.entries(APP_ROLES).map(([k, v]) => `<option value="${k}" ${k === u.role ? 'selected' : ''}>${v}</option>`).join('')}
       </select></td>
       <td>${esc(S.players.find((p) => p.user_id === u.id)?.name ?? '')}</td>
+      <td>${u.id === S.session.user.id
+      ? '<span class="sub">Tu cuenta</span>'
+      : `<button class="btn sm ghost danger" data-action="del-user" data-user-id="${u.id}">Eliminar</button>`}
+      </td>
     </tr>`).join('');
 
   const roleSelect = (sel, attrs) => `<select ${attrs}>${ROLE_ORDER.map((r) =>
@@ -533,8 +537,8 @@ function viewAdmin() {
         <h2>Cuentas y permisos</h2>
         <p class="hint">Jugador: edita solo su agent pool. Admin: edita todo, incluidas las composiciones.</p>
         <div class="table-scroll"><table class="admin-table">
-          <thead><tr><th>Cuenta</th><th>Permiso</th><th>Jugador</th></tr></thead>
-          <tbody>${users || '<tr><td colspan="3">Nadie se ha registrado todavía.</td></tr>'}</tbody></table></div>
+          <thead><tr><th>Cuenta</th><th>Permiso</th><th>Jugador</th><th></th></tr></thead>
+          <tbody>${users || '<tr><td colspan="4">Nadie se ha registrado todavía.</td></tr>'}</tbody></table></div>
       </section>
 
       <section class="admin-block">
@@ -689,6 +693,27 @@ async function apiCreateUser(email, password, displayName) {
   return json.data;
 }
 
+async function apiDeleteUser(userId) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) throw new Error('Sesión caducada, vuelve a iniciar sesión');
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-user-premier`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+      'apikey': SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ action: 'delete', user_id: userId }),
+  });
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json.error) {
+    throw new Error(json.error || `Error HTTP ${res.status} al eliminar la cuenta`);
+  }
+  return json.data;
+}
+
 // ---------------------------------------------------------------- eventos
 async function onClick(e) {
   const el = e.target.closest('[data-action]');
@@ -726,6 +751,30 @@ async function onClick(e) {
       const c = byId(S.comps, id);
       if (!confirm(`¿Borrar la composición "${c?.name}"?`)) return;
       await mutate(sb.from('compositions').delete().eq('id', id), 'Composición borrada');
+      break;
+    }
+    case 'del-user': {
+      const userId = el.dataset.userId;
+      const user = S.profiles.find((u) => u.id === userId);
+      if (!userId || !user) return;
+      if (userId === S.session?.user?.id) return toast('No puedes eliminar tu propia cuenta.', 'err');
+
+      const linkedPlayer = S.players.find((p) => p.user_id === userId);
+      const label = user.display_name || user.email || 'esta cuenta';
+      const extra = linkedPlayer
+        ? ` Se desvinculará del jugador ${linkedPlayer.name}, pero el jugador y su agent pool no se borrarán.`
+        : '';
+      if (!confirm(`¿Eliminar definitivamente la cuenta "${label}"?${extra}`)) return;
+
+      el.disabled = true;
+      try {
+        await apiDeleteUser(userId);
+        toast('Cuenta eliminada');
+        await refresh();
+      } catch (error) {
+        el.disabled = false;
+        toast(friendlyError(error), 'err');
+      }
       break;
     }
     case 'del-player': {
