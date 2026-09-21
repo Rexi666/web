@@ -101,8 +101,13 @@ async function refresh() { await loadAll(); render(); }
 
 // ---------------------------------------------------------------- render
 function render() {
+  // Se reemplaza #main en cada actualización. Conservamos el scroll interno
+  // de la tabla y el de la página para evitar saltos al recibir Realtime.
   const wrap = $('.table-wrap');
   const scrollLeft = wrap?.scrollLeft ?? 0;
+  const scrollTop = wrap?.scrollTop ?? 0;
+  const pageScrollX = window.scrollX;
+  const pageScrollY = window.scrollY;
 
   renderAuth();
   renderTabs();
@@ -113,9 +118,12 @@ function render() {
   main.innerHTML = S.tab === 'maps' ? viewMaps() : S.tab === 'admin' ? viewAdmin() : viewPool();
 
   const newWrap = $('.table-wrap');
-  if (newWrap) newWrap.scrollLeft = scrollLeft;
+  if (newWrap) {
+    newWrap.scrollLeft = scrollLeft;
+    newWrap.scrollTop = scrollTop;
+  }
+  window.scrollTo(pageScrollX, pageScrollY);
 }
-
 function renderAuth() {
   $('#brand').textContent = TEAM_NAME;
   const el = $('#auth');
