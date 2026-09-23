@@ -18,16 +18,18 @@ const ROLES = { duelist: 'Duelistas', initiator: 'Iniciadores', controller: 'Con
 const ROLE_ONE = { duelist: 'Duelista', initiator: 'Iniciador', controller: 'Controlador', sentinel: 'Centinela' };
 const ROLE_ORDER = ['duelist', 'initiator', 'controller', 'sentinel'];
 const APP_ROLES = { viewer: 'Solo ver', player: 'Jugador', admin: 'Admin' };
+const CAL_EVENT_LABELS = { season: 'Temporada', match_days: 'Días de partido', play_day: 'Día elegido' };
 
 // ---------------------------------------------------------------- estado
 const S = {
   session: null, profile: null, loading: true,
   players: [], agents: [], maps: [], pool: new Map(), agentImages: new Map(), mapImages: new Map(),
-  comps: [], slots: [], profiles: [],
+  comps: [], slots: [], profiles: [], calendarEvents: [],
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
   draft: null, // composición en edición
   generator: null, // selección de agentes y propuestas generadas
+  calendarMonth: readPref('calendar-month') || new Date().toISOString().slice(0, 7),
 };
 
 // ---------------------------------------------------------------- helpers
@@ -128,13 +130,14 @@ async function loadAll() {
     sb.from('player_agents').select('player_id,agent_id,level'),
     sb.from('compositions').select('*').order('is_main', { ascending: false }).order('created_at'),
     sb.from('composition_slots').select('*'),
+    sb.from('calendar_events').select('*').order('start_date').order('created_at'),
     isAdmin() ? sb.from('profiles').select('*').order('created_at') : Promise.resolve({ data: [] }),
   ]);
   const failed = res.find((r) => r.error);
   if (failed) toast('No se pudieron cargar los datos: ' + failed.error.message, 'err');
 
-  const [pl, ag, mp, pa, co, cs, pr] = res.map((r) => r.data ?? []);
-  Object.assign(S, { players: pl, agents: ag, maps: mp, comps: co, slots: cs, profiles: pr });
+  const [pl, ag, mp, pa, co, cs, ce, pr] = res.map((r) => r.data ?? []);
+  Object.assign(S, { players: pl, agents: ag, maps: mp, comps: co, slots: cs, calendarEvents: ce, profiles: pr });
   S.pool = new Map(pa.map((r) => [key(r.player_id, r.agent_id), r.level]));
 
   if (!S.mapId || !byId(S.maps, S.mapId)) {
@@ -165,11 +168,13 @@ function render() {
 
   main.innerHTML = S.tab === 'maps'
     ? viewMaps()
-    : S.tab === 'account'
-      ? viewAccount()
-      : S.tab === 'admin'
-        ? viewAdmin()
-        : viewPool();
+    : S.tab === 'calendar'
+      ? viewCalendar()
+      : S.tab === 'account'
+        ? viewAccount()
+        : S.tab === 'admin'
+          ? viewAdmin()
+          : viewPool();
 
   const newWrap = $('.table-wrap');
   if (newWrap) {
@@ -198,6 +203,7 @@ function renderTabs() {
   const tabs = [
     ['pool', 'Agent pool'],
     ['maps', 'Mapas'],
+    ['calendar', 'Calendario'],
     ...(S.session ? [['account', 'Mi cuenta']] : []),
     ...(isAdmin() ? [['admin', 'Admin']] : []),
   ];
@@ -274,6 +280,184 @@ function viewPool() {
         </table>
       </div>
     </section>`;
+}
+
+// ---------- vista: calendario
+function localDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function calendarItems() {
+  const items = [];
+  for (const event of S.calendarEvents) {
+    if (event.type === 'season') {
+      let current = new Date(`${event.start_date}T12:00:00`);
+      const end = new Date(`${event.end_date}T12:00:00`);
+      while (current <= end) {
+        items.push({ date: localDateKey(current), event, time: null });
+        current.setDate(current.getDate() + 1);
+      }
+    } else if (event.type === 'match_days') {
+      for (const occurrence of event.occurrences ?? []) {
+        if (occurrence.date) items.push({ date: occurrence.date, event, time: occurrence.time || null });
+      }
+    } else if (event.start_date) {
+      items.push({ date: event.start_date, event, time: event.event_time?.slice(0, 5) || null });
+    }
+  }
+  return items;
+}
+
+function formatCalendarTime(time) {
+  return time ? time.slice(0, 5) : '';
+}
+
+function viewCalendar() {
+  const [year, month] = S.calendarMonth.split('-').map(Number);
+  const first = new Date(year, month - 1, 1);
+  const last = new Date(year, month, 0);
+  const leading = (first.getDay() + 6) % 7;
+  const totalCells = Math.ceil((leading + last.getDate()) / 7) * 7;
+  const items = calendarItems();
+  const today = localDateKey(new Date());
+  const monthTitle = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(first);
+
+  const cells = Array.from({ length: totalCells }, (_, index) => {
+    const day = index - leading + 1;
+    if (day < 1 || day > last.getDate()) return '<div class="calendar-day outside"></div>';
+    const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayItems = items.filter((item) => item.date === date);
+    const events = dayItems.map(({ event, time }) => {
+      const map = event.map_id ? byId(S.maps, event.map_id) : null;
+      const label = event.type === 'season'
+        ? event.title
+        : `${time ? `${formatCalendarTime(time)} · ` : ''}${map?.name ? `${map.name} · ` : ''}${event.title}`;
+      return `<button class="calendar-event ev-${event.type}" data-action="view-calendar-event" data-id="${event.id}" title="${esc(label)}">${esc(label)}</button>`;
+    }).join('');
+    return `<div class="calendar-day ${date === today ? 'today' : ''}">
+      <div class="calendar-day-number">${day}</div>
+      <div class="calendar-day-events">${events}</div>
+    </div>`;
+  }).join('');
+
+  return `<section class="calendar-view">
+    <div class="calendar-toolbar">
+      <div>
+        <h1>Calendario</h1>
+        <div class="calendar-legend">
+          <span><i class="legend-dot season"></i> Temporada</span>
+          <span><i class="legend-dot match"></i> Días de partido</span>
+          <span><i class="legend-dot play"></i> Día elegido</span>
+        </div>
+      </div>
+      ${isAdmin() ? '<button class="btn primary" data-action="new-calendar-event">Nuevo evento</button>' : ''}
+    </div>
+    <div class="calendar-nav">
+      <button class="btn sm" data-action="calendar-prev">‹</button>
+      <h2>${esc(monthTitle)}</h2>
+      <button class="btn sm" data-action="calendar-next">›</button>
+    </div>
+    <div class="calendar-scroll">
+      <div class="calendar-grid calendar-weekdays">
+        ${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div>${d}</div>`).join('')}
+      </div>
+      <div class="calendar-grid calendar-days">${cells}</div>
+    </div>
+  </section>`;
+}
+
+function changeCalendarMonth(delta) {
+  const [year, month] = S.calendarMonth.split('-').map(Number);
+  const date = new Date(year, month - 1 + delta, 1);
+  S.calendarMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  writePref('calendar-month', S.calendarMonth);
+  render();
+}
+
+function calendarOccurrencesText(event) {
+  return (event?.occurrences ?? []).map((o) => `${o.date}${o.time ? ` ${o.time.slice(0, 5)}` : ''}`).join('\n');
+}
+
+function openCalendarEditor(event = null) {
+  if (!isAdmin()) return;
+  $('#modal').classList.remove('generator-dialog');
+  const type = event?.type ?? 'season';
+  const mapOptions = `<option value="">Sin mapa</option>` + S.maps.map((m) =>
+    `<option value="${m.id}" ${m.id === event?.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+  $('#modal').innerHTML = `<form class="modal-body" data-form="save-calendar-event" data-id="${event?.id ?? ''}">
+    <div class="modal-head"><h2>${event ? 'Editar evento' : 'Nuevo evento'}</h2>
+      <button type="button" class="icon-btn" data-action="close-modal" aria-label="Cerrar">✕</button></div>
+    <label class="field"><span>Tipo</span><select name="type" data-calendar-type>
+      ${Object.entries(CAL_EVENT_LABELS).map(([value, label]) => `<option value="${value}" ${value === type ? 'selected' : ''}>${label}</option>`).join('')}
+    </select></label>
+    <label class="field"><span>Título</span><input name="title" required maxlength="80" value="${esc(event?.title ?? '')}" placeholder="Ej. Premier Acto 2"></label>
+    <div data-calendar-fields></div>
+    <label class="field"><span>Notas</span><textarea name="notes" rows="3" maxlength="1000">${esc(event?.notes ?? '')}</textarea></label>
+    <div class="modal-foot">
+      ${event ? '<button type="button" class="btn ghost danger" data-action="delete-calendar-event">Eliminar</button>' : ''}
+      <button type="button" class="btn ghost" data-action="close-modal">Cancelar</button>
+      <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>`;
+  renderCalendarFormFields(type, event, mapOptions);
+  const dialog = $('#modal');
+  if (!dialog.open) dialog.showModal();
+}
+
+function renderCalendarFormFields(type, event = null, mapOptions = null) {
+  const container = $('[data-calendar-fields]', $('#modal'));
+  if (!container) return;
+  const options = mapOptions ?? (`<option value="">Sin mapa</option>` + S.maps.map((m) =>
+    `<option value="${m.id}" ${m.id === event?.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join(''));
+  if (type === 'season') {
+    container.innerHTML = `<div class="field-row">
+      <label class="field grow"><span>Inicio</span><input type="date" name="start_date" required value="${event?.start_date ?? ''}"></label>
+      <label class="field grow"><span>Fin</span><input type="date" name="end_date" required value="${event?.end_date ?? ''}"></label>
+    </div>`;
+  } else if (type === 'match_days') {
+    container.innerHTML = `<label class="field"><span>Mapa</span><select name="map_id">${options}</select></label>
+      <label class="field"><span>Días y horas</span>
+        <textarea name="occurrences" rows="5" required placeholder="2026-10-02 20:00\n2026-10-03 18:30">${esc(calendarOccurrencesText(event))}</textarea>
+        <small class="field-help">Una fecha por línea con formato AAAA-MM-DD HH:MM.</small>
+      </label>`;
+  } else {
+    container.innerHTML = `<label class="field"><span>Mapa</span><select name="map_id">${options}</select></label>
+      <div class="field-row">
+        <label class="field grow"><span>Día que jugaremos</span><input type="date" name="start_date" required value="${event?.start_date ?? ''}"></label>
+        <label class="field grow"><span>Hora</span><input type="time" name="event_time" value="${event?.event_time?.slice(0, 5) ?? ''}"></label>
+      </div>`;
+  }
+}
+
+function parseOccurrences(text) {
+  const lines = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  const occurrences = [];
+  for (const line of lines) {
+    const match = line.match(/^(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?$/);
+    if (!match || Number.isNaN(Date.parse(`${match[1]}T12:00:00`))) return null;
+    occurrences.push({ date: match[1], time: match[2] || null });
+  }
+  return occurrences;
+}
+
+function showCalendarEvent(event) {
+  if (!event) return;
+  if (isAdmin()) return openCalendarEditor(event);
+  const map = event.map_id ? byId(S.maps, event.map_id) : null;
+  const details = event.type === 'season'
+    ? `${event.start_date} → ${event.end_date}`
+    : event.type === 'match_days'
+      ? calendarOccurrencesText(event).replaceAll('\n', '<br>')
+      : `${event.start_date}${event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ''}`;
+  $('#modal').innerHTML = `<div class="modal-body narrow"><div class="modal-head"><h2>${esc(event.title)}</h2>
+    <button type="button" class="icon-btn" data-action="close-modal">✕</button></div>
+    <span class="calendar-type-badge ev-${event.type}">${CAL_EVENT_LABELS[event.type]}</span>
+    ${map ? `<p><strong>Mapa:</strong> ${esc(map.name)}</p>` : ''}<p>${details}</p>
+    ${event.notes ? `<p class="notes">${esc(event.notes)}</p>` : ''}</div>`;
+  $('#modal').showModal();
 }
 
 // ---------- vista: mapas y composiciones
@@ -947,6 +1131,18 @@ async function onClick(e) {
       S.tab = el.dataset.tab; writePref('tab', S.tab); render(); break;
     case 'select-map':
       S.mapId = id; writePref('map', id); render(); break;
+    case 'calendar-prev': changeCalendarMonth(-1); break;
+    case 'calendar-next': changeCalendarMonth(1); break;
+    case 'new-calendar-event': openCalendarEditor(); break;
+    case 'view-calendar-event': showCalendarEvent(byId(S.calendarEvents, id)); break;
+    case 'delete-calendar-event': {
+      const form = el.closest('[data-form="save-calendar-event"]');
+      const eventId = Number(form?.dataset.id);
+      if (!eventId || !confirm('¿Eliminar este evento del calendario?')) return;
+      $('#modal').close();
+      await mutate(sb.from('calendar_events').delete().eq('id', eventId), 'Evento eliminado');
+      break;
+    }
     case 'pick-level':
       openLevelMenu(el, Number(el.dataset.p), Number(el.dataset.a)); break;
     case 'open-login': openLogin(); break;
@@ -1026,6 +1222,14 @@ async function mutate(query, okMsg) {
 }
 
 async function onChange(e) {
+  const calendarType = e.target.closest('[data-calendar-type]');
+  if (calendarType) {
+    const form = calendarType.closest('form');
+    const existing = byId(S.calendarEvents, Number(form?.dataset.id));
+    renderCalendarFormFields(calendarType.value, existing);
+    return;
+  }
+
   const generatorSelect = e.target.closest('[data-generator-agent]');
   if (generatorSelect && S.generator) {
     const index = Number(generatorSelect.dataset.generatorAgent);
@@ -1120,6 +1324,36 @@ async function onSubmit(e) {
 
       form.reset();
       toast('Contraseña actualizada correctamente');
+      break;
+    }
+    case 'save-calendar-event': {
+      const type = String(fd.get('type'));
+      const id = Number(form.dataset.id) || null;
+      const title = String(fd.get('title') ?? '').trim();
+      const notes = String(fd.get('notes') ?? '').trim() || null;
+      let payload = { type, title, notes, map_id: null, start_date: null, end_date: null, event_time: null, occurrences: [], updated_at: new Date().toISOString() };
+      if (type === 'season') {
+        payload.start_date = String(fd.get('start_date') ?? '');
+        payload.end_date = String(fd.get('end_date') ?? '');
+        if (!payload.start_date || !payload.end_date || payload.end_date < payload.start_date) return toast('Revisa las fechas de la temporada.', 'err');
+      } else if (type === 'match_days') {
+        payload.map_id = fd.get('map_id') ? Number(fd.get('map_id')) : null;
+        payload.occurrences = parseOccurrences(String(fd.get('occurrences') ?? ''));
+        if (!payload.occurrences?.length) return toast('Añade al menos un día válido con formato AAAA-MM-DD HH:MM.', 'err');
+      } else {
+        payload.map_id = fd.get('map_id') ? Number(fd.get('map_id')) : null;
+        payload.start_date = String(fd.get('start_date') ?? '');
+        payload.event_time = String(fd.get('event_time') ?? '') || null;
+        if (!payload.start_date) return toast('Selecciona el día que jugaréis.', 'err');
+      }
+      const query = id
+        ? sb.from('calendar_events').update(payload).eq('id', id)
+        : sb.from('calendar_events').insert(payload);
+      const { error } = await query;
+      if (error) return toast(friendlyError(error), 'err');
+      $('#modal').close();
+      toast(id ? 'Evento actualizado' : 'Evento creado');
+      await refresh();
       break;
     }
     case 'generate-compositions': {

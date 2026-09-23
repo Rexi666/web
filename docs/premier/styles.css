@@ -1155,3 +1155,186 @@ dialog.generator-dialog {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- calendario ---------- */
+.calendar-toolbar,
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calendar-toolbar {
+  margin-bottom: 1rem;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1rem;
+  margin-top: .55rem;
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+.calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.legend-dot {
+  width: .7rem;
+  height: .7rem;
+  border-radius: 3px;
+}
+
+.legend-dot.season {
+  background: #8b7cf6;
+}
+
+.legend-dot.match {
+  background: #3b9eff;
+}
+
+.legend-dot.play {
+  background: #3fd4a0;
+}
+
+.calendar-nav {
+  justify-content: center;
+  margin-bottom: .65rem;
+}
+
+.calendar-nav h2 {
+  min-width: 15rem;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.calendar-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(125px, 1fr));
+  min-width: 875px;
+}
+
+.calendar-weekdays {
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.calendar-weekdays>div {
+  padding: .55rem;
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--display);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.calendar-day {
+  min-height: 112px;
+  padding: .4rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.calendar-day:nth-child(7n) {
+  border-right: 0;
+}
+
+.calendar-day.outside {
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.calendar-day.today {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.calendar-day-number {
+  margin-bottom: .3rem;
+  color: var(--muted);
+  font-family: var(--display);
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.calendar-day.today .calendar-day-number {
+  color: var(--accent);
+}
+
+.calendar-day-events {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.calendar-event {
+  width: 100%;
+  overflow: hidden;
+  padding: .24rem .35rem;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.ev-season {
+  background: color-mix(in srgb, #8b7cf6 35%, var(--panel));
+  color: #dcd7ff;
+}
+
+.ev-match_days {
+  background: color-mix(in srgb, #3b9eff 30%, var(--panel));
+  color: #d5ecff;
+}
+
+.ev-play_day {
+  background: color-mix(in srgb, #3fd4a0 32%, var(--panel));
+  color: #caffec;
+}
+
+.calendar-event:hover {
+  filter: brightness(1.15);
+}
+
+.calendar-type-badge {
+  align-self: flex-start;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.field-help {
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+@media (max-width: 640px) {
+  .calendar-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .calendar-toolbar .btn {
+    width: 100%;
+  }
+
+  .calendar-nav h2 {
+    min-width: 0;
+    flex: 1;
+  }
+}
