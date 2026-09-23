@@ -148,8 +148,10 @@ function render() {
   // Se reemplaza #main en cada actualización. Conservamos el scroll interno
   // de la tabla y el de la página para evitar saltos al recibir Realtime.
   const wrap = $('.table-wrap');
+  const chips = $('.chips');
   const scrollLeft = wrap?.scrollLeft ?? 0;
   const scrollTop = wrap?.scrollTop ?? 0;
+  const chipsScrollLeft = chips?.scrollLeft ?? 0;
   const pageScrollX = window.scrollX;
   const pageScrollY = window.scrollY;
 
@@ -173,6 +175,10 @@ function render() {
     newWrap.scrollLeft = scrollLeft;
     newWrap.scrollTop = scrollTop;
   }
+
+  const newChips = $('.chips');
+  if (newChips) newChips.scrollLeft = chipsScrollLeft;
+
   window.scrollTo(pageScrollX, pageScrollY);
 }
 function renderAuth() {
