@@ -385,8 +385,10 @@ function openCalendarEditor(event = null) {
   if (!isAdmin()) return;
   $('#modal').classList.remove('generator-dialog');
   const type = event?.type ?? 'season';
-  const mapOptions = `<option value="">Sin mapa</option>` + S.maps.map((m) =>
-    `<option value="${m.id}" ${m.id === event?.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+  const mapOptions = `<option value="">Sin mapa</option>` + S.maps
+    .filter((m) => m.in_pool)
+    .map((m) => `<option value="${m.id}" ${m.id === event?.map_id ? 'selected' : ''}>${esc(m.name)}</option>`)
+    .join('');
   $('#modal').innerHTML = `<form class="modal-body" data-form="save-calendar-event" data-id="${event?.id ?? ''}">
     <div class="modal-head"><h2>${event ? 'Editar evento' : 'Nuevo evento'}</h2>
       <button type="button" class="icon-btn" data-action="close-modal" aria-label="Cerrar">✕</button></div>
@@ -410,8 +412,10 @@ function openCalendarEditor(event = null) {
 function renderCalendarFormFields(type, event = null, mapOptions = null) {
   const container = $('[data-calendar-fields]', $('#modal'));
   if (!container) return;
-  const options = mapOptions ?? (`<option value="">Sin mapa</option>` + S.maps.map((m) =>
-    `<option value="${m.id}" ${m.id === event?.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join(''));
+  const options = mapOptions ?? (`<option value="">Sin mapa</option>` + S.maps
+    .filter((m) => m.in_pool)
+    .map((m) => `<option value="${m.id}" ${m.id === event?.map_id ? 'selected' : ''}>${esc(m.name)}</option>`)
+    .join(''));
   if (type === 'season') {
     container.innerHTML = `<div class="field-row">
       <label class="field grow"><span>Inicio</span><input type="date" name="start_date" required value="${event?.start_date ?? ''}"></label>
