@@ -1069,21 +1069,25 @@ dialog::backdrop {
   font-weight: 700;
 }
 
+dialog.generator-dialog {
+  width: min(1120px, calc(100vw - 1.5rem));
+}
+
 .generator-results-body {
-  width: min(860px, calc(100vw - 1.5rem));
+  gap: .7rem;
 }
 
 .generator-results {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: .75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem;
 }
 
 .generator-result {
   display: flex;
   flex-direction: column;
-  gap: .65rem;
-  padding: .85rem;
+  gap: .5rem;
+  padding: .7rem;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--ink);
@@ -1115,7 +1119,7 @@ dialog::backdrop {
   grid-template-columns: 1fr 1fr auto;
   align-items: center;
   gap: .45rem;
-  padding: .4rem 0;
+  padding: .3rem 0;
   border-top: 1px solid var(--line);
 }
 
@@ -1141,6 +1145,10 @@ dialog::backdrop {
 
   .map-actions .btn {
     flex: 1;
+  }
+
+  dialog.generator-dialog {
+    width: min(560px, calc(100vw - 1.5rem));
   }
 
   .generator-results {

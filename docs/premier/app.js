@@ -375,16 +375,23 @@ function generatorAgentOptions(selectedId, index) {
   const used = new Set(
     S.generator.agentIds.filter((id, i) => i !== index && id)
   );
-  return S.agents
-    .filter((a) => a.active || a.id === selectedId)
-    .sort((a, b) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role) || a.name.localeCompare(b.name))
-    .map((a) => `<option value="${a.id}" ${a.id === selectedId ? 'selected' : ''} ${used.has(a.id) ? 'disabled' : ''}>
-      ${esc(a.name)}${used.has(a.id) ? ' (seleccionado)' : ''}
-    </option>`).join('');
+  const agents = S.agents.filter((a) => a.active || a.id === selectedId);
+  const option = (a) => `<option value="${a.id}" ${a.id === selectedId ? 'selected' : ''} ${used.has(a.id) ? 'disabled' : ''}>
+    ${esc(a.name)}${used.has(a.id) ? ' (seleccionado)' : ''}
+  </option>`;
+
+  return ROLE_ORDER.map((roleId) => {
+    const roleAgents = agents
+      .filter((a) => a.role === roleId)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    if (!roleAgents.length) return '';
+    return `<optgroup label="${ROLES[roleId]}">${roleAgents.map(option).join('')}</optgroup>`;
+  }).join('');
 }
 
 function renderGeneratorSetup() {
   const g = S.generator;
+  $('#modal').classList.remove('generator-dialog');
   const rows = g.agentIds.map((agentId, index) => `
     <label class="generator-agent-row">
       <span class="generator-number">${index + 1}</span>
@@ -464,6 +471,7 @@ function generateBestCompositions(agentIds, limit = 3) {
 }
 
 function renderGeneratorResults() {
+  $('#modal').classList.add('generator-dialog');
   const results = S.generator.results;
   const cards = results.map((result, index) => {
     const rows = result.slots.map((slot) => {
@@ -580,6 +588,7 @@ function playerOptions(slot) {
 }
 
 function renderEditor() {
+  $('#modal').classList.remove('generator-dialog');
   const d = S.draft;
 
   const slotRows = d.slots.map((s, idx) => {
