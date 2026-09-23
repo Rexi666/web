@@ -27,6 +27,7 @@ const S = {
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
   draft: null, // composición en edición
+  generator: null, // selección de agentes y propuestas generadas
 };
 
 // ---------------------------------------------------------------- helpers
@@ -148,7 +149,9 @@ function render() {
   // Se reemplaza #main en cada actualización. Conservamos el scroll interno
   // de la tabla y el de la página para evitar saltos al recibir Realtime.
   const wrap = $('.table-wrap');
+  const chips = $('.chips');
   const scrollLeft = wrap?.scrollLeft ?? 0;
+  const chipsScrollLeft = chips?.scrollLeft ?? 0;
   const scrollTop = wrap?.scrollTop ?? 0;
   const pageScrollX = window.scrollX;
   const pageScrollY = window.scrollY;
@@ -173,6 +176,8 @@ function render() {
     newWrap.scrollLeft = scrollLeft;
     newWrap.scrollTop = scrollTop;
   }
+  const newChips = $('.chips');
+  if (newChips) newChips.scrollLeft = chipsScrollLeft;
   window.scrollTo(pageScrollX, pageScrollY);
 }
 function renderAuth() {
@@ -298,7 +303,10 @@ function viewMaps() {
         <div class="map-head">
           <h1 class="map-title">${esc(map?.name ?? '')}</h1>
           ${map && !map.in_pool ? '<span class="badge">Fuera del map pool</span>' : ''}
-          ${isAdmin() ? '<button class="btn primary" data-action="new-comp">Nueva composición</button>' : ''}
+          ${isAdmin() ? `<div class="map-actions">
+            <button class="btn" data-action="generate-comp">Generar composición</button>
+            <button class="btn primary" data-action="new-comp">Nueva composición</button>
+          </div>` : ''}
         </div>
       </div>
       ${comps.length
@@ -348,6 +356,167 @@ function compCard(c) {
       ${warnings.length ? `<p class="warn">${warnings.map(esc).join('. ')}.</p>` : ''}
       ${c.notes ? `<p class="notes">${esc(c.notes)}</p>` : ''}
     </article>`;
+}
+
+// ---------- generador de composiciones
+const LEVEL_SCORE = { great: 5, good: 4, normal: 3, bad: 1, none: 0 };
+
+function openCompositionGenerator() {
+  if (S.players.length < 5) {
+    return toast('Necesitas al menos 5 jugadores para generar una composición.', 'err');
+  }
+  S.generator = { agentIds: [null, null, null, null, null], results: [] };
+  renderGeneratorSetup();
+  const dlg = $('#modal');
+  if (!dlg.open) dlg.showModal();
+}
+
+function generatorAgentOptions(selectedId, index) {
+  const used = new Set(
+    S.generator.agentIds.filter((id, i) => i !== index && id)
+  );
+  return S.agents
+    .filter((a) => a.active || a.id === selectedId)
+    .sort((a, b) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role) || a.name.localeCompare(b.name))
+    .map((a) => `<option value="${a.id}" ${a.id === selectedId ? 'selected' : ''} ${used.has(a.id) ? 'disabled' : ''}>
+      ${esc(a.name)}${used.has(a.id) ? ' (seleccionado)' : ''}
+    </option>`).join('');
+}
+
+function renderGeneratorSetup() {
+  const g = S.generator;
+  const rows = g.agentIds.map((agentId, index) => `
+    <label class="generator-agent-row">
+      <span class="generator-number">${index + 1}</span>
+      <select data-generator-agent="${index}" aria-label="Agente ${index + 1}">
+        <option value="">Selecciona un agente…</option>
+        ${generatorAgentOptions(agentId, index)}
+      </select>
+    </label>`).join('');
+
+  $('#modal').innerHTML = `
+    <form class="modal-body" data-form="generate-compositions">
+      <div class="modal-head">
+        <div>
+          <h2>Generar composición</h2>
+          <p class="hint">Selecciona 5 agentes. Se buscarán hasta 3 asignaciones de jugadores.</p>
+        </div>
+        <button type="button" class="icon-btn" data-action="close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="generator-agents">${rows}</div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-action="close-modal">Cancelar</button>
+        <button type="submit" class="btn primary">Buscar combinaciones</button>
+      </div>
+    </form>`;
+}
+
+function generateBestCompositions(agentIds, limit = 3) {
+  const agents = agentIds.map((id) => byId(S.agents, id));
+  const candidates = agents.map((agent) =>
+    S.players.map((player) => {
+      const level = S.pool.get(key(player.id, agent.id)) ?? null;
+      return { player, level, score: LEVEL_SCORE[level] ?? 2 };
+    }).sort((a, b) => b.score - a.score || a.player.sort_order - b.player.sort_order || a.player.name.localeCompare(b.player.name))
+  );
+
+  const best = [];
+  const usedPlayers = new Set();
+  const assignment = [];
+
+  function addResult(score) {
+    const result = {
+      score,
+      slots: assignment.map((choice, index) => ({
+        slot: index + 1,
+        player_id: choice.player.id,
+        agent_id: agents[index].id,
+        level: choice.level,
+      })),
+    };
+    best.push(result);
+    best.sort((a, b) => b.score - a.score);
+    if (best.length > limit) best.pop();
+  }
+
+  function search(agentIndex, score) {
+    if (agentIndex === agents.length) {
+      addResult(score);
+      return;
+    }
+
+    const remainingBest = candidates.slice(agentIndex)
+      .reduce((total, list) => total + (list.find((c) => !usedPlayers.has(c.player.id))?.score ?? 0), 0);
+    if (best.length === limit && score + remainingBest < best[best.length - 1].score) return;
+
+    for (const choice of candidates[agentIndex]) {
+      if (usedPlayers.has(choice.player.id)) continue;
+      usedPlayers.add(choice.player.id);
+      assignment.push(choice);
+      search(agentIndex + 1, score + choice.score);
+      assignment.pop();
+      usedPlayers.delete(choice.player.id);
+    }
+  }
+
+  search(0, 0);
+  return best;
+}
+
+function renderGeneratorResults() {
+  const results = S.generator.results;
+  const cards = results.map((result, index) => {
+    const rows = result.slots.map((slot) => {
+      const player = byId(S.players, slot.player_id);
+      const agent = byId(S.agents, slot.agent_id);
+      const info = lvInfo(slot.level);
+      return `<li class="generator-slot">
+        <strong>${esc(agent?.name)}</strong>
+        <span>${esc(player?.name)}</span>
+        <span class="lv sm ${info.cls}" title="${info.label}">${info.short}</span>
+      </li>`;
+    }).join('');
+    return `<article class="generator-result ${index === 0 ? 'best' : ''}">
+      <div class="generator-result-head">
+        <h3>Opción ${index + 1}${index === 0 ? ' · Mejor puntuación' : ''}</h3>
+        <span class="badge">${result.score}/25</span>
+      </div>
+      <ul>${rows}</ul>
+      <button type="button" class="btn primary wide" data-action="accept-generated" data-index="${index}">Usar esta composición</button>
+    </article>`;
+  }).join('');
+
+  $('#modal').innerHTML = `
+    <div class="modal-body generator-results-body">
+      <div class="modal-head">
+        <div>
+          <h2>Composiciones propuestas</h2>
+          <p class="hint">Se priorizan los niveles Genial, Bien y Normal, sin repetir jugadores.</p>
+        </div>
+        <button type="button" class="icon-btn" data-action="close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="generator-results">${cards}</div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-action="back-generator">Cambiar agentes</button>
+        <button type="button" class="btn ghost" data-action="close-modal">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+function acceptGeneratedComposition(index) {
+  const result = S.generator?.results[index];
+  if (!result) return;
+  const count = S.comps.filter((c) => c.map_id === S.mapId).length;
+  S.draft = {
+    id: null,
+    map_id: S.mapId,
+    name: `Comp generada ${count + 1}`,
+    notes: '',
+    is_main: false,
+    slots: result.slots.map(({ slot, player_id, agent_id }) => ({ slot, player_id, agent_id })),
+  };
+  S.generator = null;
+  renderEditor();
 }
 
 // ---------- editor de composición (modal)
@@ -788,7 +957,10 @@ async function onClick(e) {
       break;
     }
     case 'logout': await sb.auth.signOut(); break;
-    case 'close-modal': $('#modal').close(); S.draft = null; break;
+    case 'close-modal': $('#modal').close(); S.draft = null; S.generator = null; break;
+    case 'generate-comp': openCompositionGenerator(); break;
+    case 'back-generator': renderGeneratorSetup(); break;
+    case 'accept-generated': acceptGeneratedComposition(Number(el.dataset.index)); break;
     case 'new-comp': openCompEditor(null); break;
     case 'edit-comp': openCompEditor(byId(S.comps, id)); break;
     case 'dup-comp': openCompEditor(byId(S.comps, id), true); break;
@@ -845,6 +1017,15 @@ async function mutate(query, okMsg) {
 }
 
 async function onChange(e) {
+  const generatorSelect = e.target.closest('[data-generator-agent]');
+  if (generatorSelect && S.generator) {
+    const index = Number(generatorSelect.dataset.generatorAgent);
+    S.generator.agentIds[index] = generatorSelect.value ? Number(generatorSelect.value) : null;
+    renderGeneratorSetup();
+    $(`[data-generator-agent="${index}"]`)?.focus();
+    return;
+  }
+
   const d = e.target.closest('[data-draft]');
   if (d) {
     if (d.tagName === 'SELECT' || d.type === 'checkbox') onDraftInput(d);
@@ -932,6 +1113,15 @@ async function onSubmit(e) {
       toast('Contraseña actualizada correctamente');
       break;
     }
+    case 'generate-compositions': {
+      const agentIds = S.generator?.agentIds ?? [];
+      if (agentIds.some((id) => !id)) return toast('Selecciona los 5 agentes.', 'err');
+      if (new Set(agentIds).size !== 5) return toast('No puedes repetir agentes.', 'err');
+      S.generator.results = generateBestCompositions(agentIds, 3);
+      if (!S.generator.results.length) return toast('No se encontraron combinaciones.', 'err');
+      renderGeneratorResults();
+      break;
+    }
     case 'save-comp': await saveDraft(); break;
     case 'add-player':
       await mutate(sb.from('players').insert({ name: String(fd.get('name')).trim(), sort_order: S.players.length }), 'Jugador añadido');
@@ -964,7 +1154,7 @@ async function init() {
   document.addEventListener('submit', onSubmit);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
   addEventListener('scroll', closeMenu, true);
-  $('#modal').addEventListener('close', () => { S.draft = null; });
+  $('#modal').addEventListener('close', () => { S.draft = null; S.generator = null; });
 
   render();
   const { data } = await sb.auth.getSession();
