@@ -148,10 +148,8 @@ function render() {
   // Se reemplaza #main en cada actualización. Conservamos el scroll interno
   // de la tabla y el de la página para evitar saltos al recibir Realtime.
   const wrap = $('.table-wrap');
-  const chips = $('.chips');
   const scrollLeft = wrap?.scrollLeft ?? 0;
   const scrollTop = wrap?.scrollTop ?? 0;
-  const chipsScrollLeft = chips?.scrollLeft ?? 0;
   const pageScrollX = window.scrollX;
   const pageScrollY = window.scrollY;
 
@@ -175,10 +173,6 @@ function render() {
     newWrap.scrollLeft = scrollLeft;
     newWrap.scrollTop = scrollTop;
   }
-
-  const newChips = $('.chips');
-  if (newChips) newChips.scrollLeft = chipsScrollLeft;
-
   window.scrollTo(pageScrollX, pageScrollY);
 }
 function renderAuth() {
@@ -394,19 +388,37 @@ function agentOptions(slot) {
   }).join('');
 }
 
+function playerOptions(slot) {
+  const d = S.draft;
+  const usedElsewhere = new Set(
+    d.slots.filter((s) => s !== slot && s.player_id).map((s) => s.player_id)
+  );
+  const opt = (p) => `<option value="${p.id}" ${p.id === slot.player_id ? 'selected' : ''}>
+    ${esc(p.name)}${usedElsewhere.has(p.id) ? ' (en uso)' : ''}</option>`;
+
+  // Sin agente seleccionado mantenemos el orden habitual de jugadores.
+  if (!slot.agent_id) return S.players.map((p) => opt(p)).join('');
+
+  // Con agente seleccionado agrupamos a los jugadores según su nivel con él.
+  const groups = [...LEVEL_ORDER.slice(0, 3), null, ...LEVEL_ORDER.slice(3)];
+  return groups.map((lv) => {
+    const list = S.players.filter(
+      (p) => (S.pool.get(key(p.id, slot.agent_id)) ?? null) === lv
+    );
+    if (!list.length) return '';
+    return `<optgroup label="${lvInfo(lv).label}">${list.map((p) => opt(p)).join('')}</optgroup>`;
+  }).join('');
+}
+
 function renderEditor() {
   const d = S.draft;
-  const usedPlayers = (slot) => new Set(d.slots.filter((s) => s !== slot && s.player_id).map((s) => s.player_id));
 
   const slotRows = d.slots.map((s, idx) => {
-    const used = usedPlayers(s);
     const lv = s.player_id && s.agent_id ? S.pool.get(key(s.player_id, s.agent_id)) : undefined;
     const i = lvInfo(lv);
     return `<div class="edit-slot">
       <select data-draft="player" data-idx="${idx}" aria-label="Jugador ${idx + 1}">
-        <option value="">Jugador…</option>
-        ${S.players.map((p) => `<option value="${p.id}" ${p.id === s.player_id ? 'selected' : ''}>
-          ${esc(p.name)}${used.has(p.id) ? ' (en uso)' : ''}</option>`).join('')}
+        <option value="">Jugador…</option>${playerOptions(s)}
       </select>
       <select data-draft="agent" data-idx="${idx}" aria-label="Agente ${idx + 1}">
         <option value="">Agente…</option>${agentOptions(s)}
@@ -451,7 +463,7 @@ function onDraftInput(el) {
     case 'player': d.slots[idx].player_id = el.value ? Number(el.value) : null; break;
     case 'agent': d.slots[idx].agent_id = el.value ? Number(el.value) : null; break;
   }
-  renderEditor(); // los desplegables dependen del jugador elegido
+  renderEditor(); // ambos desplegables dependen de la selección del otro
   $(`[data-draft="${el.dataset.draft}"][data-idx="${idx}"]`)?.focus();
 }
 
