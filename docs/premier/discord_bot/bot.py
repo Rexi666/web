@@ -52,6 +52,12 @@ EVENT_INFO = {
     "match_days": ("Días de partido", "🔵"),
     "play_day": ("Día elegido", "🟢"),
 }
+COMPOSITION_STATUS_INFO = {
+    "active": ("Activa", "🟢", discord.Color.green()),
+    "draft": ("Borrador", "🔵", discord.Color.blue()),
+    "discarded": ("Descartada", "🔴", discord.Color.red()),
+}
+COMPOSITION_STATUS_ORDER = {"active": 0, "draft": 1, "discarded": 2}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -209,7 +215,12 @@ async def composition_choices(
     current: str,
 ) -> list[app_commands.Choice[str]]:
     """Sugiere composiciones pertenecientes al mapa elegido."""
-    map_value = getattr(interaction.namespace, "mapa", None)
+    map_value = getattr(
+        interaction.namespace,
+        "mapa",
+        None,
+    )
+
     if not map_value:
         return []
 
@@ -220,21 +231,59 @@ async def composition_choices(
 
     result = await db(
         lambda: supabase.table("compositions")
-        .select("id,name,is_main")
+        .select("id,name,is_main,status")
         .eq("map_id", map_id)
-        .order("is_main", desc=True)
-        .order("name")
         .execute()
     )
-    current_lower = current.casefold()
-    return [
-        app_commands.Choice(
-            name=(f"⭐ {comp['name']}" if comp.get("is_main") else comp["name"])[:100],
-            value=str(comp["id"]),
+
+    current_lower = current.casefold().strip()
+    compositions = rows(result)
+
+    compositions.sort(
+        key=lambda comp: (
+            COMPOSITION_STATUS_ORDER.get(
+                comp.get("status") or "active",
+                99,
+            ),
+            not bool(comp.get("is_main")),
+            comp["name"].casefold(),
         )
-        for comp in rows(result)
-        if current_lower in comp["name"].casefold()
-    ][:25]
+    )
+
+    choices: list[app_commands.Choice[str]] = []
+
+    for comp in compositions:
+        if current_lower not in comp["name"].casefold():
+            continue
+
+        status = comp.get("status") or "active"
+
+        status_label, status_icon, _status_color = (
+            COMPOSITION_STATUS_INFO.get(
+                status,
+                COMPOSITION_STATUS_INFO["active"],
+            )
+        )
+
+        # La composición principal utiliza una estrella.
+        # Las demás utilizan el emoji correspondiente a su estado.
+        icon = "⭐" if comp.get("is_main") else status_icon
+
+        choice_name = (
+            f"{icon} {comp['name']} - {status_label}"
+       )
+
+        choices.append(
+            app_commands.Choice(
+                name=choice_name[:100],
+                value=str(comp["id"]),
+            )
+        )
+
+        if len(choices) >= 25:
+            break
+
+    return choices
 
 
 MAP_IMAGE_CACHE: dict[str, str] = {}
@@ -489,13 +538,20 @@ async def composiciones(
 
     comps_result = await db(
         lambda: supabase.table("compositions")
-        .select("id,name,notes,is_main")
+        .select("id,name,notes,is_main,status")
         .eq("map_id", map_id)
         .order("is_main", desc=True)
         .order("created_at")
         .execute()
     )
     comps = rows(comps_result)
+    comps.sort(
+        key=lambda comp: (
+            COMPOSITION_STATUS_ORDER.get(comp.get("status") or "active", 99),
+            not bool(comp.get("is_main")),
+            comp["name"].casefold(),
+        )
+    )
     if not comps:
         await interaction.followup.send(
             f"No hay composiciones para **{map_data['name']}**."
@@ -546,10 +602,15 @@ async def composiciones(
 
     embeds: list[discord.Embed] = [header]
     for comp in comps:
-        title = f"{'⭐ ' if comp['is_main'] else ''}{comp['name']}"
+        status = comp.get("status") or "active"
+        status_label, status_icon, status_color = COMPOSITION_STATUS_INFO.get(
+            status,
+            COMPOSITION_STATUS_INFO["active"],
+        )
+        title = f"{'⭐ ' if comp['is_main'] else status_icon + ' '}{comp['name']} · {status_label}"
         embed = discord.Embed(
             title=title,
-            color=discord.Color.gold() if comp["is_main"] else discord.Color.blurple(),
+            color=discord.Color.gold() if comp["is_main"] else status_color,
         )
         comp_slots = {
             slot["slot"]: slot
@@ -575,7 +636,7 @@ async def composiciones(
         # estructura hace que las tarjetas sean visualmente consistentes.
         notes = " ".join((comp.get("notes") or "Sin notas").split())
         embed.add_field(name="Notas", value=trim(notes, 180), inline=False)
-        embed.set_footer(text=f"Mapa: {map_data['name']} · 5 posiciones")
+        embed.set_footer(text=f"Mapa: {map_data['name']} · Estado: {status_label} · 5 posiciones")
         embeds.append(embed)
 
     await send_embeds(interaction, embeds)
