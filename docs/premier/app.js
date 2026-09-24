@@ -66,6 +66,7 @@ function friendlyError(error) {
   if (/duplicate key.*player_id/i.test(m)) return 'Ese jugador ya está en la composición.';
   if (/duplicate key.*agent_id/i.test(m)) return 'Ese agente ya está en la composición.';
   if (/duplicate key.*user_id/i.test(m)) return 'Esa cuenta ya está vinculada a otro jugador.';
+  if (/duplicate key.*discord_id|players_discord_id_unique/i.test(m)) return 'Ese usuario de Discord ya está vinculado a otro jugador.';
   if (/duplicate key/i.test(m)) return 'Ya existe uno con ese nombre.';
   return m;
 }
@@ -895,6 +896,7 @@ function viewAdmin() {
     <tr>
       <td><input data-change="player-name" data-id="${p.id}" value="${esc(p.name)}" aria-label="Nombre"></td>
       <td><select data-change="player-user" data-id="${p.id}" aria-label="Cuenta vinculada">${profileOpts(p.user_id)}</select></td>
+      <td><input data-change="player-discord" data-id="${p.id}" value="${esc(p.discord_id ?? '')}" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="Discord ID" aria-label="Discord ID"></td>
       <td><input class="num" type="number" data-change="player-order" data-id="${p.id}" value="${p.sort_order}" aria-label="Orden"></td>
       <td><button class="btn sm ghost danger" data-action="del-player" data-id="${p.id}">Borrar</button></td>
     </tr>`).join('');
@@ -934,9 +936,9 @@ function viewAdmin() {
     <div class="admin">
       <section class="admin-block">
         <h2>Jugadores</h2>
-        <p class="hint">Vincula cada jugador a su cuenta para que pueda editar su propio agent pool.</p>
+        <p class="hint">Vincula cada jugador a su cuenta web y a su ID de Discord. El bot reconocerá como admins a los jugadores cuya cuenta web tenga rol Admin.</p>
         <div class="table-scroll"><table class="admin-table">
-          <thead><tr><th>Nombre</th><th>Cuenta</th><th>Orden</th><th></th></tr></thead>
+          <thead><tr><th>Nombre</th><th>Cuenta</th><th>Discord ID</th><th>Orden</th><th></th></tr></thead>
           <tbody>${players}</tbody></table></div>
         <form class="add-row" data-form="add-player">
           <input name="name" placeholder="Nombre del jugador" required maxlength="40">
@@ -1257,6 +1259,7 @@ async function onChange(e) {
   const ops = {
     'player-name': () => sb.from('players').update({ name: String(v).trim() }).eq('id', id),
     'player-user': () => sb.from('players').update({ user_id: v || null }).eq('id', id),
+    'player-discord': () => sb.from('players').update({ discord_id: String(v).trim() || null }).eq('id', id),
     'player-order': () => sb.from('players').update({ sort_order: Number(v) || 0 }).eq('id', id),
     'user-role': () => sb.from('profiles').update({ role: v }).eq('id', raw),
     'agent-name': () => sb.from('agents').update({ name: String(v).trim() }).eq('id', id),
