@@ -19,6 +19,12 @@ const ROLE_ONE = { duelist: 'Duelista', initiator: 'Iniciador', controller: 'Con
 const ROLE_ORDER = ['duelist', 'initiator', 'controller', 'sentinel'];
 const APP_ROLES = { viewer: 'Solo ver', player: 'Jugador', admin: 'Admin' };
 const CAL_EVENT_LABELS = { season: 'Temporada', match_days: 'Días de partido', play_day: 'Día elegido' };
+const COMP_STATUSES = {
+  active: { label: 'Activas', one: 'Activa', icon: '🟢' },
+  draft: { label: 'Borradores', one: 'Borrador', icon: '🔵' },
+  discarded: { label: 'Descartadas', one: 'Descartada', icon: '🔴' },
+};
+const COMP_STATUS_ORDER = ['active', 'draft', 'discarded'];
 
 // ---------------------------------------------------------------- estado
 const S = {
@@ -566,7 +572,14 @@ function viewMaps() {
         </div>
       </div>
       ${comps.length
-      ? `<div class="comps">${comps.map(compCard).join('')}</div>`
+      ? `<div class="comp-sections">${COMP_STATUS_ORDER.map((status) => {
+        const group = comps.filter((c) => (c.status ?? 'active') === status);
+        const info = COMP_STATUSES[status];
+        return `<section class="comp-section status-${status}">
+          <div class="comp-section-head"><h2>${info.icon} ${info.label}</h2><span class="badge">${group.length}</span></div>
+          ${group.length ? `<div class="comps">${group.map(compCard).join('')}</div>` : `<p class="comp-section-empty">No hay composiciones ${info.label.toLowerCase()}.</p>`}
+        </section>`;
+      }).join('')}</div>`
       : empty(isAdmin() ? 'Aún no hay composiciones para este mapa. Crea la primera.' : 'Aún no hay composiciones para este mapa.')}
     </section>`;
 }
@@ -598,9 +611,9 @@ function compCard(c) {
     .join('');
 
   return `
-    <article class="comp ${c.is_main ? 'main' : ''}">
+    <article class="comp status-${c.status ?? 'active'} ${c.is_main ? 'main' : ''}">
       <header class="comp-head">
-        <h2>${c.is_main ? '<span class="star" title="Composición principal">★</span> ' : ''}${esc(c.name)}</h2>
+        <h2>${c.is_main ? '<span class="star" title="Composición principal">★</span> ' : ''}${esc(c.name)} <span class="comp-status-label">${COMP_STATUSES[c.status ?? 'active'].one}</span></h2>
         ${isAdmin() ? `<div class="comp-actions">
           <button class="btn sm" data-action="edit-comp" data-id="${c.id}">Editar</button>
           <button class="btn sm ghost" data-action="dup-comp" data-id="${c.id}">Duplicar</button>
@@ -777,6 +790,7 @@ function acceptGeneratedComposition(index) {
     name: `Comp generada ${count + 1}`,
     notes: '',
     is_main: false,
+    status: 'draft',
     slots: result.slots.map(({ slot, player_id, agent_id }) => ({ slot, player_id, agent_id })),
   };
   S.generator = null;
@@ -793,6 +807,7 @@ function openCompEditor(comp, duplicate = false) {
     name: comp ? (duplicate ? `${comp.name} (copia)` : comp.name) : `Comp ${count + 1}`,
     notes: comp?.notes ?? '',
     is_main: comp && !duplicate ? comp.is_main : false,
+    status: comp && !duplicate ? (comp.status ?? 'active') : (duplicate ? (comp?.status ?? 'active') : 'active'),
     slots: [1, 2, 3, 4, 5].map((n) => {
       const s = slots.find((x) => x.slot === n);
       return { slot: n, player_id: s?.player_id ?? null, agent_id: s?.agent_id ?? null };
@@ -874,10 +889,15 @@ function renderEditor() {
           <select data-draft="map">${S.maps.map((m) =>
     `<option value="${m.id}" ${m.id === d.map_id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
       </div>
+      <label class="field"><span>Estado</span>
+        <select data-draft="status">${Object.entries(COMP_STATUSES).map(([value, info]) =>
+      `<option value="${value}" ${value === d.status ? 'selected' : ''}>${info.icon} ${info.one}</option>`).join('')}</select>
+      </label>
       <div class="edit-slots">${slotRows}</div>
       <label class="field"><span>Notas</span>
         <textarea data-draft="notes" rows="3" maxlength="1000" placeholder="Setups, quién entra primero, alternativas…">${esc(d.notes)}</textarea></label>
-      <label class="check"><input type="checkbox" data-draft="main" ${d.is_main ? 'checked' : ''}> Composición principal del mapa</label>
+      <label class="check"><input type="checkbox" data-draft="main" ${d.is_main ? 'checked' : ''} ${d.status !== 'active' ? 'disabled' : ''}> Composición principal del mapa</label>
+      ${d.status !== 'active' ? '<p class="hint">Solo una composición activa puede ser principal.</p>' : ''}
       <div class="modal-foot">
         <button type="button" class="btn ghost" data-action="close-modal">Cancelar</button>
         <button type="submit" class="btn primary">Guardar composición</button>
@@ -893,6 +913,7 @@ function onDraftInput(el) {
     case 'name': d.name = el.value; return;
     case 'notes': d.notes = el.value; return;
     case 'main': d.is_main = el.checked; return;
+    case 'status': d.status = el.value; if (d.status !== 'active') d.is_main = false; renderEditor(); return;
     case 'map': d.map_id = Number(el.value); return;
     case 'player': d.slots[idx].player_id = el.value ? Number(el.value) : null; break;
     case 'agent': d.slots[idx].agent_id = el.value ? Number(el.value) : null; break;
@@ -914,6 +935,11 @@ async function saveDraft() {
     p_is_main: d.is_main, p_slots: d.slots,
   });
   if (error) return toast(friendlyError(error), 'err');
+  const statusQuery = d.id
+    ? sb.from('compositions').update({ status: d.status }).eq('id', d.id)
+    : sb.from('compositions').update({ status: d.status }).eq('map_id', d.map_id).eq('name', d.name.trim());
+  const { error: statusError } = await statusQuery;
+  if (statusError) return toast('La composición se guardó, pero no se pudo guardar su estado: ' + friendlyError(statusError), 'err');
   $('#modal').close();
   S.mapId = d.map_id;
   S.draft = null;

@@ -1447,3 +1447,56 @@ dialog.generator-dialog {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- estados de composiciones ---------- */
+.comp-sections {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.comp-section {
+  display: grid;
+  gap: .75rem;
+}
+
+.comp-section-head {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.comp-section-head .badge {
+  margin-left: auto;
+}
+
+.comp-section-empty {
+  margin: 0;
+  padding: 1rem;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.comp.status-active {
+  border-color: var(--great);
+}
+
+.comp.status-draft {
+  border-color: var(--good);
+}
+
+.comp.status-discarded {
+  border-color: var(--danger);
+}
+
+.comp.main {
+  border-color: var(--accent);
+}
+
+.comp-status-label {
+  margin-left: .35rem;
+  color: var(--muted);
+  font: 500 .72rem var(--body);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
