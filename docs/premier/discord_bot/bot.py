@@ -59,6 +59,14 @@ COMPOSITION_STATUS_INFO = {
 }
 COMPOSITION_STATUS_ORDER = {"active": 0, "draft": 1, "discarded": 2}
 
+MAIN_CHANNEL_ROLE_ID = 1552753827969634325
+MAIN_CHANNEL_ROLE_MENTION = f"<@&{MAIN_CHANNEL_ROLE_ID}>"
+
+# Discord no permite establecer directamente el ancho de un embed.
+# Esta línea invisible establece el mismo ancho mínimo para todas
+# las tarjetas de composiciones.
+COMPOSITION_EMBED_WIDTH_SPACER = "\u2800" * 48
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -636,6 +644,7 @@ async def composiciones(
         # estructura hace que las tarjetas sean visualmente consistentes.
         notes = " ".join((comp.get("notes") or "Sin notas").split())
         embed.add_field(name="Notas", value=trim(notes, 180), inline=False)
+        embed.add_field(name="\u200b", value=COMPOSITION_EMBED_WIDTH_SPACER, inline=False)
         embed.set_footer(text=f"Mapa: {map_data['name']} · Estado: {status_label} · 5 posiciones")
         embeds.append(embed)
 
@@ -1397,7 +1406,15 @@ async def send_play_day_notification(event: dict[str, Any], notification_type: s
             if channel is None:
                 channel = await bot.fetch_channel(setting["main_channel_id"])
             if isinstance(channel, discord.abc.Messageable):
-                await channel.send(embed=embed)
+                await channel.send(
+                    content=MAIN_CHANNEL_ROLE_MENTION,
+                    embed=embed,
+                    allowed_mentions=discord.AllowedMentions(
+                        roles=True,
+                        users=False,
+                        everyone=False,
+                    ),
+                )
                 delivered = True
         except (discord.Forbidden, discord.NotFound, discord.HTTPException) as exc:
             log.warning("No se pudo avisar al canal %s: %s", setting["main_channel_id"], exc)
@@ -1572,7 +1589,15 @@ async def announce_attendance_poll(
                     setting["main_channel_id"]
                 )
             if isinstance(channel, discord.abc.Messageable):
-                await channel.send(embeds=embeds)
+                await channel.send(
+                    content=MAIN_CHANNEL_ROLE_MENTION,
+                    embeds=embeds,
+                    allowed_mentions=discord.AllowedMentions(
+                        roles=True,
+                        users=False,
+                        everyone=False,
+                    ),
+                )
                 delivered = True
         except (
             discord.Forbidden,
