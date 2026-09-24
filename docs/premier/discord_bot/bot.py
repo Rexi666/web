@@ -36,7 +36,6 @@ except ValueError as exc:
 
 if not 0 <= MORNING_HOUR <= 23 or not 0 <= MORNING_MINUTE <= 59:
     raise ValueError("NOTIFICATION_MORNING_HOUR contiene una hora no válida")
-OWNER_USER_ID = 621725560866996244
 
 LEVEL_ORDER = ["great", "good", "normal", "bad", "none", None]
 LEVEL_INFO = {
@@ -216,6 +215,48 @@ async def composition_choices(
         for comp in rows(result)
         if current_lower in comp["name"].casefold()
     ][:25]
+
+
+async def get_linked_player(discord_user_id: int) -> dict[str, Any] | None:
+    """Devuelve el jugador vinculado al Discord indicado o None."""
+    result = await db(
+        lambda: supabase.table("players")
+        .select("id,name,user_id,discord_id")
+        .eq("discord_id", str(discord_user_id))
+        .limit(1)
+        .execute()
+    )
+    linked_players = rows(result) if result is not None else []
+    return linked_players[0] if linked_players else None
+
+
+async def is_panel_admin(discord_user_id: int) -> bool:
+    """Admin del bot = Discord vinculado a un jugador con cuenta web Admin."""
+    player = await get_linked_player(discord_user_id)
+    if not player or not player.get("user_id"):
+        return False
+
+    result = await db(
+        lambda: supabase.table("profiles")
+        .select("role")
+        .eq("id", player["user_id"])
+        .limit(1)
+        .execute()
+    )
+    profiles = rows(result) if result is not None else []
+    return bool(profiles and profiles[0].get("role") == "admin")
+
+
+async def require_panel_admin(interaction: discord.Interaction) -> bool:
+    if await is_panel_admin(interaction.user.id):
+        return True
+
+    await interaction.response.send_message(
+        "No tienes permisos de administrador en Premier Planner. "
+        "Tu Discord debe estar vinculado a un jugador cuya cuenta web tenga rol Admin.",
+        ephemeral=True,
+    )
+    return False
 
 
 class PremierBot(commands.Bot):
@@ -864,11 +905,87 @@ async def calendario(interaction: discord.Interaction) -> None:
     )
 
 
+@bot.tree.command(
+    name="vincular",
+    description="Vincula un usuario de Discord con un jugador de Premier Planner",
+)
+@app_commands.describe(
+    usuario="Usuario de Discord que quieres vincular",
+    jugador="Jugador de Premier Planner",
+)
+@app_commands.autocomplete(jugador=player_choices)
+async def vincular(
+    interaction: discord.Interaction,
+    usuario: discord.User,
+    jugador: str,
+) -> None:
+    if not await require_panel_admin(interaction):
+        return
+
+    try:
+        player_id = int(jugador)
+    except ValueError:
+        await interaction.response.send_message(
+            "Selecciona un jugador de las sugerencias.",
+            ephemeral=True,
+        )
+        return
+
+    existing_result = await db(
+        lambda: supabase.table("players")
+        .select("id,name,discord_id")
+        .eq("discord_id", str(usuario.id))
+        .execute()
+    )
+    existing = rows(existing_result)
+    if existing and existing[0]["id"] != player_id:
+        await interaction.response.send_message(
+            f"{usuario.mention} ya está vinculado a **{existing[0]['name']}**.",
+            ephemeral=True,
+        )
+        return
+
+    player_result = await db(
+        lambda: supabase.table("players")
+        .select("id,name,discord_id")
+        .eq("id", player_id)
+        .maybe_single()
+        .execute()
+    )
+    player = player_result.data
+    if not player:
+        await interaction.response.send_message(
+            "Ese jugador ya no existe.",
+            ephemeral=True,
+        )
+        return
+
+    try:
+        await db(
+            lambda: supabase.table("players")
+            .update({"discord_id": str(usuario.id)})
+            .eq("id", player_id)
+            .execute()
+        )
+    except Exception as exc:
+        if "duplicate" in str(exc).lower() or "23505" in str(exc):
+            await interaction.response.send_message(
+                "Ese usuario de Discord ya está vinculado a otro jugador.",
+                ephemeral=True,
+            )
+            return
+        raise
+
+    await interaction.response.send_message(
+        f"{usuario.mention} ha sido vinculado a **{player['name']}**.",
+        ephemeral=True,
+    )
+
+
 @bot.tree.command(name="setmainchannel", description="Configura este canal para avisos de partidos")
 @app_commands.guild_only()
 async def setmainchannel(interaction: discord.Interaction) -> None:
-    if interaction.user.id != OWNER_USER_ID:
-        await interaction.response.send_message("No tienes permiso para configurar el canal.", ephemeral=True)
+    if not await require_panel_admin(interaction):
         return
     if interaction.guild_id is None or interaction.channel_id is None:
         await interaction.response.send_message("Usa este comando dentro de un canal de servidor.", ephemeral=True)
