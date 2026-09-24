@@ -507,7 +507,9 @@ function openAttendancePoll() {
 }
 function viewAttendance() {
   const me = myPlayer();
-  const polls = [...S.attendancePolls].sort((a, b) => (a.status === 'open' ? -1 : 1) - (b.status === 'open' ? -1 : 1) || String(b.created_at).localeCompare(String(a.created_at)));
+  const polls = S.attendancePolls
+    .filter((poll) => poll.status === 'open')
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   const cards = polls.map((poll) => {
     const options = S.attendanceOptions.filter((o) => o.poll_id === poll.id);
     const map = byId(S.maps, poll.map_id);
