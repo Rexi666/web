@@ -1500,3 +1500,33 @@ dialog.generator-dialog {
   text-transform: uppercase;
   letter-spacing: .04em;
 }
+
+/* ---------- jugadores del generador ---------- */
+.generator-step {
+  display: grid;
+  gap: .55rem;
+}
+
+.generator-step h3 {
+  font-size: 1rem;
+}
+
+.generator-step .hint {
+  margin-top: -.2rem;
+}
+
+.generator-players {
+  display: grid;
+  gap: .55rem;
+}
+
+.generator-player-row {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: .6rem;
+}
+
+.generator-player-row select {
+  width: 100%;
+}

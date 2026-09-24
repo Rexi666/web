@@ -634,7 +634,11 @@ function openCompositionGenerator() {
   if (S.players.length < 5) {
     return toast('Necesitas al menos 5 jugadores para generar una composición.', 'err');
   }
-  S.generator = { agentIds: [null, null, null, null, null], results: [] };
+  S.generator = {
+    playerIds: S.players.slice(0, 5).map((player) => player.id),
+    agentIds: [null, null, null, null, null],
+    results: [],
+  };
   renderGeneratorSetup();
   const dlg = $('#modal');
   if (!dlg.open) dlg.showModal();
@@ -661,6 +665,19 @@ function generatorAgentOptions(selectedId, index) {
 function renderGeneratorSetup() {
   const g = S.generator;
   $('#modal').classList.remove('generator-dialog');
+  const playerRows = [0, 1, 2, 3, 4].map((index) => {
+    const selectedId = g.playerIds[index] ?? null;
+    const used = new Set(g.playerIds.filter((id, i) => i !== index && id));
+    return `<label class="generator-player-row">
+      <span class="generator-number">${index + 1}</span>
+      <select data-generator-player="${index}" aria-label="Jugador ${index + 1}">
+        <option value="">Selecciona un jugador…</option>
+        ${S.players.map((player) => `<option value="${player.id}" ${player.id === selectedId ? 'selected' : ''} ${used.has(player.id) ? 'disabled' : ''}>
+          ${esc(player.name)}${used.has(player.id) ? ' (seleccionado)' : ''}
+        </option>`).join('')}
+      </select>
+    </label>`;
+  }).join('');
   const rows = g.agentIds.map((agentId, index) => `
     <label class="generator-agent-row">
       <span class="generator-number">${index + 1}</span>
@@ -679,7 +696,16 @@ function renderGeneratorSetup() {
         </div>
         <button type="button" class="icon-btn" data-action="close-modal" aria-label="Cerrar">✕</button>
       </div>
-      <div class="generator-agents">${rows}</div>
+      <section class="generator-step">
+        <h3>1. Jugadores disponibles</h3>
+        <p class="hint">Selecciona exactamente los 5 jugadores para los que quieres generar la composición.</p>
+        <div class="generator-players">${playerRows}</div>
+      </section>
+      <section class="generator-step">
+        <h3>2. Agentes de la composición</h3>
+        <p class="hint">Selecciona 5 agentes distintos.</p>
+        <div class="generator-agents">${rows}</div>
+      </section>
       <div class="modal-foot">
         <button type="button" class="btn ghost" data-action="close-modal">Cancelar</button>
         <button type="submit" class="btn primary">Buscar combinaciones</button>
@@ -687,10 +713,11 @@ function renderGeneratorSetup() {
     </form>`;
 }
 
-function generateBestCompositions(agentIds, limit = 3) {
+function generateBestCompositions(agentIds, playerIds, limit = 3) {
   const agents = agentIds.map((id) => byId(S.agents, id));
+  const selectedPlayers = playerIds.map((id) => byId(S.players, id)).filter(Boolean);
   const candidates = agents.map((agent) =>
-    S.players.map((player) => {
+    selectedPlayers.map((player) => {
       const level = S.pool.get(key(player.id, agent.id)) ?? null;
       return { player, level, score: LEVEL_SCORE[level] ?? 2 };
     }).sort((a, b) => b.score - a.score || a.player.sort_order - b.player.sort_order || a.player.name.localeCompare(b.player.name))
@@ -1341,6 +1368,14 @@ async function onChange(e) {
     return;
   }
 
+  const generatorPlayer = e.target.closest('[data-generator-player]');
+  if (generatorPlayer && S.generator) {
+    const index = Number(generatorPlayer.dataset.generatorPlayer);
+    S.generator.playerIds[index] = generatorPlayer.value ? Number(generatorPlayer.value) : null;
+    renderGeneratorSetup();
+    $(`[data-generator-player="${index}"]`)?.focus();
+    return;
+  }
   const generatorSelect = e.target.closest('[data-generator-agent]');
   if (generatorSelect && S.generator) {
     const index = Number(generatorSelect.dataset.generatorAgent);
@@ -1479,10 +1514,13 @@ async function onSubmit(e) {
       break;
     }
     case 'generate-compositions': {
+      const playerIds = S.generator?.playerIds ?? [];
       const agentIds = S.generator?.agentIds ?? [];
+      if (playerIds.length !== 5 || playerIds.some((id) => !id)) return toast('Selecciona exactamente 5 jugadores.', 'err');
+      if (new Set(playerIds).size !== 5) return toast('No puedes repetir jugadores.', 'err');
       if (agentIds.some((id) => !id)) return toast('Selecciona los 5 agentes.', 'err');
       if (new Set(agentIds).size !== 5) return toast('No puedes repetir agentes.', 'err');
-      S.generator.results = generateBestCompositions(agentIds, 3);
+      S.generator.results = generateBestCompositions(agentIds, playerIds, 3);
       if (!S.generator.results.length) return toast('No se encontraron combinaciones.', 'err');
       renderGeneratorResults();
       break;
