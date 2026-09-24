@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
@@ -155,13 +156,19 @@ async def player_choices(
     current: str,
 ) -> list[app_commands.Choice[str]]:
     result = await db(
-        lambda: supabase.table("players").select("id,name").order("name").execute()
+        lambda: supabase.table("players")
+        .select("id,name")
+        .order("name")
+        .execute()
     )
-    current_lower = current.casefold()
+    current_lower = current.casefold().strip()
     return [
-        app_commands.Choice(name=p["name"][:100], value=str(p["id"]))
-        for p in rows(result)
-        if current_lower in p["name"].casefold()
+        app_commands.Choice(
+            name=player["name"][:100],
+            value=str(player["id"]),
+        )
+        for player in rows(result)
+        if current_lower in player["name"].casefold()
     ][:25]
 
 
@@ -215,6 +222,42 @@ async def composition_choices(
         for comp in rows(result)
         if current_lower in comp["name"].casefold()
     ][:25]
+
+
+MAP_IMAGE_CACHE: dict[str, str] = {}
+MAP_IMAGE_CACHE_LOADED = False
+
+
+async def load_map_image_cache() -> None:
+    global MAP_IMAGE_CACHE_LOADED
+    if MAP_IMAGE_CACHE_LOADED:
+        return
+
+    try:
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(
+                "https://valorant-api.com/v1/maps?language=es-ES"
+            ) as response:
+                response.raise_for_status()
+                payload = await response.json()
+
+        MAP_IMAGE_CACHE.clear()
+        for map_data in payload.get("data") or []:
+            name = map_data.get("displayName")
+            image = map_data.get("wideScreenSplash") or map_data.get("splash")
+            if name and image:
+                MAP_IMAGE_CACHE[name.casefold()] = image
+        MAP_IMAGE_CACHE_LOADED = True
+    except Exception:
+        log.exception("No se pudieron cargar las imágenes de mapas")
+
+
+async def get_map_image(map_name: str | None) -> str | None:
+    if not map_name:
+        return None
+    await load_map_image_cache()
+    return MAP_IMAGE_CACHE.get(map_name.casefold())
 
 
 async def get_linked_player(discord_user_id: int) -> dict[str, Any] | None:
@@ -283,7 +326,10 @@ class PremierBot(commands.Bot):
 bot = PremierBot()
 
 
-@bot.tree.command(name="agentes", description="Muestra los agentes de un jugador ordenados por nivel")
+@bot.tree.command(
+    name="agentes",
+    description="Muestra los agentes de un jugador ordenados por nivel",
+)
 @app_commands.describe(
     jugador="Jugador del agent pool",
     tipo="Nivel que quieres mostrar (opcional)",
@@ -305,24 +351,55 @@ async def agentes(
     tipo: app_commands.Choice[str] | None = None,
 ) -> None:
     await interaction.response.defer(thinking=True)
+
     try:
         player_id = int(jugador)
     except ValueError:
-        await interaction.followup.send("Selecciona un jugador de las sugerencias.", ephemeral=True)
+        await interaction.followup.send(
+            "Selecciona un jugador de las sugerencias.",
+            ephemeral=True,
+        )
         return
 
     player_result, agents_result, levels_result = await asyncio.gather(
-        db(lambda: supabase.table("players").select("id,name").eq("id", player_id).maybe_single().execute()),
-        db(lambda: supabase.table("agents").select("id,name,role,active").eq("active", True).order("name").execute()),
-        db(lambda: supabase.table("player_agents").select("agent_id,level").eq("player_id", player_id).execute()),
+        db(
+            lambda: supabase.table("players")
+            .select("id,name")
+            .eq("id", player_id)
+            .limit(1)
+            .execute()
+        ),
+        db(
+            lambda: supabase.table("agents")
+            .select("id,name,role,active")
+            .eq("active", True)
+            .order("name")
+            .execute()
+        ),
+        db(
+            lambda: supabase.table("player_agents")
+            .select("agent_id,level")
+            .eq("player_id", player_id)
+            .execute()
+        ),
     )
-    player = player_result.data
+
+    players = rows(player_result)
+    player = players[0] if players else None
     if not player:
-        await interaction.followup.send("Ese jugador ya no existe.", ephemeral=True)
+        await interaction.followup.send(
+            "Ese jugador ya no existe.",
+            ephemeral=True,
+        )
         return
 
-    level_by_agent = {item["agent_id"]: item["level"] for item in rows(levels_result)}
-    grouped: dict[str | None, list[str]] = {level: [] for level in LEVEL_ORDER}
+    level_by_agent = {
+        item["agent_id"]: item["level"]
+        for item in rows(levels_result)
+    }
+    grouped: dict[str | None, list[str]] = {
+        level: [] for level in LEVEL_ORDER
+    }
     for agent in rows(agents_result):
         grouped[level_by_agent.get(agent["id"])].append(agent["name"])
 
@@ -330,12 +407,7 @@ async def agentes(
     if tipo is not None:
         selected_level = None if tipo.value == "unrated" else tipo.value
 
-    levels_to_show = (
-        LEVEL_ORDER
-        if tipo is None
-        else [selected_level]
-    )
-
+    levels_to_show = LEVEL_ORDER if tipo is None else [selected_level]
     title = f"Agentes de {player['name']}"
     if tipo is not None:
         title += f" · {tipo.name}"
@@ -380,15 +452,24 @@ async def composiciones(
     try:
         map_id = int(mapa)
     except ValueError:
-        await interaction.followup.send("Selecciona un mapa de las sugerencias.", ephemeral=True)
+        await interaction.followup.send(
+            "Selecciona un mapa de las sugerencias.", ephemeral=True
+        )
         return
 
     map_result = await db(
-        lambda: supabase.table("maps").select("id,name,in_pool").eq("id", map_id).maybe_single().execute()
+        lambda: supabase.table("maps")
+        .select("id,name,in_pool")
+        .eq("id", map_id)
+        .limit(1)
+        .execute()
     )
-    map_data = map_result.data
+    map_rows = rows(map_result)
+    map_data = map_rows[0] if map_rows else None
     if not map_data or not map_data.get("in_pool"):
-        await interaction.followup.send("Ese mapa no está en el map pool.", ephemeral=True)
+        await interaction.followup.send(
+            "Ese mapa no está en el map pool.", ephemeral=True
+        )
         return
 
     comps_result = await db(
@@ -401,7 +482,9 @@ async def composiciones(
     )
     comps = rows(comps_result)
     if not comps:
-        await interaction.followup.send(f"No hay composiciones para **{map_data['name']}**.")
+        await interaction.followup.send(
+            f"No hay composiciones para **{map_data['name']}**."
+        )
         return
 
     if composicion is not None:
@@ -413,7 +496,6 @@ async def composiciones(
                 ephemeral=True,
             )
             return
-
         comps = [comp for comp in comps if comp["id"] == composition_id]
         if not comps:
             await interaction.followup.send(
@@ -422,9 +504,15 @@ async def composiciones(
             )
             return
 
-    comp_ids = [c["id"] for c in comps]
+    comp_ids = [comp["id"] for comp in comps]
     slots_result, players_result, agents_result = await asyncio.gather(
-        db(lambda: supabase.table("composition_slots").select("composition_id,slot,player_id,agent_id").in_("composition_id", comp_ids).order("slot").execute()),
+        db(
+            lambda: supabase.table("composition_slots")
+            .select("composition_id,slot,player_id,agent_id")
+            .in_("composition_id", comp_ids)
+            .order("slot")
+            .execute()
+        ),
         db(lambda: supabase.table("players").select("id,name").execute()),
         db(lambda: supabase.table("agents").select("id,name").execute()),
     )
@@ -432,26 +520,50 @@ async def composiciones(
     agents_by_id = {a["id"]: a["name"] for a in rows(agents_result)}
     slots = rows(slots_result)
 
-    embeds: list[discord.Embed] = []
+    header = discord.Embed(
+        title=f"🗺️ Composiciones de {map_data['name']}",
+        description=f"{len(comps)} composición{'es' if len(comps) != 1 else ''} disponible{'s' if len(comps) != 1 else ''}.",
+        color=discord.Color.blurple(),
+    )
+    map_image = await get_map_image(map_data["name"])
+    if map_image:
+        header.set_image(url=map_image)
+
+    embeds: list[discord.Embed] = [header]
     for comp in comps:
         title = f"{'⭐ ' if comp['is_main'] else ''}{comp['name']}"
-        embed = discord.Embed(title=title, color=discord.Color.gold() if comp["is_main"] else discord.Color.blurple())
-        comp_slots = sorted(
-            (s for s in slots if s["composition_id"] == comp["id"]),
-            key=lambda s: s["slot"],
+        embed = discord.Embed(
+            title=title,
+            color=discord.Color.gold() if comp["is_main"] else discord.Color.blurple(),
         )
+        comp_slots = {
+            slot["slot"]: slot
+            for slot in slots
+            if slot["composition_id"] == comp["id"]
+        }
         lines = []
-        for slot in comp_slots:
-            agent_name = agents_by_id.get(slot.get("agent_id"), "Sin agente")
-            player_name = players.get(slot.get("player_id"), "Sin jugador")
-            lines.append(f"**{slot['slot']}. {agent_name}** · {player_name}")
-        embed.description = "\n".join(lines) or "Composición sin asignaciones."
-        if comp.get("notes"):
-            embed.add_field(name="Notas", value=trim(comp["notes"]), inline=False)
-        embed.set_footer(text=f"Mapa: {map_data['name']}")
-        embeds.append(embed)
-    await send_embeds(interaction, embeds)
+        for slot_number in range(1, 6):
+            slot = comp_slots.get(slot_number)
+            agent_name = (
+                agents_by_id.get(slot.get("agent_id"), "Sin agente")
+                if slot else "Sin agente"
+            )
+            player_name = (
+                players.get(slot.get("player_id"), "Sin jugador")
+                if slot else "Sin jugador"
+            )
+            lines.append(f"**{slot_number}. {agent_name}** · {player_name}")
+        embed.description = "\n".join(lines)
 
+        # Todos los embeds tienen siempre el mismo campo de notas y un máximo
+        # uniforme. Discord no permite fijar una altura exacta, pero esta
+        # estructura hace que las tarjetas sean visualmente consistentes.
+        notes = " ".join((comp.get("notes") or "Sin notas").split())
+        embed.add_field(name="Notas", value=trim(notes, 180), inline=False)
+        embed.set_footer(text=f"Mapa: {map_data['name']} · 5 posiciones")
+        embeds.append(embed)
+
+    await send_embeds(interaction, embeds)
 
 @bot.tree.command(
     name="calendario",
@@ -906,6 +1018,84 @@ async def calendario(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(
+    name="proximopartido",
+    description="Muestra el próximo día elegido para jugar",
+)
+async def proximopartido(interaction: discord.Interaction) -> None:
+    await interaction.response.defer(thinking=True)
+    now = datetime.now(TIMEZONE)
+
+    events_result, maps_result = await asyncio.gather(
+        db(
+            lambda: supabase.table("calendar_events")
+            .select("*")
+            .eq("type", "play_day")
+            .gte("start_date", now.date().isoformat())
+            .execute()
+        ),
+        db(lambda: supabase.table("maps").select("id,name").execute()),
+    )
+    maps = {m["id"]: m["name"] for m in rows(maps_result)}
+
+    candidates: list[tuple[datetime, dict[str, Any]]] = []
+    for event in rows(events_result):
+        event_date = parse_iso_date(event.get("start_date"))
+        if not event_date:
+            continue
+        event_time = str(event.get("event_time") or "23:59")[:5]
+        try:
+            hour, minute = map(int, event_time.split(":"))
+        except ValueError:
+            hour, minute = 23, 59
+        event_datetime = datetime(
+            event_date.year,
+            event_date.month,
+            event_date.day,
+            hour,
+            minute,
+            tzinfo=TIMEZONE,
+        )
+        if event_datetime >= now:
+            candidates.append((event_datetime, event))
+
+    if not candidates:
+        await interaction.followup.send(
+            "No hay ningún próximo día elegido para jugar."
+        )
+        return
+
+    event_datetime, event = min(candidates, key=lambda item: item[0])
+    map_name = maps.get(event.get("map_id"))
+    embed = discord.Embed(
+        title="🎮 Próximo partido",
+        description=event.get("title") or "Día elegido para jugar",
+        color=discord.Color.green(),
+    )
+    embed.add_field(
+        name="Fecha",
+        value=format_date_with_weekday(event_datetime.date()),
+        inline=False,
+    )
+    embed.add_field(
+        name="Hora",
+        value=event_datetime.strftime("%H:%M"),
+        inline=True,
+    )
+    if map_name:
+        embed.add_field(name="Mapa", value=map_name, inline=True)
+        map_image = await get_map_image(map_name)
+        if map_image:
+            embed.set_image(url=map_image)
+    if event.get("notes"):
+        embed.add_field(
+            name="Notas",
+            value=trim(event["notes"]),
+            inline=False,
+        )
+    await interaction.followup.send(embed=embed)
+
+
+@bot.tree.command(
     name="vincular",
     description="Vincula un usuario de Discord con un jugador de Premier Planner",
 )
@@ -1042,7 +1232,13 @@ async def send_play_day_notification(event: dict[str, Any], notification_type: s
     map_data = map_result.data if map_result else None
     event_time = str(event.get("event_time") or "")[:5]
 
-    title = "📅 Partido dentro de 3 días" if notification_type == "three_days" else "🎮 Hoy jugamos"
+    notification_titles = {
+        "three_days": "📅 Partido dentro de 3 días",
+        "same_day": "🎮 Hoy jugamos",
+        "one_hour": "⏰ Partido dentro de 1 hora",
+        "fifteen_minutes": "🚨 Partido dentro de 15 minutos",
+    }
+    title = notification_titles.get(notification_type, "🎮 Recordatorio de partido")
     embed = discord.Embed(title=title, color=discord.Color.green())
     embed.add_field(name="Evento", value=event["title"], inline=False)
     if map_data:
@@ -1069,7 +1265,7 @@ async def send_play_day_notification(event: dict[str, Any], notification_type: s
         raise RuntimeError("No se pudo entregar la notificación en ningún canal configurado")
 
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=5)
 async def notification_worker() -> None:
     now = datetime.now(TIMEZONE)
     today = now.date()
@@ -1086,27 +1282,53 @@ async def notification_worker() -> None:
         event_date = parse_iso_date(event.get("start_date"))
         if not event_date:
             continue
+
+        event_time = str(event.get("event_time") or "")[:5]
+        event_datetime: datetime | None = None
+        if event_time:
+            try:
+                hour, minute = map(int, event_time.split(":"))
+                event_datetime = datetime(
+                    event_date.year,
+                    event_date.month,
+                    event_date.day,
+                    hour,
+                    minute,
+                    tzinfo=TIMEZONE,
+                )
+            except ValueError:
+                log.warning("Hora inválida en el evento %s: %s", event["id"], event_time)
+
+        notifications: list[str] = []
         days_left = (event_date - today).days
-        notification_type: str | None = None
         if days_left == 3:
-            notification_type = "three_days"
-        elif days_left == 0 and (now.hour, now.minute) >= (
+            notifications.append("three_days")
+        if days_left == 0 and (now.hour, now.minute) >= (
             MORNING_HOUR,
             MORNING_MINUTE,
         ):
-            notification_type = "same_day"
-        if not notification_type:
-            continue
+            notifications.append("same_day")
 
-        claimed = await claim_notification(event["id"], notification_type)
-        if not claimed:
-            continue
-        try:
-            await send_play_day_notification(event, notification_type)
-        except Exception:
-            await release_notification(event["id"], notification_type)
-            log.exception("Error enviando aviso del evento %s", event["id"])
+        if event_datetime and event_datetime > now:
+            seconds_left = (event_datetime - now).total_seconds()
+            if 15 * 60 < seconds_left <= 60 * 60:
+                notifications.append("one_hour")
+            elif 0 < seconds_left <= 15 * 60:
+                notifications.append("fifteen_minutes")
 
+        for notification_type in notifications:
+            claimed = await claim_notification(event["id"], notification_type)
+            if not claimed:
+                continue
+            try:
+                await send_play_day_notification(event, notification_type)
+            except Exception:
+                await release_notification(event["id"], notification_type)
+                log.exception(
+                    "Error enviando aviso %s del evento %s",
+                    notification_type,
+                    event["id"],
+                )
 
 @notification_worker.before_loop
 async def before_notification_worker() -> None:
