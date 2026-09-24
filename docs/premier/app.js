@@ -25,6 +25,7 @@ const S = {
   session: null, profile: null, loading: true,
   players: [], agents: [], maps: [], pool: new Map(), agentImages: new Map(), mapImages: new Map(),
   comps: [], slots: [], profiles: [], calendarEvents: [],
+  attendancePolls: [], attendanceOptions: [], attendanceVotes: [],
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
   draft: null, // composición en edición
@@ -132,13 +133,16 @@ async function loadAll() {
     sb.from('compositions').select('*').order('is_main', { ascending: false }).order('created_at'),
     sb.from('composition_slots').select('*'),
     sb.from('calendar_events').select('*').order('start_date').order('created_at'),
+    S.session ? sb.from('attendance_polls').select('*').order('created_at', { ascending: false }) : Promise.resolve({ data: [] }),
+    S.session ? sb.from('attendance_options').select('*').order('event_date').order('event_time') : Promise.resolve({ data: [] }),
+    S.session ? sb.from('attendance_votes').select('*') : Promise.resolve({ data: [] }),
     isAdmin() ? sb.from('profiles').select('*').order('created_at') : Promise.resolve({ data: [] }),
   ]);
   const failed = res.find((r) => r.error);
   if (failed) toast('No se pudieron cargar los datos: ' + failed.error.message, 'err');
 
-  const [pl, ag, mp, pa, co, cs, ce, pr] = res.map((r) => r.data ?? []);
-  Object.assign(S, { players: pl, agents: ag, maps: mp, comps: co, slots: cs, calendarEvents: ce, profiles: pr });
+  const [pl, ag, mp, pa, co, cs, ce, ap, ao, av, pr] = res.map((r) => r.data ?? []);
+  Object.assign(S, { players: pl, agents: ag, maps: mp, comps: co, slots: cs, calendarEvents: ce, attendancePolls: ap, attendanceOptions: ao, attendanceVotes: av, profiles: pr });
   S.pool = new Map(pa.map((r) => [key(r.player_id, r.agent_id), r.level]));
 
   if (!S.mapId || !byId(S.maps, S.mapId)) {
@@ -171,11 +175,13 @@ function render() {
     ? viewMaps()
     : S.tab === 'calendar'
       ? viewCalendar()
-      : S.tab === 'account'
-        ? viewAccount()
-        : S.tab === 'admin'
-          ? viewAdmin()
-          : viewPool();
+      : S.tab === 'attendance'
+        ? viewAttendance()
+        : S.tab === 'account'
+          ? viewAccount()
+          : S.tab === 'admin'
+            ? viewAdmin()
+            : viewPool();
 
   const newWrap = $('.table-wrap');
   if (newWrap) {
@@ -205,6 +211,7 @@ function renderTabs() {
     ['pool', 'Agent pool'],
     ['maps', 'Mapas'],
     ['calendar', 'Calendario'],
+    ...(S.session ? [['attendance', 'Asistencia']] : []),
     ...(S.session ? [['account', 'Mi cuenta']] : []),
     ...(isAdmin() ? [['admin', 'Admin']] : []),
   ];
@@ -463,6 +470,64 @@ function showCalendarEvent(event) {
     ${map ? `<p><strong>Mapa:</strong> ${esc(map.name)}</p>` : ''}<p>${details}</p>
     ${event.notes ? `<p class="notes">${esc(event.notes)}</p>` : ''}</div>`;
   $('#modal').showModal();
+}
+
+// ---------- vista: asistencia
+const ATTENDANCE_CHOICES = {
+  available: { label: 'Disponible', icon: '✅' },
+  maybe: { label: 'Por confirmar', icon: '❓' },
+  unavailable: { label: 'No disponible', icon: '❌' },
+};
+function attendanceDateLabel(option) {
+  const date = new Date(`${option.event_date}T12:00:00`);
+  const label = new Intl.DateTimeFormat('es-ES', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  }).format(date);
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}${option.event_time ? ` · ${option.event_time.slice(0, 5)}` : ''}`;
+}
+function votesFor(optionId, choice) {
+  return S.attendanceVotes.filter((v) => v.option_id === optionId && v.choice === choice);
+}
+function voteNames(optionId, choice) {
+  return votesFor(optionId, choice).map((v) => byId(S.players, v.player_id)?.name).filter(Boolean);
+}
+function openAttendancePoll() {
+  const events = S.calendarEvents.filter((e) => e.type === 'match_days' && (e.occurrences ?? []).length);
+  if (!events.length) return toast('No hay conjuntos de días de partido disponibles.', 'err');
+  $('#modal').innerHTML = `<form class="modal-body" data-form="open-attendance-poll">
+    <div class="modal-head"><h2>Abrir votación de asistencia</h2><button type="button" class="icon-btn" data-action="close-modal">✕</button></div>
+    <label class="field"><span>Conjunto de días</span><select name="event_id" required>
+      ${events.map((e) => `<option value="${e.id}">${esc(e.title)} · ${esc(byId(S.maps, e.map_id)?.name ?? 'Sin mapa')}</option>`).join('')}
+    </select></label>
+    <label class="field"><span>Título de la votación</span><input name="title" required maxlength="100" value="Disponibilidad Premier"></label>
+    <p class="hint">Se incluirán todas las fechas y horas del conjunto seleccionado.</p>
+    <div class="modal-foot"><button type="button" class="btn ghost" data-action="close-modal">Cancelar</button><button class="btn primary">Abrir votación</button></div>
+  </form>`;
+  $('#modal').showModal();
+}
+function viewAttendance() {
+  const me = myPlayer();
+  const polls = [...S.attendancePolls].sort((a, b) => (a.status === 'open' ? -1 : 1) - (b.status === 'open' ? -1 : 1) || String(b.created_at).localeCompare(String(a.created_at)));
+  const cards = polls.map((poll) => {
+    const options = S.attendanceOptions.filter((o) => o.poll_id === poll.id);
+    const map = byId(S.maps, poll.map_id);
+    const optionCards = options.map((option) => {
+      const myVote = me && S.attendanceVotes.find((v) => v.option_id === option.id && v.player_id === me.id)?.choice;
+      const selected = poll.selected_option_id === option.id;
+      const groups = Object.entries(ATTENDANCE_CHOICES).map(([choice, info]) => {
+        const names = voteNames(option.id, choice);
+        return `<div class="attendance-result ${choice}"><strong>${info.icon} ${info.label} · ${names.length}</strong><span>${esc(names.join(', ') || 'Nadie')}</span></div>`;
+      }).join('');
+      const buttons = poll.status === 'open' && me
+        ? `<div class="attendance-actions">${Object.entries(ATTENDANCE_CHOICES).map(([choice, info]) => `<button class="vote-btn ${choice} ${myVote === choice ? 'active' : ''}" data-action="attendance-vote" data-id="${option.id}" data-choice="${choice}">${info.icon} ${info.label}</button>`).join('')}</div>`
+        : '';
+      const close = poll.status === 'open' && isAdmin()
+        ? `<button class="btn sm primary" data-action="close-attendance" data-poll="${poll.id}" data-id="${option.id}">Elegir este día y cerrar</button>` : '';
+      return `<article class="attendance-option ${selected ? 'selected' : ''}"><div class="attendance-option-head"><h3>${esc(attendanceDateLabel(option))}</h3>${selected ? '<span class="badge role-admin">Día elegido</span>' : ''}</div>${buttons}<div class="attendance-results">${groups}</div>${close}</article>`;
+    }).join('');
+    return `<section class="attendance-poll"><header><div><h2>${esc(poll.title)}</h2><p class="hint">${esc(map?.name ?? 'Sin mapa')} · ${poll.status === 'open' ? 'Votación abierta' : 'Votación cerrada'}</p></div><span class="badge ${poll.status === 'open' ? 'role-player' : ''}">${poll.status === 'open' ? 'Abierta' : 'Cerrada'}</span></header><div class="attendance-options">${optionCards}</div></section>`;
+  }).join('');
+  return `<section><div class="attendance-toolbar"><div><h1>Asistencia</h1><p class="hint">Vota tu disponibilidad para cada fecha. Puedes cambiar tu voto mientras la votación esté abierta.</p></div>${isAdmin() ? '<button class="btn primary" data-action="open-attendance">Abrir votación</button>' : ''}</div>${!myPlayer() ? '<div class="empty">Tu cuenta debe estar vinculada a un jugador para votar.</div>' : ''}${cards || empty('No hay votaciones de asistencia.')}</section>`;
 }
 
 // ---------- vista: mapas y composiciones
@@ -1140,6 +1205,18 @@ async function onClick(e) {
     case 'calendar-prev': changeCalendarMonth(-1); break;
     case 'calendar-next': changeCalendarMonth(1); break;
     case 'new-calendar-event': openCalendarEditor(); break;
+    case 'open-attendance': openAttendancePoll(); break;
+    case 'attendance-vote': {
+      const { error } = await sb.rpc('vote_attendance', { p_option_id: id, p_choice: el.dataset.choice });
+      if (error) toast(friendlyError(error), 'err'); else { toast('Voto guardado'); await refresh(); }
+      break;
+    }
+    case 'close-attendance': {
+      if (!confirm('¿Cerrar la votación y elegir esta fecha? Se creará el día elegido en el calendario.')) return;
+      const { error } = await sb.rpc('close_attendance_poll', { p_poll_id: Number(el.dataset.poll), p_selected_option_id: id });
+      if (error) toast(friendlyError(error), 'err'); else { toast('Votación cerrada y fecha elegida'); await refresh(); }
+      break;
+    }
     case 'view-calendar-event': showCalendarEvent(byId(S.calendarEvents, id)); break;
     case 'delete-calendar-event': {
       const form = el.closest('[data-form="save-calendar-event"]');
@@ -1332,6 +1409,16 @@ async function onSubmit(e) {
       form.reset();
       toast('Contraseña actualizada correctamente');
       break;
+    }
+    case 'open-attendance-poll': {
+      const event = byId(S.calendarEvents, Number(fd.get('event_id')));
+      if (!event || event.type !== 'match_days') return toast('Selecciona un conjunto de días válido.', 'err');
+      const options = (event.occurrences ?? []).filter((o) => o.date).map((o, i) => ({ date: o.date, time: o.time?.slice(0, 5) ?? null, sort_order: i }));
+      const { error } = await sb.rpc('open_attendance_poll', {
+        p_title: String(fd.get('title') ?? '').trim(), p_map_id: event.map_id, p_source_event_id: event.id, p_options: options,
+      });
+      if (error) return toast(friendlyError(error), 'err');
+      $('#modal').close(); toast('Votación abierta'); await refresh(); break;
     }
     case 'save-calendar-event': {
       const type = String(fd.get('type'));
