@@ -60,6 +60,7 @@ logging.basicConfig(
 log = logging.getLogger("premier-bot")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+DB_LOCK = asyncio.Lock()
 
 
 def rows(response: Any) -> list[dict[str, Any]]:
@@ -67,8 +68,20 @@ def rows(response: Any) -> list[dict[str, Any]]:
 
 
 async def db(callable_, *args, **kwargs):
-    """Ejecuta el cliente síncrono de Supabase sin bloquear Discord."""
-    return await asyncio.to_thread(callable_, *args, **kwargs)
+    """Ejecuta Supabase sin bloquear y reintenta fallos HTTP transitorios."""
+    async with DB_LOCK:
+        for attempt in range(2):
+            try:
+                return await asyncio.to_thread(callable_, *args, **kwargs)
+            except Exception as exc:
+                transient = exc.__class__.__name__ in {
+                    "RemoteProtocolError", "ReadError", "WriteError",
+                    "ConnectError", "PoolTimeout",
+                }
+                if not transient or attempt == 1:
+                    raise
+                log.warning("Fallo transitorio de Supabase (%s). Reintentando...", exc.__class__.__name__)
+                await asyncio.sleep(0.25)
 
 
 def parse_iso_date(value: str | None) -> date | None:
@@ -318,6 +331,8 @@ class PremierBot(commands.Bot):
         await self.tree.sync()
         if not notification_worker.is_running():
             notification_worker.start()
+        if not attendance_worker.is_running():
+            attendance_worker.start()
 
     async def on_ready(self) -> None:
         log.info("Conectado como %s (%s)", self.user, self.user.id if self.user else "?")
@@ -1017,6 +1032,71 @@ async def calendario(interaction: discord.Interaction) -> None:
     )
 
 
+async def get_attendance_poll_data(poll_id: int | None = None, only_open: bool = False):
+    query = supabase.table("attendance_polls").select("*")
+    if poll_id is not None:
+        query = query.eq("id", poll_id)
+    if only_open:
+        query = query.eq("status", "open")
+    result = await db(lambda: query.order("created_at", desc=True).limit(1).execute())
+    polls = rows(result)
+    if not polls:
+        return None, [], [], {}, None
+    poll = polls[0]
+    # Las consultas pasan por DB_LOCK, por lo que no comparten HTTP/2 simultáneamente.
+    options_result, votes_result, players_result = await asyncio.gather(
+        db(lambda: supabase.table("attendance_options").select("*").eq("poll_id", poll["id"]).order("sort_order").execute()),
+        db(lambda: supabase.table("attendance_votes").select("*").eq("poll_id", poll["id"]).execute()),
+        db(lambda: supabase.table("players").select("id,name,discord_id").execute()),
+    )
+    map_name = None
+    if poll.get("map_id"):
+        map_result = await db(lambda: supabase.table("maps").select("name").eq("id", poll["map_id"]).limit(1).execute())
+        map_rows = rows(map_result)
+        map_name = map_rows[0]["name"] if map_rows else None
+    players = {item["id"]: item for item in rows(players_result)}
+    return poll, rows(options_result), rows(votes_result), players, map_name
+
+
+def build_attendance_embeds(poll, options, votes, players, map_name):
+    status = "Abierta" if poll["status"] == "open" else "Cerrada"
+    header = discord.Embed(
+        title=f"📊 {poll['title']}",
+        description=f"Estado: **{status}**" + (f"\nMapa: **{map_name}**" if map_name else ""),
+        color=discord.Color.blurple() if status == "Abierta" else discord.Color.greyple(),
+    )
+    embeds = [header]
+    labels = {"available": "✅ Disponible", "maybe": "❓ Por confirmar", "unavailable": "❌ No disponible"}
+    for option in options:
+        title = format_date_with_weekday(option["event_date"])
+        if option.get("event_time"):
+            title += f" · {str(option['event_time'])[:5]}"
+        selected = poll.get("selected_option_id") == option["id"]
+        embed = discord.Embed(title=("🏆 " if selected else "") + title, color=discord.Color.green() if selected else discord.Color.dark_teal())
+        option_votes = [v for v in votes if v["option_id"] == option["id"]]
+        for choice, label in labels.items():
+            names = []
+            for vote in option_votes:
+                if vote["choice"] != choice:
+                    continue
+                player = players.get(vote["player_id"])
+                if player:
+                    names.append(f"<@{player['discord_id']}>" if player.get("discord_id") else player["name"])
+            embed.add_field(name=f"{label} · {len(names)}", value=", ".join(names) or "Nadie", inline=False)
+        embeds.append(embed)
+    return embeds
+
+
+@bot.tree.command(name="votacion", description="Muestra la votación de asistencia abierta")
+async def votacion(interaction: discord.Interaction) -> None:
+    await interaction.response.defer(thinking=True)
+    poll, options, votes, players, map_name = await get_attendance_poll_data(only_open=True)
+    if not poll:
+        await interaction.followup.send("No hay ninguna votación de asistencia abierta.")
+        return
+    await send_embeds(interaction, build_attendance_embeds(poll, options, votes, players, map_name))
+
+
 @bot.tree.command(
     name="proximopartido",
     description="Muestra el próximo día elegido para jugar",
@@ -1329,6 +1409,157 @@ async def notification_worker() -> None:
                     notification_type,
                     event["id"],
                 )
+
+async def announce_attendance_poll(
+    poll: dict[str, Any],
+    closed: bool,
+) -> bool:
+    loaded, options, votes, players, map_name = await get_attendance_poll_data(
+        poll_id=poll["id"]
+    )
+    if not loaded:
+        return False
+
+    if closed:
+        selected_option = next(
+            (
+                option
+                for option in options
+                if option["id"] == loaded.get("selected_option_id")
+            ),
+            None,
+        )
+        if not selected_option:
+            log.warning(
+                "La votación %s se cerró sin una fecha seleccionada",
+                loaded["id"],
+            )
+            return False
+
+        selected_date = format_date_with_weekday(
+            selected_option["event_date"]
+        )
+        selected_time = (
+            str(selected_option.get("event_time"))[:5]
+            if selected_option.get("event_time")
+            else None
+        )
+        embed = discord.Embed(
+            title=f"🏁 Votación finalizada: {loaded['title']}",
+            description="Se ha elegido el próximo día de partido.",
+            color=discord.Color.green(),
+        )
+        embed.add_field(
+            name="Fecha",
+            value=selected_date,
+            inline=False,
+        )
+        if selected_time:
+            embed.add_field(
+                name="Hora",
+                value=selected_time,
+                inline=True,
+            )
+        if map_name:
+            embed.add_field(
+                name="Mapa",
+                value=map_name,
+                inline=True,
+            )
+        embeds = [embed]
+    else:
+        lines: list[str] = []
+        for option in options:
+            line = f"• **{format_date_with_weekday(option['event_date'])}**"
+            if option.get("event_time"):
+                line += f" · **{str(option['event_time'])[:5]}**"
+            lines.append(line)
+
+        description_parts = [
+            "Se ha abierto una nueva votación de asistencia.",
+            "",
+            "\n".join(lines) if lines else "No hay fechas disponibles.",
+            "",
+            "Entra en la pestaña **Asistencia** de la web para votar.",
+        ]
+        embed = discord.Embed(
+            title=f"📣 Nueva votación: {loaded['title']}",
+            description="\n".join(description_parts),
+            color=discord.Color.blurple(),
+        )
+        if map_name:
+            embed.add_field(
+                name="Mapa",
+                value=map_name,
+                inline=False,
+            )
+        embeds = [embed]
+
+    settings = rows(
+        await db(
+            lambda: supabase.table("discord_bot_settings")
+            .select("main_channel_id")
+            .execute()
+        )
+    )
+    delivered = False
+    for setting in settings:
+        try:
+            channel = bot.get_channel(setting["main_channel_id"])
+            if channel is None:
+                channel = await bot.fetch_channel(
+                    setting["main_channel_id"]
+                )
+            if isinstance(channel, discord.abc.Messageable):
+                await channel.send(embeds=embeds)
+                delivered = True
+        except (
+            discord.Forbidden,
+            discord.NotFound,
+            discord.HTTPException,
+        ) as exc:
+            log.warning("No se pudo anunciar la votación: %s", exc)
+    return delivered
+
+
+@tasks.loop(minutes=1)
+async def attendance_worker() -> None:
+    result = await db(lambda: supabase.table("attendance_polls").select("*").or_("and(status.eq.open,opened_notified_at.is.null),and(status.eq.closed,closed_notified_at.is.null)").order("created_at").execute())
+    for poll in rows(result):
+        closed = poll["status"] == "closed"
+        try:
+            if not await announce_attendance_poll(poll, closed):
+                continue
+            if closed:
+                # Las opciones y los votos se eliminan por ON DELETE CASCADE.
+                await db(
+                    lambda p=poll: supabase.table("attendance_polls")
+                    .delete()
+                    .eq("id", p["id"])
+                    .execute()
+                )
+            else:
+                await db(
+                    lambda p=poll: supabase.table("attendance_polls")
+                    .update({
+                        "opened_notified_at": datetime.now(TIMEZONE).isoformat()
+                    })
+                    .eq("id", p["id"])
+                    .execute()
+                )
+        except Exception:
+            log.exception("Error anunciando la votación %s", poll["id"])
+
+
+@attendance_worker.before_loop
+async def before_attendance_worker() -> None:
+    await bot.wait_until_ready()
+
+
+@attendance_worker.error
+async def attendance_worker_error(error: BaseException) -> None:
+    log.exception("Error en la tarea de votaciones", exc_info=error)
+
 
 @notification_worker.before_loop
 async def before_notification_worker() -> None:
