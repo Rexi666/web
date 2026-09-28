@@ -1530,3 +1530,187 @@ dialog.generator-dialog {
 .generator-player-row select {
   width: 100%;
 }
+
+/* ---------- estadísticas ---------- */
+.stats-head,
+.stats-filters,
+.match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap
+}
+
+.stats-head {
+  margin-bottom: 1rem
+}
+
+.stats-filters {
+  padding: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 1rem
+}
+
+.stats-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: .6rem
+}
+
+.stat-metric {
+  padding: .7rem;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: .2rem
+}
+
+.stat-metric span {
+  font-size: .75rem;
+  color: var(--muted)
+}
+
+.stat-metric strong {
+  font: 700 1.15rem var(--display)
+}
+
+.stats-player-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: .7rem;
+  margin: 1rem 0
+}
+
+.stats-player-card {
+  display: grid;
+  gap: .25rem;
+  text-align: left;
+  padding: .8rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer
+}
+
+.stats-player-card:hover {
+  border-color: var(--accent)
+}
+
+.stats-player-card span {
+  color: var(--muted);
+  font-size: .85rem
+}
+
+.stats-player-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem
+}
+
+.stats-card {
+  padding: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 1rem
+}
+
+.stats-card h2 {
+  margin-bottom: .75rem
+}
+
+.pool-summary {
+  display: grid;
+  grid-template-columns: auto 85px 1fr;
+  align-items: center;
+  gap: .55rem;
+  padding: .3rem 0
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse
+}
+
+.stats-table th,
+.stats-table td {
+  padding: .45rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap
+}
+
+.stats-table th {
+  color: var(--muted);
+  font-size: .78rem
+}
+
+.match-card {
+  padding: .7rem;
+  border-top: 1px solid var(--line)
+}
+
+.match-card>div {
+  display: grid
+}
+
+.match-card span {
+  color: var(--muted);
+  font-size: .82rem
+}
+
+.match-card.win strong {
+  color: var(--great)
+}
+
+.match-card.loss strong {
+  color: var(--danger)
+}
+
+dialog.stats-dialog {
+  width: min(1180px, calc(100vw - 1.5rem))
+}
+
+.match-stats-head,
+.match-player-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.2fr) minmax(120px, 1.2fr) repeat(7, minmax(55px, .55fr));
+  gap: .35rem;
+  align-items: center
+}
+
+.match-stats-head {
+  color: var(--muted);
+  font-size: .75rem
+}
+
+.match-player-row input,
+.match-player-row select {
+  width: 100%;
+  min-width: 0
+}
+
+.match-player-stats {
+  display: grid;
+  gap: .35rem;
+  overflow-x: auto
+}
+
+@media(max-width:760px) {
+  .stats-player-detail {
+    grid-template-columns: 1fr
+  }
+
+  .match-stats-head,
+  .match-player-row {
+    min-width: 850px
+  }
+
+  .stats-filters>.field {
+    width: 100%
+  }
+}

@@ -32,6 +32,9 @@ const S = {
   players: [], agents: [], maps: [], pool: new Map(), agentImages: new Map(), mapImages: new Map(),
   comps: [], slots: [], profiles: [], calendarEvents: [],
   attendancePolls: [], attendanceOptions: [], attendanceVotes: [],
+  matches: [], matchStats: [],
+  statsType: readPref('stats-type') || 'premier', statsSeason: readPref('stats-season') || 'all',
+  statsPlayerId: Number(readPref('stats-player')) || null, matchDraft: null,
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
   draft: null, // composición en edición
@@ -142,13 +145,15 @@ async function loadAll() {
     S.session ? sb.from('attendance_polls').select('*').order('created_at', { ascending: false }) : Promise.resolve({ data: [] }),
     S.session ? sb.from('attendance_options').select('*').order('event_date').order('event_time') : Promise.resolve({ data: [] }),
     S.session ? sb.from('attendance_votes').select('*') : Promise.resolve({ data: [] }),
+    S.session ? sb.from('matches').select('*').order('played_at', { ascending: false }).order('created_at', { ascending: false }) : Promise.resolve({ data: [] }),
+    S.session ? sb.from('match_player_stats').select('*') : Promise.resolve({ data: [] }),
     isAdmin() ? sb.from('profiles').select('*').order('created_at') : Promise.resolve({ data: [] }),
   ]);
   const failed = res.find((r) => r.error);
   if (failed) toast('No se pudieron cargar los datos: ' + failed.error.message, 'err');
 
-  const [pl, ag, mp, pa, co, cs, ce, ap, ao, av, pr] = res.map((r) => r.data ?? []);
-  Object.assign(S, { players: pl, agents: ag, maps: mp, comps: co, slots: cs, calendarEvents: ce, attendancePolls: ap, attendanceOptions: ao, attendanceVotes: av, profiles: pr });
+  const [pl, ag, mp, pa, co, cs, ce, ap, ao, av, mt, ms, pr] = res.map((r) => r.data ?? []);
+  Object.assign(S, { players: pl, agents: ag, maps: mp, comps: co, slots: cs, calendarEvents: ce, attendancePolls: ap, attendanceOptions: ao, attendanceVotes: av, matches: mt, matchStats: ms, profiles: pr });
   S.pool = new Map(pa.map((r) => [key(r.player_id, r.agent_id), r.level]));
 
   if (!S.mapId || !byId(S.maps, S.mapId)) {
@@ -183,11 +188,13 @@ function render() {
       ? viewCalendar()
       : S.tab === 'attendance'
         ? viewAttendance()
-        : S.tab === 'account'
-          ? viewAccount()
-          : S.tab === 'admin'
-            ? viewAdmin()
-            : viewPool();
+        : S.tab === 'stats'
+          ? viewStatistics()
+          : S.tab === 'account'
+            ? viewAccount()
+            : S.tab === 'admin'
+              ? viewAdmin()
+              : viewPool();
 
   const newWrap = $('.table-wrap');
   if (newWrap) {
@@ -217,7 +224,7 @@ function renderTabs() {
     ['pool', 'Agent pool'],
     ['maps', 'Mapas'],
     ['calendar', 'Calendario'],
-    ...(S.session ? [['attendance', 'Asistencia']] : []),
+    ...(S.session ? [['attendance', 'Asistencia'], ['stats', 'Estadísticas']] : []),
     ...(S.session ? [['account', 'Mi cuenta']] : []),
     ...(isAdmin() ? [['admin', 'Admin']] : []),
   ];
@@ -536,6 +543,97 @@ function viewAttendance() {
     return `<section class="attendance-poll"><header><div><h2>${esc(poll.title)}</h2><p class="hint">${esc(map?.name ?? 'Sin mapa')} · ${poll.status === 'open' ? 'Votación abierta' : 'Votación cerrada'}</p></div><span class="badge ${poll.status === 'open' ? 'role-player' : ''}">${poll.status === 'open' ? 'Abierta' : 'Cerrada'}</span></header><div class="attendance-options">${optionCards}</div></section>`;
   }).join('');
   return `<section><div class="attendance-toolbar"><div><h1>Asistencia</h1><p class="hint">Vota tu disponibilidad para cada fecha. Puedes cambiar tu voto mientras la votación esté abierta.</p></div>${isAdmin() ? '<button class="btn primary" data-action="open-attendance">Abrir votación</button>' : ''}</div>${!myPlayer() ? '<div class="empty">Tu cuenta debe estar vinculada a un jugador para votar.</div>' : ''}${cards || empty('No hay votaciones de asistencia.')}</section>`;
+}
+
+
+// ---------- vista: estadísticas
+const sum = (list, field) => list.reduce((total, row) => total + Number(row[field] || 0), 0);
+const avg = (list, field) => list.length ? sum(list, field) / list.length : 0;
+const fmt = (number, digits = 1) => Number(number || 0).toFixed(digits);
+function statsSeasons() {
+  return S.calendarEvents.filter((e) => e.type === 'season').sort((a, b) => String(b.start_date).localeCompare(String(a.start_date)));
+}
+function filteredMatches() {
+  return S.matches.filter((match) => {
+    if (S.statsType !== 'all' && match.match_type !== S.statsType) return false;
+    if (S.statsSeason === 'all') return true;
+    const season = byId(S.calendarEvents, Number(S.statsSeason));
+    return season && match.played_at >= season.start_date && match.played_at <= season.end_date;
+  });
+}
+function metricCards(rows, matches) {
+  const rounds = matches.reduce((n, m) => n + Number(m.team_score || 0) + Number(m.opponent_score || 0), 0);
+  const kills = sum(rows, 'kills'), deaths = sum(rows, 'deaths'), assists = sum(rows, 'assists');
+  const items = [
+    ['Partidas', matches.length], ['ACS medio', fmt(avg(rows, 'acs'))],
+    ['Kills', `${kills} / ${fmt(matches.length ? kills / matches.length : 0)}`],
+    ['Muertes', `${deaths} / ${fmt(matches.length ? deaths / matches.length : 0)}`],
+    ['Asistencias', `${assists} / ${fmt(matches.length ? assists / matches.length : 0)}`],
+    ['KD%', `${fmt((kills / Math.max(deaths, 1)) * 100)}%`],
+    ['KDA%', `${fmt(((kills + assists) / Math.max(deaths, 1)) * 100)}%`],
+    ['Kills/ronda', fmt(rounds ? kills / rounds : 0, 2)],
+    ['First bloods medios', fmt(avg(rows, 'first_bloods'))],
+    ['Plantes medios', fmt(avg(rows, 'plants'))], ['Defuses medios', fmt(avg(rows, 'defuses'))],
+  ];
+  return `<div class="stats-metrics">${items.map(([k, v]) => `<div class="stat-metric"><span>${k}</span><strong>${v}</strong></div>`).join('')}</div>`;
+}
+function aggregateRows(rows, keyField, lookup, matches) {
+  const grouped = new Map();
+  for (const row of rows) {
+    const key = row[keyField];
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(row);
+  }
+  return [...grouped.entries()].map(([id, list]) => {
+    const relatedMatches = matches.filter((m) => list.some((r) => r.match_id === m.id));
+    return { id, name: lookup(id)?.name ?? 'Desconocido', games: list.length, acs: avg(list, 'acs'), kills: sum(list, 'kills'), deaths: sum(list, 'deaths'), assists: sum(list, 'assists'), wins: relatedMatches.filter((m) => m.result === 'win').length };
+  }).sort((a, b) => b.games - a.games || b.acs - a.acs);
+}
+function statsTable(title, rows) {
+  return `<section class="stats-card"><h2>${title}</h2>${rows.length ? `<div class="table-scroll"><table class="stats-table"><thead><tr><th>Nombre</th><th>PJ</th><th>V%</th><th>ACS</th><th>K</th><th>D</th><th>A</th><th>KD</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.games}</td><td>${fmt(r.games ? r.wins / r.games * 100 : 0)}%</td><td>${fmt(r.acs)}</td><td>${r.kills}</td><td>${r.deaths}</td><td>${r.assists}</td><td>${fmt(r.kills / Math.max(r.deaths, 1), 2)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="hint">Sin datos.</p>'}</section>`;
+}
+function playerSummary(player, matches) {
+  const matchIds = new Set(matches.map((m) => m.id));
+  const rows = S.matchStats.filter((r) => r.player_id === player.id && matchIds.has(r.match_id));
+  const playedMatches = matches.filter((m) => rows.some((r) => r.match_id === m.id));
+  const agentRows = aggregateRows(rows, 'agent_id', (id) => byId(S.agents, id), playedMatches);
+  const mapRows = aggregateRows(rows.map((r) => ({ ...r, map_id: byId(S.matches, r.match_id)?.map_id })), 'map_id', (id) => byId(S.maps, id), playedMatches);
+  const pool = [...LEVEL_ORDER, null].map((level) => {
+    const names = S.agents.filter((a) => a.active && (S.pool.get(key(player.id, a.id)) ?? null) === level).map((a) => a.name);
+    const info = lvInfo(level); return names.length ? `<div class="pool-summary"><span class="lv sm ${info.cls}">${info.short}</span><strong>${info.label}</strong><span>${esc(names.join(', '))}</span></div>` : '';
+  }).join('');
+  return `<div class="stats-player-detail"><div class="stats-card"><h2>${esc(player.name)}</h2>${metricCards(rows, playedMatches)}</div><section class="stats-card"><h2>Agent pool</h2>${pool || '<p class="hint">Sin valoraciones.</p>'}</section>${statsTable('Agentes jugados', agentRows)}${statsTable('Mapas', mapRows)}</div>`;
+}
+function viewStatistics() {
+  const matches = filteredMatches();
+  const selected = S.statsPlayerId ? byId(S.players, S.statsPlayerId) : null;
+  const seasons = statsSeasons();
+  const list = S.players.map((player) => {
+    const rows = S.matchStats.filter((r) => r.player_id === player.id && matches.some((m) => m.id === r.match_id));
+    const pMatches = matches.filter((m) => rows.some((r) => r.match_id === m.id));
+    return `<button class="stats-player-card" data-action="stats-player" data-id="${player.id}"><strong>${esc(player.name)}</strong><span>${pMatches.length} partidas · ${fmt(avg(rows, 'acs'))} ACS</span></button>`;
+  }).join('');
+  return `<section class="statistics-view"><div class="stats-head"><div><h1>Estadísticas</h1><p class="hint">Rendimiento del equipo en Premier y Ranked.</p></div>${isAdmin() ? '<button class="btn primary" data-action="new-match">Registrar partida</button>' : ''}</div><div class="stats-filters"><label class="field"><span>Tipo</span><select data-stats-filter="type"><option value="premier" ${S.statsType === 'premier' ? 'selected' : ''}>Premier</option><option value="ranked" ${S.statsType === 'ranked' ? 'selected' : ''}>Ranked</option><option value="all" ${S.statsType === 'all' ? 'selected' : ''}>Premier + Ranked</option></select></label><label class="field"><span>Temporada</span><select data-stats-filter="season"><option value="all">Todas</option>${seasons.map((x) => `<option value="${x.id}" ${String(x.id) === String(S.statsSeason) ? 'selected' : ''}>${esc(x.title)}</option>`).join('')}</select></label><label class="field grow"><span>Jugador</span><select data-stats-filter="player"><option value="">Todos los jugadores</option>${S.players.map((p) => `<option value="${p.id}" ${p.id === S.statsPlayerId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label></div>${selected ? playerSummary(selected, matches) : `<div class="stats-team-summary">${metricCards(S.matchStats.filter((r) => matches.some((m) => m.id === r.match_id)), matches)}<div class="stats-player-list">${list || empty('No hay jugadores.')}</div></div>`}<section class="stats-card matches-list"><h2>Partidas (${matches.length})</h2>${matches.map(matchCard).join('') || '<p class="hint">No hay partidas con estos filtros.</p>'}</section></section>`;
+}
+function matchCard(match) {
+  const map = byId(S.maps, match.map_id), comp = byId(S.comps, match.composition_id);
+  return `<article class="match-card ${match.result}"><div><strong>${match.result === 'win' ? 'Victoria' : 'Derrota'} · ${match.team_score}-${match.opponent_score}</strong><span>${match.match_type === 'premier' ? 'Premier' : 'Ranked'} · ${match.played_at} · ${esc(map?.name ?? '')}${comp ? ` · ${esc(comp.name)}` : ''}</span></div>${match.result_image_url ? `<a class="btn sm" href="${esc(match.result_image_url)}" target="_blank" rel="noopener">Imagen</a>` : ''}${isAdmin() ? `<button class="btn sm ghost danger" data-action="delete-match" data-id="${match.id}">Borrar</button>` : ''}</article>`;
+}
+function openMatchEditor() {
+  const premierEvents = S.calendarEvents.filter((e) => e.type === 'play_day');
+  const playerRows = S.players.map((p) => `<div class="match-player-row"><strong>${esc(p.name)}</strong><select name="agent_${p.id}" required><option value="">Agente…</option>${S.agents.filter((a) => a.active).map((a) => `<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select>${['acs', 'kills', 'deaths', 'assists', 'first_bloods', 'plants', 'defuses'].map((f) => `<input type="number" min="0" name="${f}_${p.id}" value="0" aria-label="${f}">`).join('')}</div>`).join('');
+  $('#modal').classList.add('stats-dialog');
+  $('#modal').innerHTML = `<form class="modal-body" data-form="save-match"><div class="modal-head"><h2>Registrar partida</h2><button type="button" class="icon-btn" data-action="close-modal">✕</button></div><div class="field-row"><label class="field grow"><span>Tipo</span><select name="match_type" data-match-type><option value="premier">Premier</option><option value="ranked">Ranked</option></select></label><label class="field grow" data-premier-event><span>Evento del calendario</span><select name="calendar_event_id">${premierEvents.map((e) => `<option value="${e.id}">${esc(e.title)} · ${e.start_date}</option>`).join('')}</select></label><label class="field grow" data-ranked-date hidden><span>Fecha</span><input type="date" name="played_at" value="${localDateKey(new Date())}"></label></div><div class="field-row"><label class="field grow"><span>Resultado</span><select name="result"><option value="win">Victoria</option><option value="loss">Derrota</option></select></label><label class="field"><span>Marcador propio</span><input type="number" name="team_score" min="0" required></label><label class="field"><span>Marcador rival</span><input type="number" name="opponent_score" min="0" required></label></div><div class="field-row"><label class="field grow"><span>Mapa</span><select name="map_id" required>${S.maps.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></label><label class="field grow"><span>Composición</span><select name="composition_id"><option value="">Sin composición</option>${S.comps.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></label></div><label class="field"><span>Notas</span><textarea name="notes" rows="3"></textarea></label><label class="field"><span>Imagen del resultado</span><input type="file" name="result_image" accept="image/png,image/jpeg,image/webp"></label><div class="match-stats-head"><strong>Jugador</strong><span>Agente</span><span>ACS</span><span>K</span><span>D</span><span>A</span><span>FB</span><span>Pl</span><span>Def</span></div><div class="match-player-stats">${playerRows}</div><div class="modal-foot"><button type="button" class="btn ghost" data-action="close-modal">Cancelar</button><button class="btn primary">Guardar partida</button></div></form>`;
+  $('#modal').showModal();
+}
+async function uploadMatchImage(file) {
+  if (!file?.size) return null;
+  if (file.size > 5 * 1024 * 1024) throw new Error('La imagen no puede superar 5 MB.');
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const path = `${Date.now()}-${crypto.randomUUID()}.${ext}`;
+  const { error } = await sb.storage.from('match-results').upload(path, file, { upsert: false });
+  if (error) throw error;
+  return sb.storage.from('match-results').getPublicUrl(path).data.publicUrl;
 }
 
 // ---------- vista: mapas y composiciones
@@ -1261,6 +1359,12 @@ async function onClick(e) {
     case 'calendar-next': changeCalendarMonth(1); break;
     case 'new-calendar-event': openCalendarEditor(); break;
     case 'open-attendance': openAttendancePoll(); break;
+    case 'new-match': openMatchEditor(); break;
+    case 'stats-player': S.statsPlayerId = id; writePref('stats-player', id); render(); break;
+    case 'delete-match': {
+      if (!confirm('¿Eliminar esta partida y todas sus estadísticas?')) return;
+      await mutate(sb.from('matches').delete().eq('id', id), 'Partida eliminada'); break;
+    }
     case 'attendance-vote': {
       const { error } = await sb.rpc('vote_attendance', { p_option_id: id, p_choice: el.dataset.choice });
       if (error) toast(friendlyError(error), 'err'); else { toast('Voto guardado'); await refresh(); }
@@ -1360,6 +1464,19 @@ async function mutate(query, okMsg) {
 }
 
 async function onChange(e) {
+  const statsFilter = e.target.closest('[data-stats-filter]');
+  if (statsFilter) {
+    if (statsFilter.dataset.statsFilter === 'type') { S.statsType = statsFilter.value; writePref('stats-type', S.statsType); }
+    if (statsFilter.dataset.statsFilter === 'season') { S.statsSeason = statsFilter.value; writePref('stats-season', S.statsSeason); }
+    if (statsFilter.dataset.statsFilter === 'player') { S.statsPlayerId = Number(statsFilter.value) || null; writePref('stats-player', S.statsPlayerId || ''); }
+    render(); return;
+  }
+  const matchType = e.target.closest('[data-match-type]');
+  if (matchType) {
+    $('[data-premier-event]', $('#modal')).hidden = matchType.value !== 'premier';
+    $('[data-ranked-date]', $('#modal')).hidden = matchType.value !== 'ranked';
+    return;
+  }
   const calendarType = e.target.closest('[data-calendar-type]');
   if (calendarType) {
     const form = calendarType.closest('form');
@@ -1482,6 +1599,23 @@ async function onSubmit(e) {
       });
       if (error) return toast(friendlyError(error), 'err');
       $('#modal').close(); toast('Votación abierta'); await refresh(); break;
+    }
+    case 'save-match': {
+      const type = String(fd.get('match_type'));
+      const eventId = type === 'premier' ? Number(fd.get('calendar_event_id')) : null;
+      const event = eventId ? byId(S.calendarEvents, eventId) : null;
+      const playedAt = type === 'premier' ? event?.start_date : String(fd.get('played_at'));
+      if (!playedAt) return toast('Selecciona una fecha o evento válido.', 'err');
+      try {
+        const imageUrl = await uploadMatchImage(form.elements.result_image.files[0]);
+        const { data: match, error } = await sb.from('matches').insert({ match_type: type, calendar_event_id: eventId, played_at: playedAt, result: String(fd.get('result')), team_score: Number(fd.get('team_score')), opponent_score: Number(fd.get('opponent_score')), map_id: Number(fd.get('map_id')), composition_id: fd.get('composition_id') ? Number(fd.get('composition_id')) : null, notes: String(fd.get('notes') || '').trim() || null, result_image_url: imageUrl, created_by: S.session.user.id }).select('id').single();
+        if (error) throw error;
+        const stats = S.players.map((p) => ({ match_id: match.id, player_id: p.id, agent_id: Number(fd.get(`agent_${p.id}`)), acs: Number(fd.get(`acs_${p.id}`) || 0), kills: Number(fd.get(`kills_${p.id}`) || 0), deaths: Number(fd.get(`deaths_${p.id}`) || 0), assists: Number(fd.get(`assists_${p.id}`) || 0), first_bloods: Number(fd.get(`first_bloods_${p.id}`) || 0), plants: Number(fd.get(`plants_${p.id}`) || 0), defuses: Number(fd.get(`defuses_${p.id}`) || 0) })).filter((r) => r.agent_id);
+        const { error: statsError } = await sb.from('match_player_stats').insert(stats);
+        if (statsError) { await sb.from('matches').delete().eq('id', match.id); throw statsError; }
+        $('#modal').close(); toast('Partida guardada'); await refresh();
+      } catch (error) { toast(friendlyError(error), 'err'); }
+      break;
     }
     case 'save-calendar-event': {
       const type = String(fd.get('type'));
