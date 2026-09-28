@@ -866,8 +866,7 @@ function viewMaps() {
   return `
     <section>
       <div class="chips" role="tablist">${chips}</div>
-      <div class="map-stats-toolbar"><label class="field"><span>Tipo de partida</span><select data-map-stats-filter="type"><option value="premier" ${S.mapStatsType === 'premier' ? 'selected' : ''}>Premier</option><option value="ranked" ${S.mapStatsType === 'ranked' ? 'selected' : ''}>Ranked</option><option value="all" ${S.mapStatsType === 'all' ? 'selected' : ''}>Premier + Ranked</option></select></label><label class="field"><span>Temporada</span><select data-map-stats-filter="season"><option value="all">Todas</option>${seasons.map((season) => `<option value="${season.id}" ${String(season.id) === String(S.mapStatsSeason) ? 'selected' : ''}>${esc(season.title)}</option>`).join('')}</select></label></div>
-      <div class="map-hero ${mapImage ? 'has-image' : ''}">
+            <div class="map-hero ${mapImage ? 'has-image' : ''}">
         ${mapImage ? `<img class="map-image" src="${esc(mapImage)}" alt="Vista del mapa ${esc(map?.name ?? '')}" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.map-hero').classList.remove('has-image'); this.remove()">` : ''}
         <div class="map-hero-shade"></div>
         <div class="map-head">
@@ -879,6 +878,7 @@ function viewMaps() {
           </div>` : ''}
         </div>
       </div>
+      <div class="map-stats-toolbar"><label class="field"><span>Tipo de partida</span><select data-map-stats-filter="type"><option value="premier" ${S.mapStatsType === 'premier' ? 'selected' : ''}>Premier</option><option value="ranked" ${S.mapStatsType === 'ranked' ? 'selected' : ''}>Ranked</option><option value="all" ${S.mapStatsType === 'all' ? 'selected' : ''}>Premier + Ranked</option></select></label><label class="field"><span>Temporada</span><select data-map-stats-filter="season"><option value="all">Todas</option>${seasons.map((season) => `<option value="${season.id}" ${String(season.id) === String(S.mapStatsSeason) ? 'selected' : ''}>${esc(season.title)}</option>`).join('')}</select></label></div>
       <section class="map-stats-card"><h2>Estadísticas de ${esc(map?.name ?? '')}</h2>${resultStatsMarkup(mapStats)}</section>
       ${comps.length
       ? `<div class="comp-sections">${COMP_STATUS_ORDER.map((status) => {
