@@ -587,7 +587,7 @@ function aggregateRows(rows, keyField, lookup, matches) {
   }
   return [...grouped.entries()].map(([id, list]) => {
     const relatedMatches = matches.filter((m) => list.some((r) => r.match_id === m.id));
-    return { id, name: lookup(id)?.name ?? 'Desconocido', games: list.length, performanceScore: avg(list, 'acs'), kills: sum(list, 'kills'), deaths: sum(list, 'deaths'), assists: sum(list, 'assists'), trades: sum(list, 'trades'), wins: relatedMatches.filter((m) => m.result === 'win').length };
+    return { id, name: lookup(id)?.name ?? 'Desconocido', games: relatedMatches.length, performanceScore: avg(list, 'acs'), kills: sum(list, 'kills'), deaths: sum(list, 'deaths'), assists: sum(list, 'assists'), trades: sum(list, 'trades'), wins: relatedMatches.filter((m) => m.result === 'win').length };
   }).sort((a, b) => b.games - a.games || b.performanceScore - a.performanceScore);
 }
 function statsTable(title, rows) {

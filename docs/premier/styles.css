@@ -1760,3 +1760,8 @@ dialog.stats-dialog {
 .stats-team-maps .stats-card {
   margin-bottom: 0;
 }
+
+/* Separacion uniforme entre el detalle por mapa y el historial */
+.stats-player-detail+.matches-list {
+  margin-top: 1rem;
+}
