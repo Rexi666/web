@@ -1732,3 +1732,31 @@ dialog.stats-dialog {
 .match-card.draw strong {
   color: var(--accent);
 }
+
+/* Ajustes de detalle de jugador e historial */
+.stats-player-tables {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.stats-player-tables .stats-card {
+  margin-bottom: 0;
+}
+
+.match-card-actions {
+  display: flex !important;
+  align-items: center;
+  gap: .4rem;
+  margin-left: auto;
+}
+
+/* Resumen por mapa en la vista de todos los jugadores */
+.stats-team-maps {
+  margin: 1rem 0;
+}
+
+.stats-team-maps .stats-card {
+  margin-bottom: 0;
+}

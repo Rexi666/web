@@ -603,7 +603,7 @@ function playerSummary(player, matches) {
     const names = S.agents.filter((a) => a.active && (S.pool.get(key(player.id, a.id)) ?? null) === level).map((a) => a.name);
     const info = lvInfo(level); return names.length ? `<div class="pool-summary"><span class="lv sm ${info.cls}">${info.short}</span><strong>${info.label}</strong><span>${esc(names.join(', '))}</span></div>` : '';
   }).join('');
-  return `<div class="stats-player-detail"><div class="stats-card"><h2>${esc(player.name)}</h2>${metricCards(rows, playedMatches)}</div><section class="stats-card"><h2>Agent pool</h2>${pool || '<p class="hint">Sin valoraciones.</p>'}</section>${statsTable('Agentes jugados', agentRows)}${statsTable('Mapas', mapRows)}</div>`;
+  return `<div class="stats-player-detail"><div class="stats-card"><h2>${esc(player.name)}</h2>${metricCards(rows, playedMatches)}</div><section class="stats-card"><h2>Agent pool</h2>${pool || '<p class="hint">Sin valoraciones.</p>'}</section><div class="stats-player-tables">${statsTable('Agentes jugados', agentRows)}${statsTable('Mapas', mapRows)}</div></div>`;
 }
 function viewStatistics() {
   const matches = filteredMatches();
@@ -614,11 +614,21 @@ function viewStatistics() {
     const pMatches = matches.filter((m) => rows.some((r) => r.match_id === m.id));
     return `<button class="stats-player-card" data-action="stats-player" data-id="${player.id}"><strong>${esc(player.name)}</strong><span>${pMatches.length} partidas · ${fmt(avg(rows, 'acs'))} Performance Score</span></button>`;
   }).join('');
-  return `<section class="statistics-view"><div class="stats-head"><div><h1>Estadísticas</h1><p class="hint">Rendimiento del equipo en Premier y Ranked.</p></div>${isAdmin() ? '<button class="btn primary" data-action="new-match">Registrar partida</button>' : ''}</div><div class="stats-filters"><label class="field"><span>Tipo</span><select data-stats-filter="type"><option value="premier" ${S.statsType === 'premier' ? 'selected' : ''}>Premier</option><option value="ranked" ${S.statsType === 'ranked' ? 'selected' : ''}>Ranked</option><option value="all" ${S.statsType === 'all' ? 'selected' : ''}>Premier + Ranked</option></select></label><label class="field"><span>Temporada</span><select data-stats-filter="season"><option value="all">Todas</option>${seasons.map((x) => `<option value="${x.id}" ${String(x.id) === String(S.statsSeason) ? 'selected' : ''}>${esc(x.title)}</option>`).join('')}</select></label><label class="field grow"><span>Jugador</span><select data-stats-filter="player"><option value="">Todos los jugadores</option>${S.players.map((p) => `<option value="${p.id}" ${p.id === S.statsPlayerId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label></div>${selected ? playerSummary(selected, matches) : `<div class="stats-team-summary">${metricCards(S.matchStats.filter((r) => matches.some((m) => m.id === r.match_id)), matches)}<div class="stats-player-list">${list || empty('No hay jugadores.')}</div></div>`}<section class="stats-card matches-list"><h2>Partidas (${matches.length})</h2>${matches.map(matchCard).join('') || '<p class="hint">No hay partidas con estos filtros.</p>'}</section></section>`;
+  const allRows = S.matchStats.filter((row) => matches.some((match) => match.id === row.match_id));
+  const teamMapRows = aggregateRows(
+    allRows.map((row) => ({
+      ...row,
+      map_id: byId(S.matches, row.match_id)?.map_id,
+    })).filter((row) => row.map_id),
+    'map_id',
+    (id) => byId(S.maps, id),
+    matches,
+  );
+  return `<section class="statistics-view"><div class="stats-head"><div><h1>Estadísticas</h1><p class="hint">Rendimiento del equipo en Premier y Ranked.</p></div>${isAdmin() ? '<button class="btn primary" data-action="new-match">Registrar partida</button>' : ''}</div><div class="stats-filters"><label class="field"><span>Tipo</span><select data-stats-filter="type"><option value="premier" ${S.statsType === 'premier' ? 'selected' : ''}>Premier</option><option value="ranked" ${S.statsType === 'ranked' ? 'selected' : ''}>Ranked</option><option value="all" ${S.statsType === 'all' ? 'selected' : ''}>Premier + Ranked</option></select></label><label class="field"><span>Temporada</span><select data-stats-filter="season"><option value="all">Todas</option>${seasons.map((x) => `<option value="${x.id}" ${String(x.id) === String(S.statsSeason) ? 'selected' : ''}>${esc(x.title)}</option>`).join('')}</select></label><label class="field grow"><span>Jugador</span><select data-stats-filter="player"><option value="">Todos los jugadores</option>${S.players.map((p) => `<option value="${p.id}" ${p.id === S.statsPlayerId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label></div>${selected ? playerSummary(selected, matches) : `<div class="stats-team-summary">${metricCards(allRows, matches)}<div class="stats-player-list">${list || empty('No hay jugadores.')}</div><div class="stats-team-maps">${statsTable('Estadísticas por mapa', teamMapRows)}</div></div>`}<section class="stats-card matches-list"><h2>Partidas (${matches.length})</h2>${matches.map(matchCard).join('') || '<p class="hint">No hay partidas con estos filtros.</p>'}</section></section>`;
 }
 function matchCard(match) {
   const map = byId(S.maps, match.map_id), comp = byId(S.comps, match.composition_id);
-  return `<article class="match-card ${match.result}"><div><strong>${matchResultLabel(match.result)} · ${match.team_score}-${match.opponent_score}</strong><span>${match.match_type === 'premier' ? 'Premier' : 'Ranked'} · ${match.played_at} · ${esc(map?.name ?? '')}${comp ? ` · ${esc(comp.name)}` : ''}</span></div>${match.result_image_url ? `<a class="btn sm" href="${esc(match.result_image_url)}" target="_blank" rel="noopener">Imagen</a>` : ''}${isAdmin() ? `<button class="btn sm ghost danger" data-action="delete-match" data-id="${match.id}">Borrar</button>` : ''}</article>`;
+  return `<article class="match-card ${match.result}"><div><strong>${matchResultLabel(match.result)} · ${match.team_score}-${match.opponent_score}</strong><span>${match.match_type === 'premier' ? 'Premier' : 'Ranked'} · ${match.played_at} · ${esc(map?.name ?? '')}${comp ? ` · ${esc(comp.name)}` : ''}</span></div><div class="match-card-actions">${match.result_image_url ? `<a class="btn sm" href="${esc(match.result_image_url)}" target="_blank" rel="noopener">Imagen</a>` : ''}${isAdmin() ? `<button class="btn sm" data-action="edit-match" data-id="${match.id}">Editar</button><button class="btn sm ghost danger" data-action="delete-match" data-id="${match.id}">Borrar</button>` : ''}</div></article>`;
 }
 /* Sustituye openMatchEditor(), añade updateMatchEditorDependencies(),
    añade los dos bloques indicados a onChange(), y usa resultLabel en matchCard(). */
@@ -688,67 +698,84 @@ function fillMatchLineupFromComposition(compositionId) {
   });
 }
 
-function openMatchEditor() {
+function openMatchEditor(match = null) {
+  const editing = Boolean(match);
+  const existingStats = editing
+    ? S.matchStats.filter((row) => row.match_id === match.id)
+    : [];
   const premierEvents = S.calendarEvents.filter((event) => event.type === 'play_day');
   const activeAgents = S.agents.filter((agent) => agent.active);
-
   const playerOptions = S.players.map((player) =>
     `<option value="${player.id}">${esc(player.name)}</option>`).join('');
   const agentOptions = activeAgents.map((agent) =>
     `<option value="${agent.id}">${esc(agent.name)}</option>`).join('');
-
-  const playerRows = [1, 2, 3, 4, 5].map((slot) => `
-    <div class="match-player-row" data-match-player-row data-slot="${slot}">
-      <select name="player_${slot}" data-match-player required>
-        <option value="">Jugador…</option>${playerOptions}
-      </select>
-      <select name="agent_${slot}" data-match-agent required>
-        <option value="">Agente…</option>${agentOptions}
-      </select>
-      ${['acs', 'kills', 'deaths', 'assists', 'first_bloods', 'trades', 'plants', 'defuses']
-      .map((field) => `<input type="number" min="0" name="${field}_${slot}" value="0" required>`).join('')}
-    </div>`).join('');
-
+  const statFields = ['acs', 'kills', 'deaths', 'assists', 'trades', 'first_bloods', 'plants', 'defuses'];
+  const playerRows = [1, 2, 3, 4, 5].map((slot, index) => {
+    const stat = existingStats[index] ?? null;
+    return `
+      <div class="match-player-row" data-match-player-row data-slot="${slot}">
+        <select name="player_${slot}" data-match-player required>
+          <option value="">Jugador…</option>${playerOptions}
+        </select>
+        <select name="agent_${slot}" data-match-agent required>
+          <option value="">Agente…</option>${agentOptions}
+        </select>
+        ${statFields.map((field) => `<input type="number" min="0" name="${field}_${slot}" value="${Number(stat?.[field] ?? 0)}" required>`).join('')}
+      </div>`;
+  }).join('');
   $('#modal').classList.add('stats-dialog');
   $('#modal').innerHTML = `
-    <form class="modal-body" data-form="save-match">
-      <div class="modal-head"><h2>Registrar partida</h2>
+    <form class="modal-body" data-form="save-match" data-match-id="${match?.id ?? ''}" data-current-image="${esc(match?.result_image_url ?? '')}">
+      <div class="modal-head"><h2>${editing ? 'Editar partida' : 'Registrar partida'}</h2>
         <button type="button" class="icon-btn" data-action="close-modal">✕</button></div>
       <div class="field-row">
         <label class="field grow"><span>Tipo</span><select name="match_type" data-match-type>
-          <option value="premier">Premier</option><option value="ranked">Ranked</option>
+          <option value="premier" ${match?.match_type === 'premier' || !match ? 'selected' : ''}>Premier</option>
+          <option value="ranked" ${match?.match_type === 'ranked' ? 'selected' : ''}>Ranked</option>
         </select></label>
         <label class="field grow" data-premier-event><span>Evento del calendario</span>
           <select name="calendar_event_id">${premierEvents.map((event) =>
-    `<option value="${event.id}">${esc(event.title)} · ${event.start_date}</option>`).join('')}</select></label>
+    `<option value="${event.id}" ${event.id === match?.calendar_event_id ? 'selected' : ''}>${esc(event.title)} · ${event.start_date}</option>`).join('')}</select></label>
         <label class="field grow" data-ranked-date hidden><span>Fecha</span>
-          <input type="date" name="played_at" value="${localDateKey(new Date())}"></label>
+          <input type="date" name="played_at" value="${match?.played_at ?? localDateKey(new Date())}"></label>
       </div>
       <div class="field-row">
-        <label class="field grow"><span>Resultado</span><select name="result">
-          <option value="win">Victoria</option><option value="loss">Derrota</option>
-        </select></label>
-        <label class="field"><span>Marcador propio</span><input type="number" name="team_score" min="0" required></label>
-        <label class="field"><span>Marcador rival</span><input type="number" name="opponent_score" min="0" required></label>
+        <label class="field grow"><span>Resultado</span><select name="result"></select></label>
+        <label class="field"><span>Marcador propio</span><input type="number" name="team_score" min="0" required value="${match?.team_score ?? ''}"></label>
+        <label class="field"><span>Marcador rival</span><input type="number" name="opponent_score" min="0" required value="${match?.opponent_score ?? ''}"></label>
       </div>
       <div class="field-row">
         <label class="field grow"><span>Mapa</span><select name="map_id" data-match-map required>
-          ${S.maps.map((map) => `<option value="${map.id}">${esc(map.name)}</option>`).join('')}</select></label>
+          ${S.maps.map((map) => `<option value="${map.id}" ${map.id === match?.map_id ? 'selected' : ''}>${esc(map.name)}</option>`).join('')}</select></label>
         <label class="field grow"><span>Composición</span><select name="composition_id" data-match-composition>
           <option value="">Sin composición</option></select></label>
       </div>
-      <label class="field"><span>Notas</span><textarea name="notes" rows="3"></textarea></label>
-      <label class="field"><span>Imagen del resultado</span>
+      <label class="field"><span>Notas</span><textarea name="notes" rows="3">${esc(match?.notes ?? '')}</textarea></label>
+      <label class="field"><span>${editing ? 'Sustituir imagen del resultado (opcional)' : 'Imagen del resultado'}</span>
         <input type="file" name="result_image" accept="image/png,image/jpeg,image/webp"></label>
-      <div class="match-stats-head"><strong>Jugador</strong><span>Agente</span><span>Performance Score</span><span>Kills</span><span>Muertes</span><span>Asistencias</span><span>First Bloods</span><span>Trades</span><span>Plantes</span><span>Defuses</span></div>
+      ${editing && match?.result_image_url ? '<p class="hint">Si no eliges otra imagen, se conservará la actual.</p>' : ''}
+      <div class="match-stats-head"><strong>Jugador</strong><span>Agente</span><span>Performance Score</span><span>Kills</span><span>Muertes</span><span>Asistencias</span><span>Trades</span><span>First Bloods</span><span>Plantes</span><span>Defuses</span></div>
       <div class="match-player-stats">${playerRows}</div>
       <div class="modal-foot"><button type="button" class="btn ghost" data-action="close-modal">Cancelar</button>
-        <button class="btn primary">Guardar partida</button></div>
+        <button class="btn primary">${editing ? 'Guardar cambios' : 'Guardar partida'}</button></div>
     </form>`;
+
   updateMatchEditorDependencies();
+  const resultSelect = $('#modal').querySelector('select[name="result"]');
+  resultSelect.value = match?.result ?? 'win';
+  const compositionSelect = $('[data-match-composition]', $('#modal'));
+  compositionSelect.value = match?.composition_id ?? '';
+
+  if (editing) {
+    const rows = [...document.querySelectorAll('[data-match-player-row]')];
+    rows.forEach((row, index) => {
+      const stat = existingStats[index];
+      row.querySelector('[data-match-player]').value = stat?.player_id ?? '';
+      row.querySelector('[data-match-agent]').value = stat?.agent_id ?? '';
+    });
+  }
   $('#modal').showModal();
 }
-
 /* Añadir al principio de onChange(e), antes de calendarType: */
 function matchEditorChangeHandler(e) {
   if (e.target.closest('[data-match-type]') || e.target.closest('[data-match-map]')) {
@@ -773,8 +800,8 @@ function buildMatchStats(fd, matchId) {
     kills: Number(fd.get(`kills_${slot}`) || 0),
     deaths: Number(fd.get(`deaths_${slot}`) || 0),
     assists: Number(fd.get(`assists_${slot}`) || 0),
-    first_bloods: Number(fd.get(`first_bloods_${slot}`) || 0),
     trades: Number(fd.get(`trades_${slot}`) || 0),
+    first_bloods: Number(fd.get(`first_bloods_${slot}`) || 0),
     plants: Number(fd.get(`plants_${slot}`) || 0),
     defuses: Number(fd.get(`defuses_${slot}`) || 0),
   })).filter((row) => row.player_id && row.agent_id);
@@ -1519,6 +1546,7 @@ async function onClick(e) {
     case 'new-calendar-event': openCalendarEditor(); break;
     case 'open-attendance': openAttendancePoll(); break;
     case 'new-match': openMatchEditor(); break;
+    case 'edit-match': openMatchEditor(byId(S.matches, id)); break;
     case 'stats-player': S.statsPlayerId = id; writePref('stats-player', id); render(); break;
     case 'delete-match': {
       if (!confirm('¿Eliminar esta partida y todas sus estadísticas?')) return;
@@ -1755,28 +1783,58 @@ async function onSubmit(e) {
       $('#modal').close(); toast('Votación abierta'); await refresh(); break;
     }
     case 'save-match': {
+      const matchId = Number(form.dataset.matchId) || null;
       const type = String(fd.get('match_type'));
       const eventId = type === 'premier' ? Number(fd.get('calendar_event_id')) : null;
       const event = eventId ? byId(S.calendarEvents, eventId) : null;
       const playedAt = type === 'premier' ? event?.start_date : String(fd.get('played_at'));
       if (!playedAt) return toast('Selecciona una fecha o evento válido.', 'err');
       try {
-        const imageUrl = await uploadMatchImage(form.elements.result_image.files[0]);
-        const { data: match, error } = await sb.from('matches').insert({ match_type: type, calendar_event_id: eventId, played_at: playedAt, result: String(fd.get('result')), team_score: Number(fd.get('team_score')), opponent_score: Number(fd.get('opponent_score')), map_id: Number(fd.get('map_id')), composition_id: fd.get('composition_id') ? Number(fd.get('composition_id')) : null, notes: String(fd.get('notes') || '').trim() || null, result_image_url: imageUrl, created_by: S.session.user.id }).select('id').single();
-        if (error) throw error;
-        const stats = buildMatchStats(fd, match.id);
-        if (stats.length !== 5) {
-          await sb.from('matches').delete().eq('id', match.id);
-          return toast('Debes seleccionar los 5 jugadores y sus agentes.', 'err');
+        const newFile = form.elements.result_image.files[0];
+        const imageUrl = newFile?.size
+          ? await uploadMatchImage(newFile)
+          : (form.dataset.currentImage || null);
+        const payload = {
+          match_type: type,
+          calendar_event_id: eventId,
+          played_at: playedAt,
+          result: String(fd.get('result')),
+          team_score: Number(fd.get('team_score')),
+          opponent_score: Number(fd.get('opponent_score')),
+          map_id: Number(fd.get('map_id')),
+          composition_id: fd.get('composition_id') ? Number(fd.get('composition_id')) : null,
+          notes: String(fd.get('notes') || '').trim() || null,
+          result_image_url: imageUrl,
+          updated_at: new Date().toISOString(),
+        };
+        let savedMatchId = matchId;
+        if (matchId) {
+          const { error } = await sb.from('matches').update(payload).eq('id', matchId);
+          if (error) throw error;
+        } else {
+          const { data: match, error } = await sb.from('matches')
+            .insert({ ...payload, created_by: S.session.user.id })
+            .select('id').single();
+          if (error) throw error;
+          savedMatchId = match.id;
         }
+        const stats = buildMatchStats(fd, savedMatchId);
+        if (stats.length !== 5) return toast('Debes seleccionar los 5 jugadores y sus agentes.', 'err');
         if (new Set(stats.map((row) => row.player_id)).size !== stats.length) {
-          await sb.from('matches').delete().eq('id', match.id);
           return toast('No puedes repetir jugadores en una partida.', 'err');
         }
+        if (matchId) {
+          const { error: deleteError } = await sb.from('match_player_stats').delete().eq('match_id', matchId);
+          if (deleteError) throw deleteError;
+        }
         const { error: statsError } = await sb.from('match_player_stats').insert(stats);
-        if (statsError) { await sb.from('matches').delete().eq('id', match.id); throw statsError; }
-        $('#modal').close(); toast('Partida guardada'); await refresh();
-      } catch (error) { toast(friendlyError(error), 'err'); }
+        if (statsError) throw statsError;
+        $('#modal').close();
+        toast(matchId ? 'Partida actualizada' : 'Partida guardada');
+        await refresh();
+      } catch (error) {
+        toast(friendlyError(error), 'err');
+      }
       break;
     }
     case 'save-calendar-event': {
