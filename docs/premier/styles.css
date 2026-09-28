@@ -1714,3 +1714,21 @@ dialog.stats-dialog {
     width: 100%
   }
 }
+
+/* Estadísticas ampliadas: Performance Score, Trades y nombres completos */
+.match-stats-head,
+.match-player-row {
+  grid-template-columns:
+    minmax(135px, 1.15fr) minmax(135px, 1.15fr) minmax(125px, .9fr) repeat(3, minmax(78px, .65fr)) minmax(105px, .8fr) minmax(78px, .65fr) minmax(78px, .65fr) minmax(78px, .65fr);
+  min-width: 1120px;
+}
+
+.match-stats-head span,
+.match-stats-head strong {
+  white-space: normal;
+  line-height: 1.15;
+}
+
+.match-card.draw strong {
+  color: var(--accent);
+}
