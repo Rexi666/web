@@ -1765,3 +1765,84 @@ dialog.stats-dialog {
 .stats-player-detail+.matches-list {
   margin-top: 1rem;
 }
+
+/* Estadisticas en la pestana Mapas */
+.map-stats-toolbar {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin: .75rem 0 1rem;
+  padding: .85rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.map-stats-toolbar .field {
+  min-width: 190px;
+}
+
+.map-stats-card {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.map-stats-card h2 {
+  margin-bottom: .75rem;
+}
+
+.map-result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .55rem;
+}
+
+.map-result-stats>div {
+  display: grid;
+  gap: .15rem;
+  padding: .6rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--ink);
+}
+
+.map-result-stats span {
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.map-result-stats strong {
+  font-family: var(--display);
+  font-size: 1.05rem;
+}
+
+.comp-match-stats {
+  padding-top: .7rem;
+  border-top: 1px solid var(--line);
+}
+
+.comp-match-stats .map-result-stats {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.comp-match-stats .map-result-stats>div {
+  padding: .5rem;
+}
+
+.comp-match-stats .map-result-stats strong {
+  font-size: .9rem;
+}
+
+@media (max-width:640px) {
+  .map-stats-toolbar .field {
+    width: 100%;
+  }
+
+  .map-result-stats,
+  .comp-match-stats .map-result-stats {
+    grid-template-columns: 1fr;
+  }
+}

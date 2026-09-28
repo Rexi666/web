@@ -35,6 +35,8 @@ const S = {
   matches: [], matchStats: [],
   statsType: readPref('stats-type') || 'premier', statsSeason: readPref('stats-season') || 'all',
   statsPlayerId: Number(readPref('stats-player')) || null, matchDraft: null,
+  mapStatsType: readPref('map-stats-type') || 'premier',
+  mapStatsSeason: readPref('map-stats-season') || 'all',
   tab: readPref('tab') || 'pool',
   mapId: Number(readPref('map')) || null,
   draft: null, // composición en edición
@@ -823,11 +825,32 @@ async function uploadMatchImage(file) {
 }
 
 // ---------- vista: mapas y composiciones
+function filteredMapMatches() {
+  return S.matches.filter((match) => {
+    if (S.mapStatsType !== 'all' && match.match_type !== S.mapStatsType) return false;
+    if (S.mapStatsSeason === 'all') return true;
+    const season = byId(S.calendarEvents, Number(S.mapStatsSeason));
+    return season && match.played_at >= season.start_date && match.played_at <= season.end_date;
+  });
+}
+function resultsSummary(matches) {
+  const games = matches.length;
+  const wins = matches.filter((match) => match.result === 'win').length;
+  const losses = matches.filter((match) => match.result === 'loss').length;
+  const draws = matches.filter((match) => match.result === 'draw').length;
+  return { games, wins, losses, draws, winRate: games ? wins / games * 100 : 0 };
+}
+function resultStatsMarkup(stats, usageLabel = 'Partidas jugadas') {
+  return `<div class="map-result-stats"><div><span>${usageLabel}</span><strong>${stats.games}</strong></div><div><span>Victorias / Derrotas${stats.draws ? ' / Empates' : ''}</span><strong>${stats.wins} / ${stats.losses}${stats.draws ? ` / ${stats.draws}` : ''}</strong></div><div><span>WIN</span><strong>${fmt(stats.winRate)}%</strong></div></div>`;
+}
 function viewMaps() {
   if (!S.maps.length) return empty('No hay mapas. Añádelos en Admin.');
   const sorted = [...S.maps].sort((a, b) => (b.in_pool - a.in_pool) || a.name.localeCompare(b.name));
   const map = byId(S.maps, S.mapId);
   const comps = S.comps.filter((c) => c.map_id === S.mapId);
+  const seasons = statsSeasons();
+  const mapMatches = filteredMapMatches().filter((match) => match.map_id === S.mapId);
+  const mapStats = resultsSummary(mapMatches);
 
   const chips = sorted.map((m) => {
     const n = S.comps.filter((c) => c.map_id === m.id).length;
@@ -843,6 +866,7 @@ function viewMaps() {
   return `
     <section>
       <div class="chips" role="tablist">${chips}</div>
+      <div class="map-stats-toolbar"><label class="field"><span>Tipo de partida</span><select data-map-stats-filter="type"><option value="premier" ${S.mapStatsType === 'premier' ? 'selected' : ''}>Premier</option><option value="ranked" ${S.mapStatsType === 'ranked' ? 'selected' : ''}>Ranked</option><option value="all" ${S.mapStatsType === 'all' ? 'selected' : ''}>Premier + Ranked</option></select></label><label class="field"><span>Temporada</span><select data-map-stats-filter="season"><option value="all">Todas</option>${seasons.map((season) => `<option value="${season.id}" ${String(season.id) === String(S.mapStatsSeason) ? 'selected' : ''}>${esc(season.title)}</option>`).join('')}</select></label></div>
       <div class="map-hero ${mapImage ? 'has-image' : ''}">
         ${mapImage ? `<img class="map-image" src="${esc(mapImage)}" alt="Vista del mapa ${esc(map?.name ?? '')}" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.map-hero').classList.remove('has-image'); this.remove()">` : ''}
         <div class="map-hero-shade"></div>
@@ -855,6 +879,7 @@ function viewMaps() {
           </div>` : ''}
         </div>
       </div>
+      <section class="map-stats-card"><h2>Estadísticas de ${esc(map?.name ?? '')}</h2>${resultStatsMarkup(mapStats)}</section>
       ${comps.length
       ? `<div class="comp-sections">${COMP_STATUS_ORDER.map((status) => {
         const group = comps.filter((c) => (c.status ?? 'active') === status);
@@ -870,6 +895,7 @@ function viewMaps() {
 
 function compCard(c) {
   const slots = slotsOf(c.id);
+  const compositionStats = resultsSummary(filteredMapMatches().filter((match) => match.composition_id === c.id));
   const warnings = [];
   const roleCount = {};
 
@@ -905,6 +931,7 @@ function compCard(c) {
         </div>` : ''}
       </header>
       <ul class="slots">${rows}</ul>
+      <div class="comp-match-stats">${resultStatsMarkup(compositionStats, 'Veces usada')}</div>
       ${summary ? `<div class="roles">${summary}</div>` : ''}
       ${warnings.length ? `<p class="warn">${warnings.map(esc).join('. ')}.</p>` : ''}
       ${c.notes ? `<p class="notes">${esc(c.notes)}</p>` : ''}
@@ -1651,6 +1678,12 @@ async function mutate(query, okMsg) {
 }
 
 async function onChange(e) {
+  const mapStatsFilter = e.target.closest('[data-map-stats-filter]');
+  if (mapStatsFilter) {
+    if (mapStatsFilter.dataset.mapStatsFilter === 'type') { S.mapStatsType = mapStatsFilter.value; writePref('map-stats-type', S.mapStatsType); }
+    if (mapStatsFilter.dataset.mapStatsFilter === 'season') { S.mapStatsSeason = mapStatsFilter.value; writePref('map-stats-season', S.mapStatsSeason); }
+    render(); return;
+  }
   const statsFilter = e.target.closest('[data-stats-filter]');
   if (statsFilter) {
     if (statsFilter.dataset.statsFilter === 'type') { S.statsType = statsFilter.value; writePref('stats-type', S.statsType); }
