@@ -294,6 +294,100 @@ async def composition_choices(
     return choices
 
 
+
+async def statistics_map_choices(
+    interaction: discord.Interaction,
+    current: str,
+) -> list[app_commands.Choice[str]]:
+    """Autocompletado de mapas para /estadisticas, incluidos mapas fuera del pool."""
+    result = await db(
+        lambda: supabase.table("maps")
+        .select("id,name")
+        .order("name")
+        .execute()
+    )
+    query = current.casefold().strip()
+    return [
+        app_commands.Choice(name=item["name"][:100], value=str(item["id"]))
+        for item in rows(result)
+        if query in item["name"].casefold()
+    ][:25]
+
+
+async def match_choices(
+    interaction: discord.Interaction,
+    current: str,
+) -> list[app_commands.Choice[str]]:
+    """Sugiere partidas recientes con una etiqueta legible y estable."""
+    matches_result, maps_result, comps_result = await asyncio.gather(
+        db(
+            lambda: supabase.table("matches")
+            .select("id,played_at,match_type,map_id,composition_id,created_at")
+            .order("played_at", desc=True)
+            .order("created_at", desc=True)
+            .limit(100)
+            .execute()
+        ),
+        db(lambda: supabase.table("maps").select("id,name").execute()),
+        db(lambda: supabase.table("compositions").select("id,name").execute()),
+    )
+    maps = {item["id"]: item["name"] for item in rows(maps_result)}
+    compositions = {item["id"]: item["name"] for item in rows(comps_result)}
+    matches = rows(matches_result)
+
+    # El número solo se añade cuando varias partidas comparten fecha, tipo,
+    # mapa y composición. Las más recientes reciben el número menor.
+    totals: dict[tuple[Any, ...], int] = {}
+    for match in matches:
+        key = (
+            match.get("played_at"),
+            match.get("match_type"),
+            match.get("map_id"),
+            match.get("composition_id"),
+        )
+        totals[key] = totals.get(key, 0) + 1
+
+    seen: dict[tuple[Any, ...], int] = {}
+    query = current.casefold().strip()
+    choices: list[app_commands.Choice[str]] = []
+    for match in matches:
+        key = (
+            match.get("played_at"),
+            match.get("match_type"),
+            match.get("map_id"),
+            match.get("composition_id"),
+        )
+        seen[key] = seen.get(key, 0) + 1
+        match_type = "Premier" if match.get("match_type") == "premier" else "Ranked"
+        icon = "🟡" if match.get("match_type") == "premier" else "🔴"
+        label = (
+            f"{icon} {match.get('played_at', 'Sin-fecha')}-{match_type}-"
+            f"{maps.get(match.get('map_id'), 'Sin mapa')}-"
+            f"{compositions.get(match.get('composition_id'), 'Sin composición')}"
+        )
+        if totals[key] > 1:
+            label += f"-{seen[key]}"
+        if query and query not in label.casefold():
+            continue
+        choices.append(
+            app_commands.Choice(name=label[:100], value=str(match["id"]))
+        )
+        if len(choices) == 25:
+            break
+    return choices
+
+
+def safe_ratio(numerator: float, denominator: float) -> float:
+    return numerator / denominator if denominator else 0.0
+
+
+def result_label(result: str | None) -> tuple[str, str]:
+    return {
+        "win": ("Victoria", "✅"),
+        "loss": ("Derrota", "❌"),
+        "draw": ("Empate", "➖"),
+    }.get(result, ("Sin resultado", "▫️"))
+
 MAP_IMAGE_CACHE: dict[str, str] = {}
 MAP_IMAGE_CACHE_LOADED = False
 
@@ -649,6 +743,239 @@ async def composiciones(
         embeds.append(embed)
 
     await send_embeds(interaction, embeds)
+
+
+@bot.tree.command(
+    name="estadisticas",
+    description="Muestra estadísticas de un jugador, un mapa o ambos",
+)
+@app_commands.describe(
+    tipo="Tipo de partidas que quieres incluir",
+    jugador="Jugador que quieres consultar (opcional)",
+    mapa="Mapa que quieres consultar (opcional)",
+)
+@app_commands.choices(
+    tipo=[
+        app_commands.Choice(name="Premier", value="premier"),
+        app_commands.Choice(name="Ranked", value="ranked"),
+        app_commands.Choice(name="Premier + Ranked", value="all"),
+    ]
+)
+@app_commands.autocomplete(
+    jugador=player_choices,
+    mapa=statistics_map_choices,
+)
+async def estadisticas(
+    interaction: discord.Interaction,
+    tipo: app_commands.Choice[str],
+    jugador: str | None = None,
+    mapa: str | None = None,
+) -> None:
+    if jugador is None and mapa is None:
+        await interaction.response.send_message(
+            "Selecciona al menos un jugador o un mapa.",
+            ephemeral=True,
+        )
+        return
+
+    await interaction.response.defer(thinking=True)
+    try:
+        player_id = int(jugador) if jugador is not None else None
+        map_id = int(mapa) if mapa is not None else None
+    except ValueError:
+        await interaction.followup.send(
+            "Selecciona las opciones desde las sugerencias.", ephemeral=True
+        )
+        return
+
+    matches_result, stats_result, players_result, maps_result, agents_result = await asyncio.gather(
+        db(
+            lambda: supabase.table("matches")
+            .select("id,played_at,match_type,result,team_score,opponent_score,map_id")
+            .order("played_at", desc=True)
+            .execute()
+        ),
+        db(lambda: supabase.table("match_player_stats").select("*").execute()),
+        db(lambda: supabase.table("players").select("id,name").execute()),
+        db(lambda: supabase.table("maps").select("id,name").execute()),
+        db(lambda: supabase.table("agents").select("id,name").execute()),
+    )
+    players = {item["id"]: item["name"] for item in rows(players_result)}
+    maps = {item["id"]: item["name"] for item in rows(maps_result)}
+    agents = {item["id"]: item["name"] for item in rows(agents_result)}
+    matches = rows(matches_result)
+    if tipo.value != "all":
+        matches = [
+            match
+            for match in matches
+            if match.get("match_type") == tipo.value
+        ]
+    if map_id is not None:
+        matches = [match for match in matches if match.get("map_id") == map_id]
+    match_ids = {match["id"] for match in matches}
+    stats = [row for row in rows(stats_result) if row["match_id"] in match_ids]
+    if player_id is not None:
+        stats = [row for row in stats if row.get("player_id") == player_id]
+        played_ids = {row["match_id"] for row in stats}
+        matches = [match for match in matches if match["id"] in played_ids]
+
+    title_parts = []
+    if player_id is not None:
+        title_parts.append(players.get(player_id, "Jugador desconocido"))
+    if map_id is not None:
+        title_parts.append(maps.get(map_id, "Mapa desconocido"))
+    title_parts.insert(0, tipo.name)
+    embed = discord.Embed(
+        title="📈 Estadísticas · " + " · ".join(title_parts),
+        color=(
+            discord.Color.gold()
+            if tipo.value == "premier"
+            else discord.Color.red()
+            if tipo.value == "ranked"
+            else discord.Color.blurple()
+        ),
+    )
+    if not matches or not stats:
+        embed.description = "No hay estadísticas para esta selección."
+        await interaction.followup.send(embed=embed)
+        return
+
+    games = len(matches)
+    wins = sum(match.get("result") == "win" for match in matches)
+    losses = sum(match.get("result") == "loss" for match in matches)
+    draws = sum(match.get("result") == "draw" for match in matches)
+    kills = sum(int(row.get("kills") or 0) for row in stats)
+    deaths = sum(int(row.get("deaths") or 0) for row in stats)
+    assists = sum(int(row.get("assists") or 0) for row in stats)
+    rounds = sum(
+        int(match.get("team_score") or 0) + int(match.get("opponent_score") or 0)
+        for match in matches
+    )
+    embed.add_field(name="Partidas", value=str(games), inline=True)
+    embed.add_field(
+        name="Resultados",
+        value=f"{wins} V · {losses} D" + (f" · {draws} E" if draws else ""),
+        inline=True,
+    )
+    embed.add_field(name="WIN", value=f"{safe_ratio(wins, games) * 100:.1f}%", inline=True)
+    embed.add_field(
+        name="Performance Score medio",
+        value=f"{safe_ratio(sum(int(row.get('acs') or 0) for row in stats), len(stats)):.1f}",
+        inline=True,
+    )
+    embed.add_field(name="Kills", value=f"{kills} · {safe_ratio(kills, games):.1f}/partida", inline=True)
+    embed.add_field(name="Muertes", value=f"{deaths} · {safe_ratio(deaths, games):.1f}/partida", inline=True)
+    embed.add_field(name="Asistencias", value=f"{assists} · {safe_ratio(assists, games):.1f}/partida", inline=True)
+    embed.add_field(name="KD", value=f"{safe_ratio(kills, deaths):.2f}", inline=True)
+    embed.add_field(name="Kills/ronda", value=f"{safe_ratio(kills, rounds):.2f}", inline=True)
+    embed.add_field(
+        name="Medias adicionales",
+        value=(
+            f"First Bloods: **{safe_ratio(sum(int(row.get('first_bloods') or 0) for row in stats), games):.1f}**\n"
+            f"Trades: **{safe_ratio(sum(int(row.get('trades') or 0) for row in stats), games):.1f}**\n"
+            f"Plantes: **{safe_ratio(sum(int(row.get('plants') or 0) for row in stats), games):.1f}**\n"
+            f"Defuses: **{safe_ratio(sum(int(row.get('defuses') or 0) for row in stats), games):.1f}**"
+        ),
+        inline=False,
+    )
+
+    agent_counts: dict[int, int] = {}
+    for row in stats:
+        agent_id = row.get("agent_id")
+        if agent_id is not None:
+            agent_counts[agent_id] = agent_counts.get(agent_id, 0) + 1
+    if agent_counts:
+        used = sorted(agent_counts.items(), key=lambda item: (-item[1], agents.get(item[0], "")))
+        embed.add_field(
+            name="Agentes más jugados",
+            value="\n".join(
+                f"• **{agents.get(agent_id, 'Desconocido')}** · {count} partida{'s' if count != 1 else ''}"
+                for agent_id, count in used[:10]
+            ),
+            inline=False,
+        )
+    embed.set_footer(text="Premier Planner · Estadísticas registradas")
+    await interaction.followup.send(embed=embed)
+
+
+@bot.tree.command(
+    name="resumen",
+    description="Muestra el resumen completo de una partida registrada",
+)
+@app_commands.describe(partida="Partida que quieres consultar")
+@app_commands.autocomplete(partida=match_choices)
+async def resumen(
+    interaction: discord.Interaction,
+    partida: str,
+) -> None:
+    await interaction.response.defer(thinking=True)
+    try:
+        match_id = int(partida)
+    except ValueError:
+        await interaction.followup.send(
+            "Selecciona una partida de las sugerencias.", ephemeral=True
+        )
+        return
+
+    match_result, stats_result, players_result, agents_result, maps_result, comps_result = await asyncio.gather(
+        db(lambda: supabase.table("matches").select("*").eq("id", match_id).limit(1).execute()),
+        db(lambda: supabase.table("match_player_stats").select("*").eq("match_id", match_id).execute()),
+        db(lambda: supabase.table("players").select("id,name").execute()),
+        db(lambda: supabase.table("agents").select("id,name").execute()),
+        db(lambda: supabase.table("maps").select("id,name").execute()),
+        db(lambda: supabase.table("compositions").select("id,name").execute()),
+    )
+    found = rows(match_result)
+    if not found:
+        await interaction.followup.send("Esa partida ya no existe.", ephemeral=True)
+        return
+    match = found[0]
+    stats = rows(stats_result)
+    players = {item["id"]: item["name"] for item in rows(players_result)}
+    agents = {item["id"]: item["name"] for item in rows(agents_result)}
+    maps = {item["id"]: item["name"] for item in rows(maps_result)}
+    compositions = {item["id"]: item["name"] for item in rows(comps_result)}
+
+    is_premier = match.get("match_type") == "premier"
+    type_icon = "🟡" if is_premier else "🔴"
+    type_name = "Premier" if is_premier else "Ranked"
+    result_name, result_icon = result_label(match.get("result"))
+    color = discord.Color.gold() if is_premier else discord.Color.red()
+    embed = discord.Embed(
+        title=f"{type_icon} {type_name} · {maps.get(match.get('map_id'), 'Sin mapa')}",
+        description=f"{result_icon} **{result_name} · {match.get('team_score', 0)}-{match.get('opponent_score', 0)}**",
+        color=color,
+    )
+    embed.add_field(name="Fecha", value=format_date_with_weekday(match.get("played_at")), inline=True)
+    embed.add_field(name="Mapa", value=maps.get(match.get("map_id"), "Sin mapa"), inline=True)
+    embed.add_field(
+        name="Composición",
+        value=compositions.get(match.get("composition_id"), "Sin composición"),
+        inline=True,
+    )
+
+    stats.sort(key=lambda row: (-int(row.get("acs") or 0), players.get(row.get("player_id"), "")))
+    for row in stats:
+        kills = int(row.get("kills") or 0)
+        deaths = int(row.get("deaths") or 0)
+        assists = int(row.get("assists") or 0)
+        embed.add_field(
+            name=f"{players.get(row.get('player_id'), 'Jugador desconocido')} · {agents.get(row.get('agent_id'), 'Agente desconocido')}",
+            value=(
+                f"Performance Score: **{int(row.get('acs') or 0)}**\n"
+                f"K/D/A: **{kills}/{deaths}/{assists}** · KD **{safe_ratio(kills, deaths):.2f}**\n"
+                f"Trades: **{int(row.get('trades') or 0)}** · First Bloods: **{int(row.get('first_bloods') or 0)}**\n"
+                f"Plantes: **{int(row.get('plants') or 0)}** · Defuses: **{int(row.get('defuses') or 0)}**"
+            ),
+            inline=False,
+        )
+    if match.get("notes"):
+        embed.add_field(name="Notas", value=trim(str(match["notes"])), inline=False)
+    if match.get("result_image_url"):
+        embed.set_image(url=match["result_image_url"])
+    embed.set_footer(text=f"Partida #{match['id']} · Ordenada por Performance Score")
+    await interaction.followup.send(embed=embed)
+
 
 @bot.tree.command(
     name="calendario",
