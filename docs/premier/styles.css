@@ -1846,3 +1846,26 @@ dialog.stats-dialog {
     grid-template-columns: 1fr;
   }
 }
+
+/* Copias de seguridad del panel Admin */
+.backup-block {
+  grid-column: 1 / -1;
+}
+
+.backup-actions {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin-top: .9rem;
+}
+
+.backup-import {
+  position: relative;
+  overflow: hidden;
+}
+
+.backup-warning {
+  margin: .75rem 0 0;
+  color: var(--bad);
+  font-size: .85rem;
+}

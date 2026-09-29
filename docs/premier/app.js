@@ -1318,6 +1318,130 @@ function viewAccount() {
     </section>`;
 }
 
+// ---------- copias de seguridad
+const BACKUP_TABLES = [
+  'players', 'agents', 'maps', 'player_agents', 'compositions',
+  'composition_slots', 'calendar_events', 'attendance_polls',
+  'attendance_options', 'attendance_votes', 'matches', 'match_player_stats',
+];
+const BACKUP_DELETE_ORDER = [
+  'match_player_stats', 'matches', 'attendance_votes', 'attendance_options',
+  'attendance_polls', 'composition_slots', 'compositions', 'player_agents',
+  'calendar_events', 'players', 'agents', 'maps',
+];
+const BACKUP_IMPORT_ORDER = [
+  'agents', 'maps', 'players', 'player_agents', 'compositions',
+  'composition_slots', 'calendar_events', 'attendance_polls',
+  'attendance_options', 'attendance_votes', 'matches', 'match_player_stats',
+];
+function downloadJson(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+async function exportBackup() {
+  if (!isAdmin()) return;
+  const button = $('[data-action="export-backup"]');
+  if (button) button.disabled = true;
+  try {
+    const backup = {
+      format: 'premier-planner-backup',
+      version: 1,
+      exported_at: new Date().toISOString(),
+      team_name: TEAM_NAME,
+      tables: {},
+    };
+    for (const table of BACKUP_TABLES) {
+      const { data, error } = await sb.from(table).select('*');
+      if (error) throw new Error(`${table}: ${error.message}`);
+      backup.tables[table] = data ?? [];
+    }
+    const day = backup.exported_at.slice(0, 10);
+    downloadJson(backup, `premier-planner-backup-${day}.json`);
+    toast('Copia de seguridad exportada');
+  } catch (error) {
+    toast('No se pudo exportar: ' + friendlyError(error), 'err');
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+function validateBackup(backup) {
+  if (!backup || backup.format !== 'premier-planner-backup' || backup.version !== 1) {
+    throw new Error('El archivo no es una copia válida de Premier Planner.');
+  }
+  if (!backup.tables || typeof backup.tables !== 'object') {
+    throw new Error('La copia no contiene tablas.');
+  }
+  for (const table of BACKUP_TABLES) {
+    if (!Array.isArray(backup.tables[table] ?? [])) {
+      throw new Error(`La tabla ${table} no tiene un formato válido.`);
+    }
+  }
+}
+async function deleteAllRows(table) {
+  // neq sobre una columna no nula permite borrar todas las filas respetando RLS.
+  const idColumn = table === 'attendance_votes' ? 'option_id' : 'id';
+  const { error } = await sb.from(table).delete().not(idColumn, 'is', null);
+  if (error) throw new Error(`${table}: ${error.message}`);
+}
+async function importBackup(file) {
+  if (!isAdmin() || !file) return;
+  if (file.size > 25 * 1024 * 1024) return toast('La copia supera el límite de 25 MB.', 'err');
+  let backup;
+  try {
+    backup = JSON.parse(await file.text());
+    validateBackup(backup);
+  } catch (error) {
+    return toast(friendlyError(error), 'err');
+  }
+  const counts = BACKUP_TABLES.reduce((total, table) => total + (backup.tables[table]?.length ?? 0), 0);
+  const confirmed = confirm(
+    `Se reemplazarán los datos actuales por ${counts} registros de la copia del ${backup.exported_at ?? 'archivo seleccionado'}.\n\n` +
+    'Las cuentas de acceso y las imágenes de Storage no se modifican. Esta acción no se puede deshacer.'
+  );
+  if (!confirmed) return;
+  const input = $('[data-backup-file]');
+  if (input) input.disabled = true;
+  try {
+    // Rompe temporalmente la referencia circular del día seleccionado.
+    const polls = (backup.tables.attendance_polls ?? []).map((row) => ({ ...row, selected_option_id: null }));
+    for (const table of BACKUP_DELETE_ORDER) await deleteAllRows(table);
+    for (const table of BACKUP_IMPORT_ORDER) {
+      let records = table === 'attendance_polls' ? polls : (backup.tables[table] ?? []);
+      records = records.map((row) => {
+        const copy = { ...row };
+        if ('created_by' in copy) delete copy.created_by;
+        return copy;
+      });
+      for (let index = 0; index < records.length; index += 250) {
+        const batch = records.slice(index, index + 250);
+        if (!batch.length) continue;
+        const { error } = await sb.from(table).upsert(batch);
+        if (error) throw new Error(`${table}: ${error.message}`);
+      }
+    }
+    for (const poll of backup.tables.attendance_polls ?? []) {
+      if (!poll.selected_option_id) continue;
+      const { error } = await sb.from('attendance_polls')
+        .update({ selected_option_id: poll.selected_option_id })
+        .eq('id', poll.id);
+      if (error) throw new Error(`attendance_polls: ${error.message}`);
+    }
+    toast('Copia restaurada correctamente');
+    await refresh();
+  } catch (error) {
+    toast('La restauración quedó incompleta: ' + friendlyError(error), 'err');
+  } finally {
+    if (input) { input.disabled = false; input.value = ''; }
+  }
+}
+
 // ---------- vista: admin
 function viewAdmin() {
   const profileOpts = (sel) => `<option value="">Sin cuenta</option>` + S.profiles.map((p) =>
@@ -1365,6 +1489,18 @@ function viewAdmin() {
 
   return `
     <div class="admin">
+      <section class="admin-block backup-block">
+        <h2>Copias de seguridad</h2>
+        <p class="hint">Exporta los datos del Planner a un archivo JSON o restaura una copia anterior. No incluye cuentas de acceso ni los archivos de imágenes almacenados en Supabase Storage.</p>
+        <div class="backup-actions">
+          <button class="btn primary" type="button" data-action="export-backup">Exportar copia</button>
+          <label class="btn backup-import">
+            Importar copia
+            <input type="file" accept="application/json,.json" data-backup-file hidden>
+          </label>
+        </div>
+        <p class="backup-warning">Importar reemplaza completamente los datos actuales. Exporta una copia justo antes de restaurar.</p>
+      </section>
       <section class="admin-block">
         <h2>Jugadores</h2>
         <p class="hint">Vincula cada jugador a su cuenta web y a su ID de Discord. El bot reconocerá como admins a los jugadores cuya cuenta web tenga rol Admin.</p>
@@ -1573,6 +1709,7 @@ async function onClick(e) {
     case 'new-calendar-event': openCalendarEditor(); break;
     case 'open-attendance': openAttendancePoll(); break;
     case 'new-match': openMatchEditor(); break;
+    case 'export-backup': await exportBackup(); break;
     case 'edit-match': openMatchEditor(byId(S.matches, id)); break;
     case 'stats-player': S.statsPlayerId = id; writePref('stats-player', id); render(); break;
     case 'delete-match': {
@@ -1678,6 +1815,11 @@ async function mutate(query, okMsg) {
 }
 
 async function onChange(e) {
+  const backupFile = e.target.closest('[data-backup-file]');
+  if (backupFile) {
+    await importBackup(backupFile.files?.[0]);
+    return;
+  }
   const mapStatsFilter = e.target.closest('[data-map-stats-filter]');
   if (mapStatsFilter) {
     if (mapStatsFilter.dataset.mapStatsFilter === 'type') { S.mapStatsType = mapStatsFilter.value; writePref('map-stats-type', S.mapStatsType); }
