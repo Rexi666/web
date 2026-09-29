@@ -1,0 +1,2803 @@
+{
+  "format": "premier-planner-backup",
+  "version": 1,
+  "exported_at": "2026-09-29T16:51:40.458Z",
+  "team_name": "Premier Planner",
+  "tables": {
+    "players": [
+      {
+        "id": 1,
+        "name": "Rexi",
+        "user_id": "0d8371a3-049a-4079-b427-29fa59eebeff",
+        "sort_order": 0,
+        "created_at": "2026-09-21T17:44:39.201431+00:00",
+        "discord_id": "621725560866996244"
+      },
+      {
+        "id": 2,
+        "name": "Thender",
+        "user_id": "5e164b6a-4e89-4373-9fbf-7b2846a5be87",
+        "sort_order": 1,
+        "created_at": "2026-09-21T17:46:23.214077+00:00",
+        "discord_id": "954468891189469244"
+      },
+      {
+        "id": 4,
+        "name": "Corbal",
+        "user_id": "0f984a7d-a172-42b0-8e0d-a091e33550ab",
+        "sort_order": 3,
+        "created_at": "2026-09-21T17:46:32.127828+00:00",
+        "discord_id": "579728692637335562"
+      },
+      {
+        "id": 5,
+        "name": "Santi",
+        "user_id": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854",
+        "sort_order": 4,
+        "created_at": "2026-09-21T17:46:38.543518+00:00",
+        "discord_id": "662335738817544212"
+      },
+      {
+        "id": 3,
+        "name": "Piti",
+        "user_id": "65ce0a37-567c-40db-bb83-cfa3f0b31893",
+        "sort_order": 2,
+        "created_at": "2026-09-21T17:46:29.084367+00:00",
+        "discord_id": "952597649100517406"
+      }
+    ],
+    "agents": [
+      {
+        "id": 1,
+        "name": "Jett",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 2,
+        "name": "Phoenix",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 3,
+        "name": "Reyna",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 4,
+        "name": "Raze",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 5,
+        "name": "Yoru",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 6,
+        "name": "Neon",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 7,
+        "name": "Iso",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 8,
+        "name": "Waylay",
+        "role": "duelist",
+        "active": true
+      },
+      {
+        "id": 9,
+        "name": "Sova",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 10,
+        "name": "Breach",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 11,
+        "name": "Skye",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 12,
+        "name": "KAY/O",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 13,
+        "name": "Fade",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 14,
+        "name": "Gekko",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 15,
+        "name": "Tejo",
+        "role": "initiator",
+        "active": true
+      },
+      {
+        "id": 16,
+        "name": "Brimstone",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 17,
+        "name": "Omen",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 18,
+        "name": "Viper",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 19,
+        "name": "Astra",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 20,
+        "name": "Harbor",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 21,
+        "name": "Clove",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 22,
+        "name": "Miks",
+        "role": "controller",
+        "active": true
+      },
+      {
+        "id": 23,
+        "name": "Sage",
+        "role": "sentinel",
+        "active": true
+      },
+      {
+        "id": 24,
+        "name": "Cypher",
+        "role": "sentinel",
+        "active": true
+      },
+      {
+        "id": 25,
+        "name": "Killjoy",
+        "role": "sentinel",
+        "active": true
+      },
+      {
+        "id": 26,
+        "name": "Chamber",
+        "role": "sentinel",
+        "active": true
+      },
+      {
+        "id": 27,
+        "name": "Deadlock",
+        "role": "sentinel",
+        "active": true
+      },
+      {
+        "id": 28,
+        "name": "Vyse",
+        "role": "sentinel",
+        "active": true
+      },
+      {
+        "id": 29,
+        "name": "Veto",
+        "role": "sentinel",
+        "active": true
+      }
+    ],
+    "maps": [
+      {
+        "id": 1,
+        "name": "Abyss",
+        "in_pool": true
+      },
+      {
+        "id": 2,
+        "name": "Ascent",
+        "in_pool": true
+      },
+      {
+        "id": 7,
+        "name": "Haven",
+        "in_pool": true
+      },
+      {
+        "id": 9,
+        "name": "Lotus",
+        "in_pool": true
+      },
+      {
+        "id": 11,
+        "name": "Split",
+        "in_pool": true
+      },
+      {
+        "id": 12,
+        "name": "Sunset",
+        "in_pool": true
+      },
+      {
+        "id": 13,
+        "name": "Summit",
+        "in_pool": true
+      },
+      {
+        "id": 3,
+        "name": "Bind",
+        "in_pool": false
+      },
+      {
+        "id": 4,
+        "name": "Breeze",
+        "in_pool": false
+      },
+      {
+        "id": 5,
+        "name": "Corrode",
+        "in_pool": false
+      },
+      {
+        "id": 6,
+        "name": "Fracture",
+        "in_pool": false
+      },
+      {
+        "id": 8,
+        "name": "Icebox",
+        "in_pool": false
+      },
+      {
+        "id": 10,
+        "name": "Pearl",
+        "in_pool": false
+      }
+    ],
+    "player_agents": [
+      {
+        "player_id": 1,
+        "agent_id": 7,
+        "level": "great",
+        "updated_at": "2026-09-21T17:47:08.545+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 1,
+        "level": "great",
+        "updated_at": "2026-09-21T17:47:09.772+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 2,
+        "level": "great",
+        "updated_at": "2026-09-21T17:47:13.923+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 4,
+        "level": "great",
+        "updated_at": "2026-09-21T17:47:15.563+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 3,
+        "level": "great",
+        "updated_at": "2026-09-21T17:47:16.978+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 8,
+        "level": "good",
+        "updated_at": "2026-09-21T17:47:20.241+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 14,
+        "level": "good",
+        "updated_at": "2026-09-21T17:47:35.755+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 11,
+        "level": "good",
+        "updated_at": "2026-09-21T17:47:42.248+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 6,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:52:51.961+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 18,
+        "level": "none",
+        "updated_at": "2026-09-21T19:15:03.944+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 10,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:01.942+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 13,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:04.942+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 12,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:09.299+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 9,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:15.933+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 15,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:19.073+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 19,
+        "level": "bad",
+        "updated_at": "2026-09-21T17:53:23.483+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 16,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:28.012+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 21,
+        "level": "good",
+        "updated_at": "2026-09-21T17:53:32.31+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 20,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:40.906+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 22,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:44.928+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 17,
+        "level": "great",
+        "updated_at": "2026-09-21T17:53:48.706+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 18,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:53:54.231+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 26,
+        "level": "great",
+        "updated_at": "2026-09-21T17:54:06.168+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 24,
+        "level": "good",
+        "updated_at": "2026-09-21T17:54:09.879+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 27,
+        "level": "bad",
+        "updated_at": "2026-09-21T17:54:13.455+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 25,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:54:17.129+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 23,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:54:20.76+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 29,
+        "level": "normal",
+        "updated_at": "2026-09-21T17:54:25.13+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 28,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:11:07.779+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 26,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:15:11.958+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 24,
+        "level": "great",
+        "updated_at": "2026-09-21T19:15:14.281+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 27,
+        "level": "none",
+        "updated_at": "2026-09-21T19:15:17.925+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 25,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:15:26.61+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 1,
+        "agent_id": 5,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:20:13.97+00:00",
+        "updated_by": "0d8371a3-049a-4079-b427-29fa59eebeff"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 7,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:56:49.637+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 1,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:56:53.724+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 6,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:56:55.993+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 2,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:56:57.779+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 4,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:56:59.334+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 3,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:02.376+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 8,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:05.133+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 5,
+        "level": "bad",
+        "updated_at": "2026-09-21T18:57:11.113+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 10,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:14.901+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 13,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:18.341+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 14,
+        "level": "great",
+        "updated_at": "2026-09-21T18:57:21.275+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 12,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:26.24+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 11,
+        "level": "good",
+        "updated_at": "2026-09-21T18:57:28.645+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 9,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:34.617+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 15,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:37.627+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 19,
+        "level": "bad",
+        "updated_at": "2026-09-21T18:57:41.199+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 16,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:44.196+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 21,
+        "level": "good",
+        "updated_at": "2026-09-21T18:57:47.599+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 20,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:50.579+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 17,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:57:56.651+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 18,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:58:00.214+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 26,
+        "level": "great",
+        "updated_at": "2026-09-21T18:58:06.258+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 24,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:58:09.897+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 27,
+        "level": "bad",
+        "updated_at": "2026-09-21T18:58:13.241+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 25,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:58:16.432+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 23,
+        "level": "good",
+        "updated_at": "2026-09-21T18:58:19.453+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 29,
+        "level": "normal",
+        "updated_at": "2026-09-21T18:58:22.126+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 28,
+        "level": "bad",
+        "updated_at": "2026-09-21T18:58:25.401+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 2,
+        "agent_id": 22,
+        "level": "bad",
+        "updated_at": "2026-09-21T18:58:37.802+00:00",
+        "updated_by": "5e164b6a-4e89-4373-9fbf-7b2846a5be87"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 1,
+        "level": "bad",
+        "updated_at": "2026-09-21T19:13:38.922+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 7,
+        "level": "good",
+        "updated_at": "2026-09-21T19:13:41.63+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 6,
+        "level": "none",
+        "updated_at": "2026-09-21T19:13:49.721+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 2,
+        "level": "great",
+        "updated_at": "2026-09-21T19:13:57.308+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 4,
+        "level": "bad",
+        "updated_at": "2026-09-21T19:14:07.432+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 3,
+        "level": "great",
+        "updated_at": "2026-09-21T19:14:09.16+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 8,
+        "level": "good",
+        "updated_at": "2026-09-21T19:14:11.915+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 5,
+        "level": "good",
+        "updated_at": "2026-09-21T19:14:14.052+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 10,
+        "level": "none",
+        "updated_at": "2026-09-21T19:14:17.336+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 13,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:14:19.726+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 14,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:14:24.726+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 12,
+        "level": "none",
+        "updated_at": "2026-09-21T19:14:27.79+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 11,
+        "level": "good",
+        "updated_at": "2026-09-21T19:14:36.245+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 9,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:14:38.502+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 15,
+        "level": "good",
+        "updated_at": "2026-09-21T19:14:40.919+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 19,
+        "level": "none",
+        "updated_at": "2026-09-21T19:14:44.46+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 16,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:14:47.968+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 21,
+        "level": "great",
+        "updated_at": "2026-09-21T19:14:54.666+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 20,
+        "level": "none",
+        "updated_at": "2026-09-21T19:14:57.403+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 22,
+        "level": "good",
+        "updated_at": "2026-09-21T19:14:59.953+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 17,
+        "level": "good",
+        "updated_at": "2026-09-21T19:15:01.867+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 23,
+        "level": "good",
+        "updated_at": "2026-09-21T19:15:29.222+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 29,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:15:41.001+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 3,
+        "level": "none",
+        "updated_at": "2026-09-21T20:38:34.943+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 3,
+        "agent_id": 28,
+        "level": "normal",
+        "updated_at": "2026-09-21T19:15:50.849+00:00",
+        "updated_by": "65ce0a37-567c-40db-bb83-cfa3f0b31893"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 7,
+        "level": "none",
+        "updated_at": "2026-09-21T20:38:22.299+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 1,
+        "level": "bad",
+        "updated_at": "2026-09-21T20:38:24.748+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 6,
+        "level": "normal",
+        "updated_at": "2026-09-21T20:38:27.043+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 2,
+        "level": "good",
+        "updated_at": "2026-09-21T20:38:29.979+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 4,
+        "level": "none",
+        "updated_at": "2026-09-21T20:38:32.083+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 8,
+        "level": "none",
+        "updated_at": "2026-09-21T20:38:36.926+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 5,
+        "level": "great",
+        "updated_at": "2026-09-21T20:38:38.444+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 10,
+        "level": "bad",
+        "updated_at": "2026-09-21T20:38:41.415+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 13,
+        "level": "none",
+        "updated_at": "2026-09-21T20:38:44.485+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 14,
+        "level": "great",
+        "updated_at": "2026-09-21T20:38:47.259+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 12,
+        "level": "good",
+        "updated_at": "2026-09-21T20:38:49.797+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 11,
+        "level": "good",
+        "updated_at": "2026-09-21T20:38:52.703+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 9,
+        "level": "bad",
+        "updated_at": "2026-09-21T20:38:55.634+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 15,
+        "level": "none",
+        "updated_at": "2026-09-21T20:38:58.244+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 19,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:01.635+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 16,
+        "level": "bad",
+        "updated_at": "2026-09-21T20:39:04.296+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 21,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:06.863+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 20,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:08.24+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 22,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:10.673+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 27,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:25.211+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 17,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:13.477+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 28,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:35.125+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 18,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:16.438+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 26,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:20.269+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 23,
+        "level": "good",
+        "updated_at": "2026-09-21T20:39:29.032+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 29,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:32.815+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 24,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:22.597+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 5,
+        "agent_id": 25,
+        "level": "none",
+        "updated_at": "2026-09-21T20:39:26.871+00:00",
+        "updated_by": "dbf8b9b5-b019-45ad-b633-b7c2e17ac854"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 7,
+        "level": "none",
+        "updated_at": "2026-09-22T06:29:02.367+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 1,
+        "level": "bad",
+        "updated_at": "2026-09-22T06:29:06.158+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 6,
+        "level": "bad",
+        "updated_at": "2026-09-22T06:29:13.235+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 2,
+        "level": "good",
+        "updated_at": "2026-09-22T06:29:20.733+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 4,
+        "level": "great",
+        "updated_at": "2026-09-22T06:29:22.75+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 3,
+        "level": "great",
+        "updated_at": "2026-09-22T06:29:25.718+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 8,
+        "level": "none",
+        "updated_at": "2026-09-22T06:29:29.236+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 5,
+        "level": "good",
+        "updated_at": "2026-09-22T06:29:32.11+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 10,
+        "level": "none",
+        "updated_at": "2026-09-22T06:29:34.595+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 13,
+        "level": "great",
+        "updated_at": "2026-09-22T06:29:38.095+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 14,
+        "level": "none",
+        "updated_at": "2026-09-22T06:29:40.454+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 12,
+        "level": "none",
+        "updated_at": "2026-09-22T06:29:43.893+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 11,
+        "level": "great",
+        "updated_at": "2026-09-22T06:29:46.333+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 16,
+        "level": "good",
+        "updated_at": "2026-09-22T06:29:56.568+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 21,
+        "level": "great",
+        "updated_at": "2026-09-22T06:29:58.788+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 20,
+        "level": "none",
+        "updated_at": "2026-09-22T06:30:00.676+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 17,
+        "level": "great",
+        "updated_at": "2026-09-22T06:30:11.506+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 18,
+        "level": "great",
+        "updated_at": "2026-09-22T06:30:13.809+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 26,
+        "level": "great",
+        "updated_at": "2026-09-22T06:30:15.719+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 24,
+        "level": "great",
+        "updated_at": "2026-09-22T06:30:18.191+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 27,
+        "level": "none",
+        "updated_at": "2026-09-22T06:30:20.501+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 25,
+        "level": "none",
+        "updated_at": "2026-09-22T06:30:24.755+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 23,
+        "level": "good",
+        "updated_at": "2026-09-22T06:30:26.907+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 29,
+        "level": "none",
+        "updated_at": "2026-09-22T06:30:29.576+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 28,
+        "level": "none",
+        "updated_at": "2026-09-22T06:30:32.216+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 19,
+        "level": "good",
+        "updated_at": "2026-09-22T06:30:39.115+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 22,
+        "level": "good",
+        "updated_at": "2026-09-22T06:30:42.044+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 9,
+        "level": "good",
+        "updated_at": "2026-09-22T06:30:51.049+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      },
+      {
+        "player_id": 4,
+        "agent_id": 15,
+        "level": "normal",
+        "updated_at": "2026-09-22T06:30:53.185+00:00",
+        "updated_by": "0f984a7d-a172-42b0-8e0d-a091e33550ab"
+      }
+    ],
+    "compositions": [
+      {
+        "id": 4,
+        "map_id": 9,
+        "name": "Default",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T18:46:08.509829+00:00",
+        "updated_at": "2026-09-22T12:34:47.307956+00:00",
+        "status": "active"
+      },
+      {
+        "id": 6,
+        "map_id": 13,
+        "name": "Default",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T18:47:36.46261+00:00",
+        "updated_at": "2026-09-22T12:36:48.529991+00:00",
+        "status": "active"
+      },
+      {
+        "id": 15,
+        "map_id": 11,
+        "name": "Doble duelista",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-22T12:53:48.686085+00:00",
+        "updated_at": "2026-09-22T12:53:48.686085+00:00",
+        "status": "active"
+      },
+      {
+        "id": 19,
+        "map_id": 9,
+        "name": "Agresiva",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-22T13:03:02.688691+00:00",
+        "updated_at": "2026-09-22T13:03:02.688691+00:00",
+        "status": "active"
+      },
+      {
+        "id": 20,
+        "map_id": 13,
+        "name": "Agresivo con chamber",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-22T13:14:33.057152+00:00",
+        "updated_at": "2026-09-22T13:14:33.057152+00:00",
+        "status": "active"
+      },
+      {
+        "id": 21,
+        "map_id": 13,
+        "name": "Ultra agresivo",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-22T13:14:56.131442+00:00",
+        "updated_at": "2026-09-22T13:14:56.131442+00:00",
+        "status": "active"
+      },
+      {
+        "id": 22,
+        "map_id": 12,
+        "name": "Agresivo raro",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-22T13:15:57.798691+00:00",
+        "updated_at": "2026-09-22T13:15:57.798691+00:00",
+        "status": "active"
+      },
+      {
+        "id": 2,
+        "map_id": 1,
+        "name": "Default",
+        "notes": "Vale Clove por Omen",
+        "is_main": true,
+        "created_at": "2026-09-21T18:44:26.992994+00:00",
+        "updated_at": "2026-09-22T20:08:21.544887+00:00",
+        "status": "active"
+      },
+      {
+        "id": 1,
+        "map_id": 2,
+        "name": "Default",
+        "notes": "Vale Clove por Omen",
+        "is_main": true,
+        "created_at": "2026-09-21T18:42:51.053154+00:00",
+        "updated_at": "2026-09-22T20:09:29.096258+00:00",
+        "status": "active"
+      },
+      {
+        "id": 16,
+        "map_id": 2,
+        "name": "Doble centinela",
+        "notes": "Muy difícil el ataque\nVale Clove por Omen",
+        "is_main": false,
+        "created_at": "2026-09-22T12:59:01.043144+00:00",
+        "updated_at": "2026-09-22T20:10:40.784898+00:00",
+        "status": "active"
+      },
+      {
+        "id": 17,
+        "map_id": 2,
+        "name": "Doble centinela 2",
+        "notes": "Mejot ataque por flashes, pero difícil aún así\nVale Clove por Omen",
+        "is_main": false,
+        "created_at": "2026-09-22T13:00:46.887701+00:00",
+        "updated_at": "2026-09-22T20:10:48.043191+00:00",
+        "status": "active"
+      },
+      {
+        "id": 23,
+        "map_id": 7,
+        "name": "Spoter",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-22T20:13:30.442162+00:00",
+        "updated_at": "2026-09-22T20:13:30.442162+00:00",
+        "status": "active"
+      },
+      {
+        "id": 3,
+        "map_id": 7,
+        "name": "Default (modificada con chamber)",
+        "notes": "Vale Clove por Omen",
+        "is_main": true,
+        "created_at": "2026-09-21T18:45:09.197893+00:00",
+        "updated_at": "2026-09-22T20:14:11.47432+00:00",
+        "status": "active"
+      },
+      {
+        "id": 18,
+        "map_id": 7,
+        "name": "Flashes",
+        "notes": "Poco spot\nVale Clove por Omen",
+        "is_main": false,
+        "created_at": "2026-09-22T13:01:27.55721+00:00",
+        "updated_at": "2026-09-22T20:14:29.497403+00:00",
+        "status": "active"
+      },
+      {
+        "id": 24,
+        "map_id": 9,
+        "name": "Super agro",
+        "notes": "Rexi y Corbal pueden cambiar",
+        "is_main": false,
+        "created_at": "2026-09-22T20:17:30.665325+00:00",
+        "updated_at": "2026-09-22T20:17:30.665325+00:00",
+        "status": "active"
+      },
+      {
+        "id": 5,
+        "map_id": 11,
+        "name": "Default",
+        "notes": "Vale Clove por Omen",
+        "is_main": true,
+        "created_at": "2026-09-21T18:46:52.851559+00:00",
+        "updated_at": "2026-09-22T20:18:29.714557+00:00",
+        "status": "active"
+      },
+      {
+        "id": 7,
+        "map_id": 12,
+        "name": "Default",
+        "notes": "Vale Clove por Omen",
+        "is_main": true,
+        "created_at": "2026-09-21T18:48:33.120387+00:00",
+        "updated_at": "2026-09-22T20:20:31.067832+00:00",
+        "status": "active"
+      },
+      {
+        "id": 8,
+        "map_id": 3,
+        "name": "Default",
+        "notes": "Vale Clove por Omen\nCorbal y Rexi pueden cambiar",
+        "is_main": true,
+        "created_at": "2026-09-21T20:46:59.769659+00:00",
+        "updated_at": "2026-09-22T20:34:03.298654+00:00",
+        "status": "active"
+      },
+      {
+        "id": 25,
+        "map_id": 3,
+        "name": "Agro",
+        "notes": "Thender y Santi pueden cambiar",
+        "is_main": false,
+        "created_at": "2026-09-22T20:35:48.510487+00:00",
+        "updated_at": "2026-09-22T20:35:59.643687+00:00",
+        "status": "active"
+      },
+      {
+        "id": 9,
+        "map_id": 4,
+        "name": "Default",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T20:47:56.397296+00:00",
+        "updated_at": "2026-09-23T10:48:50.75344+00:00",
+        "status": "active"
+      },
+      {
+        "id": 26,
+        "map_id": 4,
+        "name": "Agro",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-23T10:50:30.093119+00:00",
+        "updated_at": "2026-09-23T10:50:30.093119+00:00",
+        "status": "active"
+      },
+      {
+        "id": 10,
+        "map_id": 5,
+        "name": "Default",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T20:49:05.626549+00:00",
+        "updated_at": "2026-09-23T10:51:08.66997+00:00",
+        "status": "active"
+      },
+      {
+        "id": 27,
+        "map_id": 5,
+        "name": "Agro",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-23T10:52:21.848824+00:00",
+        "updated_at": "2026-09-23T10:52:21.848824+00:00",
+        "status": "active"
+      },
+      {
+        "id": 11,
+        "map_id": 6,
+        "name": "Default",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T20:50:03.899377+00:00",
+        "updated_at": "2026-09-23T10:53:27.0636+00:00",
+        "status": "active"
+      },
+      {
+        "id": 28,
+        "map_id": 6,
+        "name": "Doble centinela",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-23T10:54:20.760138+00:00",
+        "updated_at": "2026-09-23T10:54:20.760138+00:00",
+        "status": "active"
+      },
+      {
+        "id": 12,
+        "map_id": 8,
+        "name": "Default",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T20:51:05.525541+00:00",
+        "updated_at": "2026-09-23T10:54:38.118551+00:00",
+        "status": "active"
+      },
+      {
+        "id": 29,
+        "map_id": 8,
+        "name": "Agro",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-23T10:57:00.478423+00:00",
+        "updated_at": "2026-09-23T10:57:00.478423+00:00",
+        "status": "active"
+      },
+      {
+        "id": 13,
+        "map_id": 10,
+        "name": "Default (no nos encaja bien)",
+        "notes": null,
+        "is_main": true,
+        "created_at": "2026-09-21T20:51:55.436133+00:00",
+        "updated_at": "2026-09-23T10:58:17.277744+00:00",
+        "status": "active"
+      },
+      {
+        "id": 30,
+        "map_id": 10,
+        "name": "Modificación rara",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-23T10:59:19.376082+00:00",
+        "updated_at": "2026-09-23T10:59:19.376082+00:00",
+        "status": "active"
+      },
+      {
+        "id": 31,
+        "map_id": 1,
+        "name": "Agro defensa Mid con chamber",
+        "notes": "Vale Clove por Omen",
+        "is_main": false,
+        "created_at": "2026-09-23T16:14:18.18569+00:00",
+        "updated_at": "2026-09-24T19:33:32.925022+00:00",
+        "status": "active"
+      },
+      {
+        "id": 32,
+        "map_id": 12,
+        "name": "Muy agresiva",
+        "notes": null,
+        "is_main": false,
+        "created_at": "2026-09-28T19:34:58.836315+00:00",
+        "updated_at": "2026-09-28T20:53:22.892332+00:00",
+        "status": "active"
+      }
+    ],
+    "composition_slots": [
+      {
+        "id": 261,
+        "composition_id": 7,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 262,
+        "composition_id": 7,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 263,
+        "composition_id": 7,
+        "slot": 3,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 264,
+        "composition_id": 7,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 265,
+        "composition_id": 7,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 271,
+        "composition_id": 8,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 272,
+        "composition_id": 8,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 273,
+        "composition_id": 8,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 274,
+        "composition_id": 8,
+        "slot": 4,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 275,
+        "composition_id": 8,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 146,
+        "composition_id": 4,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 147,
+        "composition_id": 4,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 148,
+        "composition_id": 4,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 149,
+        "composition_id": 4,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 25
+      },
+      {
+        "id": 150,
+        "composition_id": 4,
+        "slot": 5,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 281,
+        "composition_id": 25,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 26
+      },
+      {
+        "id": 282,
+        "composition_id": 25,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 4
+      },
+      {
+        "id": 283,
+        "composition_id": 25,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 284,
+        "composition_id": 25,
+        "slot": 4,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 285,
+        "composition_id": 25,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 291,
+        "composition_id": 26,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 292,
+        "composition_id": 26,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 293,
+        "composition_id": 26,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 294,
+        "composition_id": 26,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 18
+      },
+      {
+        "id": 295,
+        "composition_id": 26,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 11
+      },
+      {
+        "id": 301,
+        "composition_id": 27,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 302,
+        "composition_id": 27,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 303,
+        "composition_id": 27,
+        "slot": 3,
+        "player_id": 4,
+        "agent_id": 13
+      },
+      {
+        "id": 304,
+        "composition_id": 27,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 305,
+        "composition_id": 27,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 156,
+        "composition_id": 6,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 157,
+        "composition_id": 6,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 158,
+        "composition_id": 6,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 9
+      },
+      {
+        "id": 159,
+        "composition_id": 6,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 160,
+        "composition_id": 6,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 25
+      },
+      {
+        "id": 311,
+        "composition_id": 28,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 312,
+        "composition_id": 28,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 313,
+        "composition_id": 28,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 314,
+        "composition_id": 28,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 315,
+        "composition_id": 28,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 316,
+        "composition_id": 12,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 317,
+        "composition_id": 12,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 318,
+        "composition_id": 12,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 166,
+        "composition_id": 15,
+        "slot": 1,
+        "player_id": 4,
+        "agent_id": 4
+      },
+      {
+        "id": 167,
+        "composition_id": 15,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 168,
+        "composition_id": 15,
+        "slot": 3,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 169,
+        "composition_id": 15,
+        "slot": 4,
+        "player_id": 1,
+        "agent_id": 2
+      },
+      {
+        "id": 170,
+        "composition_id": 15,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 191,
+        "composition_id": 19,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 26
+      },
+      {
+        "id": 192,
+        "composition_id": 19,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 193,
+        "composition_id": 19,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 194,
+        "composition_id": 19,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 195,
+        "composition_id": 19,
+        "slot": 5,
+        "player_id": 4,
+        "agent_id": 4
+      },
+      {
+        "id": 196,
+        "composition_id": 20,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 26
+      },
+      {
+        "id": 197,
+        "composition_id": 20,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 4
+      },
+      {
+        "id": 198,
+        "composition_id": 20,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 199,
+        "composition_id": 20,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 200,
+        "composition_id": 20,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 201,
+        "composition_id": 21,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 2
+      },
+      {
+        "id": 202,
+        "composition_id": 21,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 4
+      },
+      {
+        "id": 203,
+        "composition_id": 21,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 204,
+        "composition_id": 21,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 205,
+        "composition_id": 21,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 206,
+        "composition_id": 22,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 2
+      },
+      {
+        "id": 207,
+        "composition_id": 22,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 208,
+        "composition_id": 22,
+        "slot": 3,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 209,
+        "composition_id": 22,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 210,
+        "composition_id": 22,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 211,
+        "composition_id": 2,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 212,
+        "composition_id": 2,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 213,
+        "composition_id": 2,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 214,
+        "composition_id": 2,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 215,
+        "composition_id": 2,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 221,
+        "composition_id": 1,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 222,
+        "composition_id": 1,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 223,
+        "composition_id": 1,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 224,
+        "composition_id": 1,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 225,
+        "composition_id": 1,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 226,
+        "composition_id": 16,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 227,
+        "composition_id": 16,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 228,
+        "composition_id": 16,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 229,
+        "composition_id": 16,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 230,
+        "composition_id": 16,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 231,
+        "composition_id": 17,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 232,
+        "composition_id": 17,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 233,
+        "composition_id": 17,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 234,
+        "composition_id": 17,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 235,
+        "composition_id": 17,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 236,
+        "composition_id": 23,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 237,
+        "composition_id": 23,
+        "slot": 2,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 238,
+        "composition_id": 23,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 239,
+        "composition_id": 23,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 9
+      },
+      {
+        "id": 240,
+        "composition_id": 23,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 241,
+        "composition_id": 3,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 242,
+        "composition_id": 3,
+        "slot": 2,
+        "player_id": 5,
+        "agent_id": 9
+      },
+      {
+        "id": 243,
+        "composition_id": 3,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 244,
+        "composition_id": 3,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 245,
+        "composition_id": 3,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 246,
+        "composition_id": 18,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 247,
+        "composition_id": 18,
+        "slot": 2,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 248,
+        "composition_id": 18,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 249,
+        "composition_id": 18,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 250,
+        "composition_id": 18,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 251,
+        "composition_id": 24,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 252,
+        "composition_id": 24,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 253,
+        "composition_id": 24,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 254,
+        "composition_id": 24,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 255,
+        "composition_id": 24,
+        "slot": 5,
+        "player_id": 4,
+        "agent_id": 26
+      },
+      {
+        "id": 256,
+        "composition_id": 5,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 257,
+        "composition_id": 5,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 258,
+        "composition_id": 5,
+        "slot": 3,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 259,
+        "composition_id": 5,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 260,
+        "composition_id": 5,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 286,
+        "composition_id": 9,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 287,
+        "composition_id": 9,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 288,
+        "composition_id": 9,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 289,
+        "composition_id": 9,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 18
+      },
+      {
+        "id": 290,
+        "composition_id": 9,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 296,
+        "composition_id": 10,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 5
+      },
+      {
+        "id": 297,
+        "composition_id": 10,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 9
+      },
+      {
+        "id": 298,
+        "composition_id": 10,
+        "slot": 3,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 299,
+        "composition_id": 10,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 300,
+        "composition_id": 10,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 14
+      },
+      {
+        "id": 306,
+        "composition_id": 11,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 4
+      },
+      {
+        "id": 307,
+        "composition_id": 11,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 308,
+        "composition_id": 11,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 11
+      },
+      {
+        "id": 309,
+        "composition_id": 11,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 310,
+        "composition_id": 11,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 319,
+        "composition_id": 12,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 18
+      },
+      {
+        "id": 320,
+        "composition_id": 12,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 25
+      },
+      {
+        "id": 321,
+        "composition_id": 29,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 322,
+        "composition_id": 29,
+        "slot": 2,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 323,
+        "composition_id": 29,
+        "slot": 3,
+        "player_id": 5,
+        "agent_id": 23
+      },
+      {
+        "id": 324,
+        "composition_id": 29,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 9
+      },
+      {
+        "id": 325,
+        "composition_id": 29,
+        "slot": 5,
+        "player_id": 3,
+        "agent_id": 21
+      },
+      {
+        "id": 326,
+        "composition_id": 13,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 327,
+        "composition_id": 13,
+        "slot": 2,
+        "player_id": 3,
+        "agent_id": 25
+      },
+      {
+        "id": 328,
+        "composition_id": 13,
+        "slot": 3,
+        "player_id": 4,
+        "agent_id": 18
+      },
+      {
+        "id": 329,
+        "composition_id": 13,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 13
+      },
+      {
+        "id": 330,
+        "composition_id": 13,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 21
+      },
+      {
+        "id": 331,
+        "composition_id": 30,
+        "slot": 1,
+        "player_id": 5,
+        "agent_id": 5
+      },
+      {
+        "id": 332,
+        "composition_id": 30,
+        "slot": 2,
+        "player_id": 3,
+        "agent_id": 25
+      },
+      {
+        "id": 333,
+        "composition_id": 30,
+        "slot": 3,
+        "player_id": 4,
+        "agent_id": 13
+      },
+      {
+        "id": 334,
+        "composition_id": 30,
+        "slot": 4,
+        "player_id": 2,
+        "agent_id": 14
+      },
+      {
+        "id": 335,
+        "composition_id": 30,
+        "slot": 5,
+        "player_id": 1,
+        "agent_id": 17
+      },
+      {
+        "id": 351,
+        "composition_id": 31,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 352,
+        "composition_id": 31,
+        "slot": 2,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 353,
+        "composition_id": 31,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 354,
+        "composition_id": 31,
+        "slot": 4,
+        "player_id": 3,
+        "agent_id": 24
+      },
+      {
+        "id": 355,
+        "composition_id": 31,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 9
+      },
+      {
+        "id": 361,
+        "composition_id": 32,
+        "slot": 1,
+        "player_id": 1,
+        "agent_id": 1
+      },
+      {
+        "id": 362,
+        "composition_id": 32,
+        "slot": 2,
+        "player_id": 3,
+        "agent_id": 2
+      },
+      {
+        "id": 363,
+        "composition_id": 32,
+        "slot": 3,
+        "player_id": 2,
+        "agent_id": 26
+      },
+      {
+        "id": 364,
+        "composition_id": 32,
+        "slot": 4,
+        "player_id": 4,
+        "agent_id": 17
+      },
+      {
+        "id": 365,
+        "composition_id": 32,
+        "slot": 5,
+        "player_id": 5,
+        "agent_id": 11
+      }
+    ],
+    "calendar_events": [],
+    "attendance_polls": [],
+    "attendance_options": [],
+    "attendance_votes": [],
+    "matches": [
+      {
+        "id": 1,
+        "match_type": "ranked",
+        "calendar_event_id": null,
+        "played_at": "2026-09-25",
+        "result": "win",
+        "team_score": 13,
+        "opponent_score": 11,
+        "map_id": 12,
+        "composition_id": 32,
+        "notes": null,
+        "result_image_url": "https://oixknmspnswjbsncefwl.supabase.co/storage/v1/object/public/match-results/1790627416600-eba90b9f-0509-4563-b808-8e1fa4684c30.png",
+        "created_by": "0d8371a3-049a-4079-b427-29fa59eebeff",
+        "created_at": "2026-09-28T20:30:27.33509+00:00",
+        "updated_at": "2026-09-28T20:30:27.33509+00:00"
+      }
+    ],
+    "match_player_stats": [
+      {
+        "id": 1,
+        "match_id": 1,
+        "player_id": 1,
+        "agent_id": 1,
+        "acs": 368,
+        "kills": 24,
+        "deaths": 20,
+        "assists": 8,
+        "first_bloods": 4,
+        "plants": 0,
+        "defuses": 0,
+        "trades": 6
+      },
+      {
+        "id": 2,
+        "match_id": 1,
+        "player_id": 3,
+        "agent_id": 2,
+        "acs": 366,
+        "kills": 23,
+        "deaths": 18,
+        "assists": 8,
+        "first_bloods": 2,
+        "plants": 0,
+        "defuses": 0,
+        "trades": 8
+      },
+      {
+        "id": 3,
+        "match_id": 1,
+        "player_id": 2,
+        "agent_id": 26,
+        "acs": 185,
+        "kills": 18,
+        "deaths": 14,
+        "assists": 2,
+        "first_bloods": 4,
+        "plants": 1,
+        "defuses": 1,
+        "trades": 1
+      },
+      {
+        "id": 4,
+        "match_id": 1,
+        "player_id": 4,
+        "agent_id": 17,
+        "acs": 267,
+        "kills": 16,
+        "deaths": 17,
+        "assists": 8,
+        "first_bloods": 1,
+        "plants": 1,
+        "defuses": 0,
+        "trades": 9
+      },
+      {
+        "id": 5,
+        "match_id": 1,
+        "player_id": 5,
+        "agent_id": 11,
+        "acs": 163,
+        "kills": 9,
+        "deaths": 19,
+        "assists": 8,
+        "first_bloods": 0,
+        "plants": 5,
+        "defuses": 0,
+        "trades": 6
+      }
+    ]
+  }
+}
