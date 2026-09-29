@@ -23,13 +23,15 @@ A typical deployment contains:
 
 ```text
 premier-planner/
+├── discord_bot/
+    ├── .env
+    ├── bot.py
+    └── requirements.txt
+├── premier/
+    ├── app.js
+    ├── config.js
+    └── styles.css
 ├── index.html
-├── app.js
-├── styles.css
-├── config.js
-├── bot.py
-├── requirements.txt
-├── .env
 └── supabase_setup.sql
 ```
 
