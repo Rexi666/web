@@ -2,17 +2,25 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: '0 */12 * * *' # a las 00:00 UTC
-  workflow_dispatch: # Botón para ejecutar manualmente
+    - cron: '0 */12 * * *' # Cada 12 horas
+  workflow_dispatch: # Permite ejecución manual
 
 jobs:
   ping_supabase:
     runs-on: ubuntu-latest
     steps:
-      - name: Insertar señal de vida
+      - name: Insertar señal de vida (Proyecto 1)
         run: |
           curl -i -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive" \
           -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Content-Type: application/json" \
-          -d '{"last_ping": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+          -d "{\"last_ping\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+
+      - name: Insertar señal de vida (Proyecto 2)
+        run: |
+          curl -i -X POST "${{ secrets.SUPABASE_URL_2 }}/rest/v1/keep_alive" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY_2 }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY_2 }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"last_ping\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
